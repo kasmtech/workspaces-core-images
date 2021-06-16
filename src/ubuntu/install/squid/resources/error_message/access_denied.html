@@ -1,0 +1,65 @@
+<html><head>
+<meta>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Access Denied</title>
+<style type="text/css"><!--
+ %l
+
+body
+:lang(fa) { direction: rtl; font-size: 100%; font-family: Tahoma, Roya, sans-serif; float: right; }
+:lang(he) { direction: rtl; }
+ --></style>
+</head><body id="%c">
+<div id="titles">
+<h1>ACCESS DENIED</h1>
+<h2>The requested URL has been rejected due to administrator policies</h2>
+</div>
+<hr>
+
+<div id="content">
+<h3>URL: </h3><div id="url"></div>
+<h3>Domain: </h3><div id="domain"></div>
+<h3>Category: </h3><div id="category"></div>
+
+<br>
+<br>
+<br>
+
+
+<div id="message"></div>
+
+<br>
+</div>
+
+<hr>
+</body>
+<script>
+var urlParams = new URLSearchParams(window.location.search);
+
+var url_elem = document.getElementById("url");
+var url = urlParams.get('url');
+if (url){
+   url_elem.innerText=url;
+};
+
+
+var category = urlParams.get('category');
+var category_elem = document.getElementById("category");
+if (category){
+   category_elem.innerText=category;
+};
+
+var domain_elem = document.getElementById("domain");
+var domain = urlParams.get('domain');
+if (domain){
+   domain_elem.innerText=domain;
+};
+
+var message_elem = document.getElementById("message");
+var message = urlParams.get('message');
+if (message){
+   message_elem.innerText= message;
+};
+
+</script>
+</html>

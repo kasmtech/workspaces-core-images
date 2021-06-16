@@ -1,0 +1,196 @@
+image: docker
+services:
+  - docker:dind
+
+stages:
+  - build
+  - readme
+
+before_script:
+  - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+  - export SANITIZED_BRANCH="$(echo $CI_COMMIT_REF_NAME | sed -r 's#^release/##' | sed 's/\//_/g')"
+  - export SANITIZED_ROLLING_BRANCH=${SANITIZED_BRANCH}-rolling
+
+# Jobs for the develop and release branches. They should push to the private and public repos
+build_ubuntu_bionic:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+build_cuda_bionic:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+build_remnux_bionic:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1  --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+build_kali_rolling:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE=""  --build-arg LC_ALL=""   -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+build_centos:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-centos-7:$SANITIZED_BRANCH -t ${ORG_NAME}/core-centos-7:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="centos:centos7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4=1 --build-arg DISTRO="centos" --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-centos .
+    - docker push ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-centos-7-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-centos-7:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-centos-7:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+
+# These jobs should run on the feature/bugfix branches - anything that is not the develop or release branches. It should only push images to the private repos
+build_ubuntu_bionic_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+
+build_cuda_bionic_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+build_remnux_bionic_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+build_kali_rolling_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+build_centos_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="centos:centos7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4=1 --build-arg DISTRO="centos"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-centos .
+    - docker push ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+# These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
+build_ubuntu_bionic_scheduled:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_cuda_bionic_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_remnux_bionic_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_kali_rolling_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_centos_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-centos-7:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="centos:centos7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4=1 --build-arg DISTRO="centos"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-centos .
+    - docker push ${ORG_NAME}/core-centos-7-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-centos-7:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+
+update_readmes:
+  stage: readme
+  script:
+    - apk add git
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@${README_TEMPLATE_REPO}
+    - sed -e "/{about}/r docs/$KASM_IMAGE/README.md" -e "/{about}/d" dockerhub-readme-template/TEMPLATE.md > docs/$KASM_IMAGE/FULL_README.md
+    - cat docs/$KASM_IMAGE/FULL_README.md
+    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  kasmweb/dockerhub-updater:latest
+    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  kasmweb/dockerhub-updater:latest
+
+  only:
+    variables:
+      - $README_USERNAME
+      - $README_PASSWORD
+  parallel:
+    matrix:
+      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-cuda-bionic, core-ubuntu-bionic]

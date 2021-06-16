@@ -1,0 +1,1 @@
+Ubuntu Bionic base image for Kasm Workspaces
