@@ -63,3 +63,13 @@ cat >/usr/bin/desktop_ready <<EOL
 until pids=\$(pidof xfce4-session); do sleep .5; done
 EOL
 chmod +x /usr/bin/desktop_ready
+
+# Change the default behavior of the delete key which is to move to trash. This will now prompt the user to permanently
+# delete the file instead of moving it to trash
+mkdir -p /etc/xdg/Thunar/
+cat >>/etc/xdg/Thunar/accels.scm<<EOL
+(gtk_accel_path "<Actions>/ThunarStandardView/delete" "Delete")
+(gtk_accel_path "<Actions>/ThunarLauncher/delete" "Delete")
+(gtk_accel_path "<Actions>/ThunarLauncher/trash-delete-2" "")
+(gtk_accel_path "<Actions>/ThunarLauncher/trash-delete" "")
+EOL
