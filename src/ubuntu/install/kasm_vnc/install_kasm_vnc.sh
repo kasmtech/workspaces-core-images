@@ -6,11 +6,11 @@ cd /tmp
 
 if [ "${DISTRO}" == "kali" ]  ;
 then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/9144045718b7519088aaaf605001fa3d34f92b34/kasmvncserver_kali-rolling_0.9.3_master_914404_amd64.deb"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/811e7cde3aed4064a4f8d2c9eb161183c873ffde/kasmvncserver_kali-rolling_0.9.3_master_811e7c_amd64.deb"
 elif [ "${DISTRO}" == "centos" ] ; then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/9144045718b7519088aaaf605001fa3d34f92b34/kasmvncserver_centos_core_0.9.3_master_914404_x86_64.rpm"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/811e7cde3aed4064a4f8d2c9eb161183c873ffde/kasmvncserver_centos_core_0.9.3_master_811e7c_x86_64.rpm"
 else
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/9144045718b7519088aaaf605001fa3d34f92b34/kasmvncserver_bionic_0.9.3_master_914404_amd64.deb"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/811e7cde3aed4064a4f8d2c9eb161183c873ffde/kasmvncserver_bionic_0.9.3_master_811e7c_amd64.deb"
 fi
 
 
