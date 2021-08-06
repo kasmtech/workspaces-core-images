@@ -30,7 +30,7 @@
         <property name="MenuImages" type="empty"/>
         <property name="ButtonImages" type="empty"/>
         <property name="MenuBarAccel" type="empty"/>
-        <property name="CursorThemeName" type="empty"/>
+        <property name="CursorThemeName" type="string" value="bridge"/>
         <property name="CursorThemeSize" type="empty"/>
         <property name="DecorationLayout" type="empty"/>
     </property>
