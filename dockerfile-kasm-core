@@ -98,6 +98,10 @@ RUN bash $INST_SCRIPTS/audio/install_audio.sh  && rm -rf $INST_SCRIPTS/audio/
 COPY ./src/ubuntu/install/audio_input $INST_SCRIPTS/audio_input/
 RUN bash $INST_SCRIPTS/audio_input/install_audio_input.sh && rm -rf $INST_SCRIPTS/audio_input/
 
+### Install custom cursors
+COPY ./src/ubuntu/install/cursors $INST_SCRIPTS/cursors/
+RUN bash $INST_SCRIPTS/cursors/install_cursors.sh && rm -rf $INST_SCRIPTS/cursors/
+
 ### Copy built Squid
 COPY --from=squid_builder /usr/local/squid /usr/local/squid
 
