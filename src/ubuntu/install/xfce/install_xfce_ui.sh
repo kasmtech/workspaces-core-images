@@ -14,6 +14,32 @@ get_rid_of_xfce_battery_widget() {
   yum remove -y xfce4-power-manager
 }
 
+config_xinit_disable_screensaver() {
+  mkdir -p /etc/X11/xinit/xinitrc.d/
+  cat >/etc/X11/xinit/xinitrc.d/disable_screensaver.sh <<EOL
+#!/bin/sh
+set -x
+xset -dpms
+xset s off
+xset q
+EOL
+
+chmod +x /etc/X11/xinit/xinitrc.d/disable_screensaver.sh
+}
+
+replace_default_xinit() {
+
+  cat >/etc/X11/xinit/xinitrc <<EOL
+#!/bin/sh
+for file in /etc/X11/xinit/xinitrc.d/* ; do
+        . \$file
+done
+. /etc/X11/Xsession
+EOL
+
+chmod +x /etc/X11/xinit/xinitrc
+}
+
 echo "Install Xfce4 UI components"
 if [ "$DISTRO" != "centos" ]; then
   apt-get update
@@ -41,6 +67,14 @@ if [ "$DISTRO" = "centos" ]; then
 else
   apt-get purge -y pm-utils xscreensaver*
   apt-get clean -y
+fi
+
+
+if [ "$DISTRO" = "centos" ]; then
+  config_xinit_disable_screensaver
+else
+  replace_default_xinit
+  config_xinit_disable_screensaver
 fi
 
 # Override default login script so users cant log themselves out of the desktop dession
