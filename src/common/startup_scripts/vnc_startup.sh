@@ -57,7 +57,7 @@ function start_kasmvnc (){
 
     rm -rf $HOME/.vnc/*.pid
 
-	vncserver $DISPLAY -depth 24 -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS
+	vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS
 
 	KASM_PROCS['kasmvnc']=$(cat $HOME/.vnc/*${DISPLAY_NUM}.pid)
 
