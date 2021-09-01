@@ -156,10 +156,6 @@ RUN touch $STARTUPDIR/wm.log \
     && chown 1000:1000 $STARTUPDIR/kasmrx/Downloads \
     && chown -R root:root /usr/local/bin
 
-RUN apt-get update && apt-get install -y cmake nasm gcc
-RUN git clone https://github.com/libjpeg-turbo/libjpeg-turbo.git
-RUN export MAKEFLAGS=-j`nproc`; cd libjpeg-turbo && cmake -G"Unix Makefiles" && make deb
-
 USER 1000
 
 ENTRYPOINT ["/dockerstartup/kasm_default_profile.sh", "/dockerstartup/vnc_startup.sh", "/dockerstartup/kasm_startup.sh"]
