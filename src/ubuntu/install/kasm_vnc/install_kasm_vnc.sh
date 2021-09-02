@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+install_libjpeg_turbo() {
+    local libjpeg_deb=libjpeg-turbo.deb
+
+    wget 'https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/dbc376940f971d62451c219f3a354bf6639e7595/output/bionic/libjpeg-turbo_2.1.2_amd64.deb' -O "$libjpeg_deb"
+    apt-get install -y "./$libjpeg_deb"
+    rm "$libjpeg_deb"
+}
+
 echo "Install KasmVNC server"
 cd /tmp
 
@@ -10,7 +18,7 @@ then
 elif [ "${DISTRO}" == "centos" ] ; then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/6f2805e18652781213be6a385f7a05f3d22b218b/kasmvncserver_centos_core_0.9.3_master_6f2805_x86_64.rpm"
 else
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/6f2805e18652781213be6a385f7a05f3d22b218b/kasmvncserver_bionic_0.9.3_master_6f2805_amd64.deb"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/dbc376940f971d62451c219f3a354bf6639e7595/kasmvncserver_bionic_0.9.3_feature_KASM-1838-libjpeg-turbo-from-source_dbc376__libjpeg-turbo-latest_amd64.deb"
 fi
 
 
@@ -20,6 +28,10 @@ if [ "${DISTRO}" == "centos" ] ; then
     yum localinstall -y kasmvncserver.rpm
     rm kasmvncserver.rpm
 else
+    if [ "$DISTRO" = "ubuntu" ]; then
+        install_libjpeg_turbo
+    fi
+
     wget $BUILD_URL -O kasmvncserver.deb
 
     apt-get update
