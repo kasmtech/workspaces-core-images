@@ -9,8 +9,12 @@ if [ "${DISTRO}" == "centos" ] ; then
   rm wmctrl*.rpm
 else
   apt-get update
-  apt-get install -y vim wget net-tools locales bzip2 wmctrl
+  apt-get install -y vim wget net-tools locales bzip2 wmctrl software-properties-common
   apt-get clean -y
+
+  #update mesa to latest
+  add-apt-repository ppa:kisak/kisak-mesa
+  apt full-upgrade -y
 
   echo "generate locales für en_US.UTF-8"
   locale-gen en_US.UTF-8
