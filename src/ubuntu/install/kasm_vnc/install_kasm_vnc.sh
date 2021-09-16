@@ -25,7 +25,7 @@ fi
 
 
 if [ "${DISTRO}" == "centos" ] ; then
-    wget $BUILD_URL -O kasmvncserver.rpm
+    wget "${BUILD_URL}" -O kasmvncserver.rpm
 
     yum localinstall -y kasmvncserver.rpm
     rm kasmvncserver.rpm
