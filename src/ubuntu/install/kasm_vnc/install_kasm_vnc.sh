@@ -34,7 +34,7 @@ else
         install_libjpeg_turbo
     fi
 
-    wget $BUILD_URL -O kasmvncserver.deb
+    wget "${BUILD_URL}" -O kasmvncserver.deb
 
     apt-get update
     apt-get install -y gettext ssl-cert
