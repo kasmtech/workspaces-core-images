@@ -16,9 +16,9 @@ if [ "${DISTRO}" == "kali" ]  ;
 then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/d9ceb72c2e982772f5827bb9b9325ff8ad73be5a/kasmvncserver_kali-rolling_0.9.3_feature_KASM-1913_webp_tweaks_d9ceb7_amd64.deb"
 elif [ "${DISTRO}" == "centos" ] ; then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/d9ceb72c2e982772f5827bb9b9325ff8ad73be5a/kasmvncserver_centos_0.9.3_feature_KASM-1913_webp_tweaks_d9ceb7_x86_64.rpm"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/d9ceb72c2e982772f5827bb9b9325ff8ad73be5a/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
 elif [ "$DISTRO" == "ubuntu" ]; then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/d9ceb72c2e982772f5827bb9b9325ff8ad73be5a/kasmvncserver_bionic_0.9.3_feature_KASM-1913_webp_tweaks_d9ceb7__libjpeg-turbo-latest_amd64.deb"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/d9ceb72c2e982772f5827bb9b9325ff8ad73be5a/kasmvncserver_bionic_0.9.3_feature_KASM-1913_webp_tweaks_d9ceb7_libjpeg-turbo-latest_amd64.deb"
 else
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/d9ceb72c2e982772f5827bb9b9325ff8ad73be5a/kasmvncserver_bionic_0.9.3_feature_KASM-1913_webp_tweaks_d9ceb7_amd64.deb"
 fi
