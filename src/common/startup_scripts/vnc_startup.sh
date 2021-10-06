@@ -209,7 +209,7 @@ if [ -f "$custom_startup_script" ]; then
 		exit 1
 	fi
 
-	"$custom_startup_script" || true
+	"$custom_startup_script" &
 fi
 
 # Monitor Kasm Services
