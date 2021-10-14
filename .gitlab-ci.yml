@@ -67,6 +67,8 @@ build_kali_rolling:
     - /^release\/.*$/
   except:
     - schedules
+  tags: 
+    - aws-autoscale
 
 build_centos:
   stage: build
@@ -120,6 +122,8 @@ build_kali_rolling_dev:
   except:
     - develop
     - /^release\/.*$/
+  tags: 
+    - aws-autoscale
 
 build_centos_dev:
   stage: build
@@ -166,6 +170,8 @@ build_kali_rolling_schedules:
     - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH
   only:
     - schedules
+  tags: 
+    - aws-autoscale
 
 build_centos_schedules:
   stage: build
