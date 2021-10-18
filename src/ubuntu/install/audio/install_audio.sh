@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 ### every exit != 0 fails the script
-set -e
+set -ex
 
+ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 echo "Install Audio Requirements"
 if [ "${DISTRO}" == "centos" ] ; then
   yum install -y curl git
@@ -16,5 +17,5 @@ fi
 
 cd $STARTUPDIR
 mkdir jsmpeg
-wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_websocket_relay/5b1e1eaa251f7a423a818056e2e8cdb66c17ef98/kasm_websocket_relay_master.5b1e1e.tar.gz | tar xz --strip 1 -C $STARTUPDIR/jsmpeg
+wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_websocket_relay/68ee0a0311d2ba8a9f2c206ec89e3abce6451f92/kasm_websocket_relay_${DISTRO/kali/ubuntu}_${ARCH}_develop.68ee0a.tar.gz | tar xz --strip 1 -C $STARTUPDIR/jsmpeg
 chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux
