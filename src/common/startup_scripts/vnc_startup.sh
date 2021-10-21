@@ -147,7 +147,9 @@ if [[ $1 =~ -h|--help ]]; then
 fi
 
 # should also source $STARTUPDIR/generate_container_user
-source $HOME/.bashrc
+if [ -f $HOME/.bashrc ]; then
+    source $HOME/.bashrc
+fi
 
 if [[ ${KASM_DEBUG:-0} == 1 ]]; then
     echo -e "\n\n------------------ DEBUG KASM STARTUP -----------------"
