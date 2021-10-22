@@ -9,7 +9,8 @@ then
 elif [ "${DISTRO}" == "centos" ] ; then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/bcad19542e02921f1f275532cc7854559d737cb5/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
 else
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/bcad19542e02921f1f275532cc7854559d737cb5/kasmvncserver_bionic_0.9.3_master_bcad19_amd64.deb"
+    UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/bcad19542e02921f1f275532cc7854559d737cb5/kasmvncserver_${UBUNTU_CODENAME}_0.9.3_master_bcad19_amd64.deb"
 fi
 
 
