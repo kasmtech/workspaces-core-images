@@ -2,21 +2,12 @@ ARG BASE_IMAGE="ubuntu:18.04"
 FROM $BASE_IMAGE AS install_tools
 ARG DISTRO=ubuntu
 
-### Install common tools
-
-COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
-RUN bash $INST_SCRIPTS/tools/install_tools.sh && rm -rf $INST_SCRIPTS/tools/
-
-FROM install_tools AS squid_builder
-
-### Build Squid
-RUN wget 'https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/a590f319f328a8a576cb966c2db5ec4a5b3b7b9b/output/kasm-squid-builder_ubuntu.tar.gz'
-RUN tar -xzf kasm-squid-builder_ubuntu.tar.gz -C /
-
-FROM install_tools
-
 MAINTAINER Kasm Tech "info@kasmweb.com"
 LABEL "com.kasmweb.image"="true"
+
+### Install common tools
+COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
+RUN bash $INST_SCRIPTS/tools/install_tools.sh && rm -rf $INST_SCRIPTS/tools/
 
 ### Environment config
 ARG START_XFCE4=0
@@ -101,9 +92,6 @@ RUN bash $INST_SCRIPTS/audio_input/install_audio_input.sh && rm -rf $INST_SCRIPT
 ### Install custom cursors
 COPY ./src/ubuntu/install/cursors $INST_SCRIPTS/cursors/
 RUN bash $INST_SCRIPTS/cursors/install_cursors.sh && rm -rf $INST_SCRIPTS/cursors/
-
-### Copy built Squid
-COPY --from=squid_builder /usr/local/squid /usr/local/squid
 
 ### Install Squid
 COPY ./src/ubuntu/install/squid/install/ $INST_SCRIPTS/squid_install/

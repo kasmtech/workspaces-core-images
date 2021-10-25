@@ -1,8 +1,13 @@
-# update squid conf with user info
+#!/bin/bash
 set -ex
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 
+# intall squid
+SQUID_COMMIT='6392f7dfb1040c67c0a5d5518abf508282523cc0'
+wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
+
+# update squid conf with user info
 if [ "$DISTRO" = centos ]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
 fi
