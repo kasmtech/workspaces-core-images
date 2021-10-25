@@ -1,6 +1,8 @@
 # update squid conf with user info
 set -ex
 
+ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
+
 if [ "$DISTRO" = centos ]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
 fi
@@ -41,11 +43,8 @@ sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
 
-if [ "$DISTRO" = centos ]; then
-  KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/f06293b2e585dbee75728e84293fe61386289c27/kasm_squid_adapter_centos_feature_KASM-1474_centos_build.f06293.tar.gz
-else
-  KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/1cc3b450ee0bfb1aa76a0c3330f8d6e86b365448/kasm_squid_adapter_develop.1cc3b4.tar.gz
-fi
+KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/d03389153257831e2378a3629c560e4d34f7e772/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.d03389.tar.gz
+
 wget -qO- ${KASM_SQUID_ADAPTER} | tar xz -C /etc/squid/
 ls -la /etc/squid
 chmod +x /etc/squid/kasm_squid_adapter

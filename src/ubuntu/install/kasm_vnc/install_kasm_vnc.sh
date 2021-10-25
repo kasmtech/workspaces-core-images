@@ -11,7 +11,6 @@ install_libjpeg_turbo() {
 
 echo "Install KasmVNC server"
 cd /tmp
-
 if [ "${DISTRO}" == "kali" ]  ;
 then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/a9434a300dbf85e65d0e9c212610a487fd10a308/kasmvncserver_kali-rolling_0.9.3_master_a9434a_amd64.deb"
