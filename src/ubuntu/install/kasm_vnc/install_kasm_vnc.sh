@@ -34,7 +34,7 @@ if [ "${DISTRO}" == "centos" ] ; then
     yum localinstall -y kasmvncserver.rpm
     rm kasmvncserver.rpm
 else
-    if [ "$DISTRO" = "ubuntu" ] && [ ! "$BUILD_ARCH" =~ ^aarch64 ] ; then
+    if [[ "$DISTRO" = "ubuntu" ]] && [[ ! "$BUILD_ARCH" =~ ^aarch64$ ]] ; then
         install_libjpeg_turbo
     fi
 
