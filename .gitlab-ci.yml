@@ -6,6 +6,9 @@ stages:
   - build
   - readme
 
+variables:
+  DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
+
 before_script:
   - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
   - export SANITIZED_BRANCH="$(echo $CI_COMMIT_REF_NAME | sed -r 's#^release/##' | sed 's/\//_/g')"
@@ -15,16 +18,19 @@ before_script:
 build_ubuntu_bionic:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
   only:
     - develop
     - /^release\/.*$/
   except:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_cuda_bionic:
   stage: build
@@ -87,13 +93,22 @@ build_centos:
 
 # These jobs should run on the feature/bugfix branches - anything that is not the develop or release branches. It should only push images to the private repos
 build_ubuntu_bionic_dev:
+  image: kasmweb/docker-buildx-private:develop
   stage: build
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 
 build_cuda_bionic_dev:
@@ -138,11 +153,16 @@ build_centos_dev:
 build_ubuntu_bionic_scheduled:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
   only:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_cuda_bionic_schedules:
   stage: build
