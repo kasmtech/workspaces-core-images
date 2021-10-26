@@ -17,6 +17,9 @@ before_script:
 # Jobs for the develop and release branches. They should push to the private and public repos
 build_ubuntu_bionic:
   stage: build
+  image: kasmweb/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
     # get qemu ready
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
@@ -152,6 +155,9 @@ build_centos_dev:
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
   stage: build
+  image: kasmweb/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
     # get qemu ready
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
