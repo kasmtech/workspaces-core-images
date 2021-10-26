@@ -10,7 +10,7 @@ SQUID_DISTRO=${DISTRO}
 if [ ! "${SQUID_DISTRO}" == "centos" ] ; then
   SQUID_DISTRO="ubuntu"
 fi
-wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
+wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${SQUID_DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
 
 # update squid conf with user info
 if [ "$DISTRO" = centos ]; then
