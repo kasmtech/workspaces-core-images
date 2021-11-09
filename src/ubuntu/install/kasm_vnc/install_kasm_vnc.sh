@@ -4,7 +4,7 @@ set -e
 install_libjpeg_turbo() {
     local libjpeg_deb=libjpeg-turbo.deb
 
-    wget 'https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/a9434a300dbf85e65d0e9c212610a487fd10a308/output/bionic/libjpeg-turbo_2.1.2_amd64.deb' -O "$libjpeg_deb"
+    wget 'https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/26f1b52b70dede7bce2f5fe1b1e9c14d2e1069d8/output/bionic/libjpeg-turbo_2.1.2_amd64.deb' -O "$libjpeg_deb"
     apt-get install -y "./$libjpeg_deb"
     rm "$libjpeg_deb"
 }
@@ -16,14 +16,14 @@ BUILD_ARCH=$(uname -p)
 
 if [ "${DISTRO}" == "kali" ]  ;
 then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/8c2c0993421639b4ac15985c732850606377742b/kasmvncserver_kali-rolling_0.9.3_master_8c2c09_amd64.deb"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/26f1b52b70dede7bce2f5fe1b1e9c14d2e1069d8/kasmvncserver_kali-rolling_0.9.3_master_26f1b5_amd64.deb"
 elif [ "${DISTRO}" == "centos" ] ; then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/8c2c0993421639b4ac15985c732850606377742b/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/26f1b52b70dede7bce2f5fe1b1e9c14d2e1069d8/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
 else
     if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/8c2c0993421639b4ac15985c732850606377742b/kasmvncserver_bionic_0.9.3_master_8c2c09_arm64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/26f1b52b70dede7bce2f5fe1b1e9c14d2e1069d8/kasmvncserver_bionic_0.9.3_master_26f1b5_arm64.deb"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/8c2c0993421639b4ac15985c732850606377742b/kasmvncserver_bionic_0.9.3_master_8c2c09_libjpeg-turbo-latest_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/26f1b52b70dede7bce2f5fe1b1e9c14d2e1069d8/kasmvncserver_bionic_0.9.3_master_26f1b5_libjpeg-turbo-latest_amd64.deb"
     fi
 fi
 
