@@ -4,7 +4,7 @@ set -e
 install_libjpeg_turbo() {
     local libjpeg_deb=libjpeg-turbo.deb
 
-    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.2_amd64.deb" -O "$libjpeg_deb"
+    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.3_amd64.deb" -O "$libjpeg_deb"
     apt-get install -y "./$libjpeg_deb"
     rm "$libjpeg_deb"
 }
@@ -14,8 +14,8 @@ cd /tmp
 
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
-COMMIT_ID="986c635cd3cbd468f5fd4a67ddaa9566b6e6e64f"
-BRANCH="feature_KASM-2119_focal"
+COMMIT_ID="ca7949537a911ef8e795d2d65583c61c4a00cae7"
+BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 if [ "${DISTRO}" == "kali" ]  ;
