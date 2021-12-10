@@ -205,7 +205,7 @@ build_cuda_bionic_schedules:
 build_nvidia_focal_schedules:
   stage: build
   script:
-          - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core-nvidia .
+    - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core-nvidia .
     - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH
   only:
