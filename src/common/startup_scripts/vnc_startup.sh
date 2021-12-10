@@ -57,7 +57,7 @@ function start_kasmvnc (){
 
     rm -rf $HOME/.vnc/*.pid
 
-	vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS
+	vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
 
 	KASM_PROCS['kasmvnc']=$(cat $HOME/.vnc/*${DISPLAY_NUM}.pid)
 
@@ -98,11 +98,11 @@ function start_audio_out (){
 
 		if [[ $DEBUG == true ]]; then
 			echo 'Starting audio service in debug mode'
-			no_proxy=127.0.0.1 ffmpeg -f pulse -ar 44100 -i default -f mpegts -correct_ts_overflow 0 -codec:a mp2 -b:a 128k -ac 1 -muxdelay 0.001 http://127.0.0.1:8081/kasmaudio &
+			no_proxy=127.0.0.1 ffmpeg -f pulse -fragment_size ${PULSEAUDIO_FRAGMENT_SIZE:-2000} -ar 44100 -i default -f mpegts -correct_ts_overflow 0 -codec:a mp2 -b:a 128k -ac 1 -muxdelay 0.001 http://127.0.0.1:8081/kasmaudio &
 			KASM_PROCS['kasm_audio_out']=$!
 		else
 			echo 'Starting audio service'
-			no_proxy=127.0.0.1 ffmpeg -v verbose -f pulse -ar 44100 -i default -f mpegts -correct_ts_overflow 0 -codec:a mp2 -b:a 128k -ac 1 -muxdelay 0.001 http://127.0.0.1:8081/kasmaudio > /dev/null 2>&1 &
+			no_proxy=127.0.0.1 ffmpeg -v verbose -f pulse -fragment_size ${PULSEAUDIO_FRAGMENT_SIZE:-2000} -ar 44100 -i default -f mpegts -correct_ts_overflow 0 -codec:a mp2 -b:a 128k -ac 1 -muxdelay 0.001 http://127.0.0.1:8081/kasmaudio > /dev/null 2>&1 &
 			KASM_PROCS['kasm_audio_out']=$!
 			echo -e "\n------------------ Started Audio Out  ----------------------------"
 			echo "Kasm Audio Out PID: ${KASM_PROCS['kasm_audio_out']}";
@@ -211,7 +211,7 @@ if [ -f "$custom_startup_script" ]; then
 		exit 1
 	fi
 
-	"$custom_startup_script" || true
+	"$custom_startup_script" &
 fi
 
 # Monitor Kasm Services

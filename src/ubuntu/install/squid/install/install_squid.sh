@@ -1,8 +1,18 @@
-# update squid conf with user info
+#!/bin/bash
 set -ex
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 
+# intall squid
+SQUID_COMMIT='6392f7dfb1040c67c0a5d5518abf508282523cc0'
+SQUID_DISTRO=${DISTRO}
+# currently all distros use the ubuntu build of squid except centos
+if [ ! "${SQUID_DISTRO}" == "centos" ] ; then
+  SQUID_DISTRO="ubuntu"
+fi
+wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${SQUID_DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
+
+# update squid conf with user info
 if [ "$DISTRO" = centos ]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
 fi
@@ -42,8 +52,7 @@ log_level: 5
 sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
-
-KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/d03389153257831e2378a3629c560e4d34f7e772/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.d03389.tar.gz
+KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/faec132e9797ebf09cfa58bd59b60c77b0b1a64b/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.faec13.tar.gz
 
 wget -qO- ${KASM_SQUID_ADAPTER} | tar xz -C /etc/squid/
 ls -la /etc/squid

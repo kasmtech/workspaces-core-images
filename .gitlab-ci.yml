@@ -6,6 +6,9 @@ stages:
   - build
   - readme
 
+variables:
+  DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
+
 before_script:
   - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
   - export SANITIZED_BRANCH="$(echo $CI_COMMIT_REF_NAME | sed -r 's#^release/##' | sed 's/\//_/g')"
@@ -14,17 +17,23 @@ before_script:
 # Jobs for the develop and release branches. They should push to the private and public repos
 build_ubuntu_bionic:
   stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
   only:
     - develop
     - /^release\/.*$/
   except:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_cuda_bionic:
   stage: build
@@ -34,6 +43,20 @@ build_cuda_bionic:
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_BRANCH
     - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+build_nvidia_focal:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE=ubuntu:20.04"" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH
   only:
     - develop
     - /^release\/.*$/
@@ -87,13 +110,22 @@ build_centos:
 
 # These jobs should run on the feature/bugfix branches - anything that is not the develop or release branches. It should only push images to the private repos
 build_ubuntu_bionic_dev:
+  image: ${ORG_NAME}/docker-buildx-private:develop
   stage: build
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 
 build_cuda_bionic_dev:
@@ -101,6 +133,15 @@ build_cuda_bionic_dev:
   script:
     - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+build_nvidia_focal_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
@@ -137,12 +178,20 @@ build_centos_dev:
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
   stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
   only:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_cuda_bionic_schedules:
   stage: build
@@ -150,6 +199,15 @@ build_cuda_bionic_schedules:
     - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_nvidia_focal_schedules:
+  stage: build
+  script:
+          - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH
   only:
     - schedules
 
@@ -190,8 +248,8 @@ update_readmes:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@${README_TEMPLATE_REPO}
     - sed -e "/{about}/r docs/$KASM_IMAGE/README.md" -e "/{about}/d" dockerhub-readme-template/TEMPLATE.md > docs/$KASM_IMAGE/FULL_README.md
     - cat docs/$KASM_IMAGE/FULL_README.md
-    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  kasmweb/dockerhub-updater:latest
-    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  kasmweb/dockerhub-updater:latest
+    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  ${ORG_NAME}/dockerhub-updater:latest
+    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  ${ORG_NAME}/dockerhub-updater:latest
 
   only:
     variables:
@@ -199,4 +257,4 @@ update_readmes:
       - $README_PASSWORD
   parallel:
     matrix:
-      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-cuda-bionic, core-ubuntu-bionic]
+      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-cuda-bionic, core-ubuntu-bionic, core-nvidia-focal]
