@@ -13,7 +13,7 @@ echo "Install KasmVNC server"
 cd /tmp
 
 BUILD_ARCH=$(uname -p)
-UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
+UBUNTU_CODENAME=""
 COMMIT_ID="ca7949537a911ef8e795d2d65583c61c4a00cae7"
 BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
@@ -24,6 +24,7 @@ then
 elif [ "${DISTRO}" == "centos" ] ; then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
 else
+    UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
     if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] ; then
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_arm64.deb"
     elif [ "${UBUNTU_CODENAME}" == "bionic" ] ; then
