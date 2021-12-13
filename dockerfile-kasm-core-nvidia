@@ -15,7 +15,7 @@ FROM install_tools
 
 MAINTAINER Kasm Tech "info@kasmweb.com"
 LABEL "com.kasmweb.image"="true"
-LABEL "com.kasmweb.gpu_acceleration"="nvidia"
+LABEL "com.kasmweb.gpu_acceleration_egl"="nvidia"
 
 ### Environment config
 ARG START_XFCE4=1
