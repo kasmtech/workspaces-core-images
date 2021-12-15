@@ -40,6 +40,15 @@ EOL
 chmod +x /etc/X11/xinit/xinitrc
 }
 
+replace_default_99x11_common_start() {
+  if [ -f /etc/X11/Xsession.d/99x11-common_start ] ; then
+    cat >/etc/X11/Xsession.d/99x11-common_start <<EOL
+# This file is sourced by Xsession(5), not executed.
+# exec $STARTUP
+EOL
+  fi
+}
+
 echo "Install Xfce4 UI components"
 if [ "$DISTRO" != "centos" ]; then
   apt-get update
@@ -75,6 +84,9 @@ if [ "$DISTRO" = "centos" ]; then
 else
   replace_default_xinit
   config_xinit_disable_screensaver
+  if [ "${START_XFCE4}" == "1" ] ; then
+    replace_default_99x11_common_start
+  fi
 fi
 
 # Override default login script so users cant log themselves out of the desktop dession

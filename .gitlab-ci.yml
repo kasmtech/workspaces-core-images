@@ -49,6 +49,20 @@ build_cuda_bionic:
   except:
     - schedules
 
+build_nvidia_focal:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE=ubuntu:20.04"" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
 build_remnux_bionic:
   stage: build
   script:
@@ -123,6 +137,15 @@ build_cuda_bionic_dev:
     - develop
     - /^release\/.*$/
 
+build_nvidia_focal_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
 build_remnux_bionic_dev:
   stage: build
   script:
@@ -179,6 +202,15 @@ build_cuda_bionic_schedules:
   only:
     - schedules
 
+build_nvidia_focal_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
 build_remnux_bionic_schedules:
   stage: build
   script:
@@ -225,4 +257,4 @@ update_readmes:
       - $README_PASSWORD
   parallel:
     matrix:
-      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-cuda-bionic, core-ubuntu-bionic]
+      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-cuda-bionic, core-ubuntu-bionic, core-nvidia-focal]

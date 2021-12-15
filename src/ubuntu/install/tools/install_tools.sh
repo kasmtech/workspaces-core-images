@@ -9,7 +9,7 @@ if [ "${DISTRO}" == "centos" ] ; then
   rm wmctrl*.rpm
 else
   apt-get update
-  apt-get install -y vim wget net-tools locales bzip2 wmctrl software-properties-common
+  apt-get install -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils
   apt-get clean -y
 
   echo "generate locales für en_US.UTF-8"
