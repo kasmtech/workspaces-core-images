@@ -14,6 +14,7 @@ VNC_VIEW_ONLY_PW=$tmpval
 tmpval=$VNC_PW
 unset VNC_PW
 VNC_PW=$tmpval
+BUILD_ARCH=$(uname -p)
 
 STARTUP_COMPLETE=0
 
@@ -57,7 +58,11 @@ function start_kasmvnc (){
 
     rm -rf $HOME/.vnc/*.pid
 
-	vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
+    if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
+		LD_PRELOAD=/lib/aarch64-linux-gnu/libgcc_s.so.1 vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
+	else
+		vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -cert ${HOME}/.vnc/self.pem -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
+	fi
 
 	KASM_PROCS['kasmvnc']=$(cat $HOME/.vnc/*${DISPLAY_NUM}.pid)
 
@@ -162,7 +167,7 @@ trap cleanup SIGINT SIGTERM
 ## resolve_vnc_connection
 VNC_IP=$(hostname -i)
 if [[ $DEBUG == true ]]; then
-  echo "IP Address used for external bind: $VNC_IP"
+    echo "IP Address used for external bind: $VNC_IP"
 fi
 
 # Create cert for KasmVNC
