@@ -52,7 +52,8 @@ build_cuda_bionic:
 build_nvidia_focal:
   stage: build
   image: ${ORG_NAME}/docker-buildx-private:develop
-  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
     # get qemu ready
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
