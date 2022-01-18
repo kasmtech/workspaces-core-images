@@ -19,7 +19,7 @@ LABEL "com.kasmweb.gpu_acceleration_egl"="nvidia"
 
 ### Environment config
 ARG START_XFCE4=1
-ARG START_PULSEAUDIO=0
+ARG START_PULSEAUDIO=1
 ARG BG_IMG=bg_kasm.png
 ARG EXTRA_SH=noop.sh
 ARG DISTRO=ubuntu
