@@ -17,7 +17,7 @@ apt-get install -y kali-linux-default
 apt-get install -y p11-kit-modules
 
 rm -rf /usr/lib/firefox-esr/libnssckbi.so
-ln /usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-trust.so /usr/lib/firefox-esr/libnssckbi.so
+ln /usr/lib/$(arch)-linux-gnu/pkcs11/p11-kit-trust.so /usr/lib/firefox-esr/libnssckbi.so
 
 
 # Kali includes chromium by default.

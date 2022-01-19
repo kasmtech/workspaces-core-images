@@ -85,12 +85,16 @@ build_remnux_bionic:
 
 build_kali_rolling:
   stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE=""  --build-arg LC_ALL=""   -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE=""  --build-arg LC_ALL=""   -f dockerfile-kasm-core .
   only:
     - develop
     - /^release\/.*$/
@@ -172,9 +176,16 @@ build_remnux_bionic_dev:
 
 build_kali_rolling_dev:
   stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
   except:
     - develop
     - /^release\/.*$/
@@ -245,10 +256,16 @@ build_remnux_bionic_schedules:
 
 build_kali_rolling_schedules:
   stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    - docker build -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
   only:
     - schedules
   tags: 
