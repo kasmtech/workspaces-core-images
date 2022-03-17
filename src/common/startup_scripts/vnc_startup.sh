@@ -73,8 +73,20 @@ function start_kasmvnc (){
 }
 
 function start_window_manager (){
-	echo -e "start window manager\n..."
-	$STARTUPDIR/window_manager_startup.sh #&> $STARTUPDIR/window_manager_startup.log
+	echo -e "\n------------------ Xfce4 window manager startup------------------"
+
+	if [ "${START_XFCE4}" == "1" ] ; then
+		if [ -f /opt/VirtualGL/bin/vglrun ] && [ ! -z "${KASM_EGL_CARD}" ] && [ ! -z "${KASM_RENDERD}" ] && [ -O "${KASM_RENDERD}" ] && [ -O "${KASM_EGL_CARD}" ] ; then
+		echo "Starting XFCE with VirtualGL using EGL device ${KASM_EGL_CARD}"
+			DISPLAY=:1 /opt/VirtualGL/bin/vglrun -d "${KASM_EGL_CARD}" /usr/bin/startxfce4 --replace &
+		else
+			echo "Starting XFCE"
+			/usr/bin/startxfce4 --replace &
+		fi
+		KASM_PROCS['window_manager']=$!
+	else
+		echo "Skipping XFCE Startup"
+	fi
 }
 
 function start_audio_out_websocket (){
@@ -132,8 +144,7 @@ function start_audio_in (){
 function start_upload (){
 	if [[ ${KASM_SVC_UPLOADS:-1} == 1 ]]; then
 		echo 'Starting upload server'
-		cd $STARTUPDIR/upload_server/
-		./kasm_upload_server --ssl --auth-token "kasm_user:$VNC_PW" &
+		$STARTUPDIR/upload_server/kasm_upload_server --ssl --auth-token "kasm_user:$VNC_PW" &
 
 		KASM_PROCS['upload_server']=$!
 
@@ -141,6 +152,19 @@ function start_upload (){
 			echo -e "\n------------------ Started Audio Out Websocket  ----------------------------"
 			echo "Kasm Audio In PID: ${KASM_PROCS['upload_server']}";
 		fi
+	fi
+}
+
+function custom_startup (){
+	custom_startup_script=/dockerstartup/custom_startup.sh
+	if [ -f "$custom_startup_script" ]; then
+		if [ ! -x "$custom_startup_script" ]; then
+			echo "${custom_startup_script}: not executable, exiting"
+			exit 1
+		fi
+
+		"$custom_startup_script" &
+		KASM_PROCS['custom_startup']=$!
 	fi
 }
 
@@ -209,15 +233,7 @@ KASMIP=$(hostname -i)
 echo "Kasm User ${KASM_USER}(${KASM_USER_ID}) started container id ${HOSTNAME} with local IP address ${KASMIP}"
 
 # start custom startup script
-custom_startup_script=/dockerstartup/custom_startup.sh
-if [ -f "$custom_startup_script" ]; then
-	if [ ! -x "$custom_startup_script" ]; then
-		echo "${custom_startup_script}: not executable, exiting"
-		exit 1
-	fi
-
-	"$custom_startup_script" &
-fi
+custom_startup
 
 # Monitor Kasm Services
 sleep 3
@@ -233,11 +249,17 @@ do
 
 			case $process in
 				kasmvnc)
-					echo "KasmVNC crashed, exiting container"
-					exit 1
-					# TODO: Is there a way to restore gracefully, restarting the container may be the best here
-					#start_kasmvnc
-					#/dockerstartup/custom_startup.sh
+					if [ "$KASMVNC_AUTO_RECOVER" = true ] ; then
+						echo "KasmVNC crashed, restarting"
+						start_kasmvnc
+					else
+						echo "KasmVNC crashed, exiting container"
+						exit 1
+					fi
+					;;
+				window_manager)
+					echo "Window manager crashed, restarting"
+					start_window_manager
 					;;
 				kasm_audio_out_websocket)
 					echo "Restarting Audio Out Websocket Service"
@@ -256,6 +278,11 @@ do
 					echo "Restarting Upload Service"
 					# TODO: This will only work if both processes are killed, requires more work
 					start_upload
+					;;
+				custom_script)
+					echo "The custom startup script exited."
+					# custom startup scripts track the target process on their own, they should not exit
+					custom_startup
 					;;
 				*)
 					echo "Unknown Service: $process"
