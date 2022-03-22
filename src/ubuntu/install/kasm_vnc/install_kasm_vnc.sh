@@ -21,9 +21,9 @@ COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 if [ "${DISTRO}" == "kali" ]  ;
 then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-      BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_amd64.deb"
     else
-      BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_arm64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_arm64.deb"
     fi
 elif [ "${DISTRO}" == "centos" ] ; then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
@@ -34,7 +34,7 @@ else
     elif [ "${UBUNTU_CODENAME}" == "bionic" ] ; then
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_libjpeg-turbo-latest_amd64.deb"
     else
-	BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_amd64.deb"
     fi
 fi
 
@@ -46,6 +46,7 @@ if [ "${DISTRO}" == "centos" ] ; then
     rm kasmvncserver.rpm
 else
     if [[ "${UBUNTU_CODENAME}" = "bionic" ]] && [[ ! "$BUILD_ARCH" =~ ^aarch64$ ]] ; then
+        # We need to install libjpeg-turbo because the version that comes with bionic is quite old and has performance issues.
         install_libjpeg_turbo
     fi
 
