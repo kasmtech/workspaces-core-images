@@ -13,7 +13,7 @@ RUN tar -xzf kasm-squid-builder_ubuntu.tar.gz -C /
 
 FROM install_tools
 
-MAINTAINER Kasm Tech "info@kasmweb.com"
+LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
 LABEL "com.kasmweb.image"="true"
 LABEL "com.kasmweb.gpu_acceleration_egl"="nvidia"
 
@@ -61,6 +61,12 @@ EXPOSE $VNC_PORT \
 
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
+
+### Install wmctrl needed for the maximize script
+RUN apt install wmctrl
+
+### Copy over the maximization script to our startup dir for use by app images.
+COPY ./src/ubuntu/install/maximize_script $STARTUPDIR/
 
 # NVIDIA SETUP
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \

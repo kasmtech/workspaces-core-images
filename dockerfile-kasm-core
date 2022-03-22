@@ -1,13 +1,9 @@
-ARG BASE_IMAGE="ubuntu:18.04"
+ARG BASE_IMAGE="ubuntu:20.04"
 FROM $BASE_IMAGE AS install_tools
 ARG DISTRO=ubuntu
 
-MAINTAINER Kasm Tech "info@kasmweb.com"
+LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
 LABEL "com.kasmweb.image"="true"
-
-### Install common tools
-COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
-RUN bash $INST_SCRIPTS/tools/install_tools.sh && rm -rf $INST_SCRIPTS/tools/
 
 ### Environment config
 ARG START_XFCE4=0
@@ -54,6 +50,15 @@ EXPOSE $VNC_PORT \
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
 
+### Install common tools
+COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
+RUN bash $INST_SCRIPTS/tools/install_tools.sh && rm -rf $INST_SCRIPTS/tools/
+
+### Install wmctrl needed for the maximize script
+RUN apt install wmctrl
+
+### Copy over the maximization script to our startup dir for use by app images.
+COPY ./src/ubuntu/install/maximize_script $STARTUPDIR/
 
 ### Install custom fonts
 COPY ./src/ubuntu/install/fonts $INST_SCRIPTS/fonts/

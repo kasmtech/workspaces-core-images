@@ -35,6 +35,26 @@ build_ubuntu_bionic:
   tags:
     - aws-autoscale
 
+build_ubuntu_focal:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-focal-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_cuda_bionic:
   stage: build
   script:
@@ -43,6 +63,20 @@ build_cuda_bionic:
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_BRANCH
     - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+
+build_cuda_focal:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-cuda-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="nvidia/cuda:11.6.0-devel-ubuntu20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-focal:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-focal:$SANITIZED_ROLLING_BRANCH
   only:
     - develop
     - /^release\/.*$/
@@ -60,7 +94,7 @@ build_nvidia_focal:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core-nvidia .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core-nvidia .
   tags:
     - aws-autoscale
   only:
@@ -82,6 +116,23 @@ build_remnux_bionic:
     - /^release\/.*$/
   except:
     - schedules
+
+build_remnux_focal:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="remnux/remnux-distro:focal" --build-arg START_XFCE4=1  --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-focal:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 
 build_kali_rolling:
   stage: build
@@ -137,12 +188,38 @@ build_ubuntu_bionic_dev:
   tags:
     - aws-autoscale
 
+build_ubuntu_focal_dev:
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  stage: build
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-focal-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core .
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 build_cuda_bionic_dev:
   stage: build
   script:
     - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+build_cuda_focal_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="nvidia/cuda:11.6.0-devel-ubuntu20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
@@ -170,6 +247,17 @@ build_remnux_bionic_dev:
   script:
     - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+
+build_remnux_focal_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="remnux/remnux-distro:focal" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
+  tags:
+    - aws-autoscale
   except:
     - develop
     - /^release\/.*$/
@@ -219,12 +307,38 @@ build_ubuntu_bionic_scheduled:
   tags:
     - aws-autoscale
 
+build_ubuntu_focal_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_cuda_bionic_schedules:
   stage: build
   script:
     - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_cuda_focal_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="nvidia/cuda:11.6.0-devel-ubuntu20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png  -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-cuda-focal:$SANITIZED_ROLLING_BRANCH
   only:
     - schedules
 
@@ -251,6 +365,17 @@ build_remnux_bionic_schedules:
     - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+
+build_remnux_focal_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="remnux/remnux-distro:focal" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH
+  tags:
+    - aws-autoscale
   only:
     - schedules
 
@@ -297,4 +422,4 @@ update_readmes:
       - $README_PASSWORD
   parallel:
     matrix:
-      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-cuda-bionic, core-ubuntu-bionic, core-nvidia-focal]
+      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-remnux-focal, core-cuda-bionic, core-cuda-focal, core-ubuntu-bionic, core-ubuntu-focal, core-nvidia-focal]
