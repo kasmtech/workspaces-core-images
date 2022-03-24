@@ -54,9 +54,6 @@ RUN mkdir -p $HOME/Desktop
 COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
 RUN bash $INST_SCRIPTS/tools/install_tools.sh && rm -rf $INST_SCRIPTS/tools/
 
-### Install wmctrl needed for the maximize script
-RUN apt install wmctrl
-
 ### Copy over the maximization script to our startup dir for use by app images.
 COPY ./src/ubuntu/install/maximize_script $STARTUPDIR/
 
