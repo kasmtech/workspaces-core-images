@@ -4,7 +4,7 @@ set -e
 install_libjpeg_turbo() {
     local libjpeg_deb=libjpeg-turbo.deb
 
-    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.3_amd64.deb" -O "$libjpeg_deb"
+    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.4_amd64.deb" -O "$libjpeg_deb"
     apt-get install -y "./$libjpeg_deb"
     rm "$libjpeg_deb"
 }
@@ -14,7 +14,7 @@ cd /tmp
 
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="a734a613c81b62b546243acbff8500336f0c1213"
+COMMIT_ID="ce78879132e679df898b05de491e3c14a52d8ad8"
 BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
@@ -26,7 +26,7 @@ then
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_arm64.deb"
     fi
 elif [ "${DISTRO}" == "centos" ] ; then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/centos_core/kasmvncserver-0.9.1~beta-1.el7.x86_64.rpm"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/centos_core/kasmvncserver-0.9.3~beta-1.el7.x86_64.rpm"
 else
     UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
     if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] ; then
