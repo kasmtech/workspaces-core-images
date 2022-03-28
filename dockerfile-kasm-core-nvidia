@@ -62,9 +62,6 @@ EXPOSE $VNC_PORT \
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
 
-### Install wmctrl needed for the maximize script
-RUN apt install wmctrl
-
 ### Copy over the maximization script to our startup dir for use by app images.
 COPY ./src/ubuntu/install/maximize_script $STARTUPDIR/
 
