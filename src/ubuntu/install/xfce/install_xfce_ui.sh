@@ -3,15 +3,11 @@
 set -e
 
 get_rid_of_policykit_error() {
-  rm /etc/xdg/autostart/xfce-polkit.desktop
+  rm -f /etc/xdg/autostart/xfce-polkit.desktop
 }
 
 disable_epel_nss_wrapper_that_breaks_firefox() {
   yum-config-manager --setopt=epel.exclude=nss_wrapper --save
-}
-
-get_rid_of_xfce_battery_widget() {
-  yum remove -y xfce4-power-manager
 }
 
 config_xinit_disable_screensaver() {
@@ -50,7 +46,7 @@ EOL
 }
 
 echo "Install Xfce4 UI components"
-if [ "$DISTRO" != "centos" ]; then
+if [[ "${DISTRO}" != @(centos|oracle7|oracle8|opensuse) ]]; then
   apt-get update
 fi
 
@@ -62,24 +58,44 @@ then
     sed -i "s@<value type=\"int\" value=\"${PLUGIN_ID}\"/>@@g" /etc/xdg/xfce4/panel/default.xml
   elif [ "$DISTRO" = "ubuntu" ]; then
     apt-get install -y supervisor xfce4 xfce4-terminal xterm
-  elif [ "$DISTRO" = "centos" ]; then
-    yum install -y epel-release
+  elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
+    if [ "${DISTRO}" == centos ]; then
+      yum install -y epel-release
+    else
+      yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm  
+    fi
     disable_epel_nss_wrapper_that_breaks_firefox
-    yum groupinstall xfce xterm -y
+    yum groupinstall xfce -y
+    yum install -y wmctrl
     get_rid_of_policykit_error
-    get_rid_of_xfce_battery_widget
+    yum remove -y xfce4-power-manager
+  elif [ "$DISTRO" = "oracle8" ]; then
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf group install xfce -y
+    dnf install -y wmctrl
+    get_rid_of_policykit_error
+    dnf remove -y xfce4-power-manager xfce4-screensaver
+  elif [ "$DISTRO" = "opensuse" ]; then
+    zypper install -yn -t pattern xfce
+    zypper install -yn xset xfce4-terminal
+    zypper remove -yn xfce4-power-manager
+    get_rid_of_policykit_error
 fi
 
 
-if [ "$DISTRO" = "centos" ]; then
+if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   yum clean all
+elif [ "${DISTRO}" == "oracle8" ]; then
+  dnf clean all
+elif [ "${DISTRO}" == "opensuse" ]; then
+  zypper clean --all
 else
   apt-get purge -y pm-utils xscreensaver*
   apt-get clean -y
 fi
 
 
-if [ "$DISTRO" = "centos" ]; then
+if [[ "${DISTRO}" == @(centos|oracle7|oracle8) ]]; then
   config_xinit_disable_screensaver
 else
   replace_default_xinit

@@ -1,7 +1,8 @@
-ARG BASE_IMAGE="centos:centos7"
+ARG BASE_IMAGE="oraclelinux:8"
 
 FROM $BASE_IMAGE AS install_tools
-ARG DISTRO=centos
+ARG DISTRO=oracle8
+
 
 ### Install common tools
 
@@ -11,8 +12,16 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 FROM install_tools AS squid_builder
 
-RUN wget --progress=dot:giga 'https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/96a014eae9161b234fc4eafb07d3b6dd555b8417/output/kasm-squid-builder_centos_amd64.tar.gz'
-RUN tar -xzf kasm-squid-builder_centos_amd64.tar.gz -C /
+ARG DISTRO=oracle8
+
+RUN if [ "${DISTRO}" == "oracle8" ]; then \
+  ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
+  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/96a014eae9161b234fc4eafb07d3b6dd555b8417/output/kasm-squid-builder_oracle_${ARCH}.tar.gz"; \
+else \
+  ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
+  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/96a014eae9161b234fc4eafb07d3b6dd555b8417/output/kasm-squid-builder_centos_${ARCH}.tar.gz"; \
+fi
+RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
 FROM install_tools
 
@@ -22,9 +31,9 @@ LABEL "com.kasmweb.image"="true"
 ### Environment config
 ARG START_XFCE4=0
 ARG START_PULSEAUDIO=0
-ARG BG_IMG=bg_centos.png
+ARG BG_IMG=bg_oracle.png
 ARG EXTRA_SH=noop.sh
-ARG DISTRO=centos
+ARG DISTRO=oracle8
 ARG LANG='en_US.UTF-8'
 ARG LANGUAGE='en_US:en'
 ARG LC_ALL='en_US.UTF-8'
@@ -70,7 +79,11 @@ RUN mkdir -p $HOME/Desktop
 ### (should be nss_wrapper), and yum would just ignore it. Thus, a necessary
 ### package would be missing. With skip_missing_names_on_install, yum will exit
 ### with 1 exit code and that will stop image building.
-RUN yum-config-manager --setopt=skip_missing_names_on_install=False --save
+RUN if [ "${DISTRO}" == "oracle8" ]; then \
+  dnf config-manager --setopt=skip_missing_names_on_install=False --save; \
+else \
+  yum-config-manager --setopt=skip_missing_names_on_install=False --save; \
+fi
 
 ### Install custom fonts
 COPY ./src/ubuntu/install/fonts $INST_SCRIPTS/fonts/
