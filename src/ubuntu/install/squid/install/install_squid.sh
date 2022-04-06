@@ -6,15 +6,31 @@ ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 # intall squid
 SQUID_COMMIT='6392f7dfb1040c67c0a5d5518abf508282523cc0'
 SQUID_DISTRO=${DISTRO}
-# currently all distros use the ubuntu build of squid except centos
-if [ ! "${SQUID_DISTRO}" == "centos" ] ; then
+# currently all distros use the ubuntu build of squid except centos/oracle
+if [[ "${SQUID_DISTRO}" != @(centos|oracle7) ]] ; then
   SQUID_DISTRO="ubuntu"
 fi
-wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${SQUID_DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
+if [ "${DISTRO}" == "oracle7" ]; then
+  SQUID_DISTRO=centos
+  DISTRO=centos
+elif [ "${DISTRO}" == "oracle8" ]; then
+  SQUID_DISTRO=oracle8
+  DISTRO=oracle
+elif [ "${DISTRO}" == "opensuse" ]; then
+  SQUID_DISTRO=opensuse
+fi
+
+if [[ "${SQUID_DISTRO}" != @(centos|oracle7|oracle8|opensuse) ]] ; then
+  wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${SQUID_DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
+fi
 
 # update squid conf with user info
-if [ "$DISTRO" = centos ]; then
+if [[ "${DISTRO}" == @(centos|oracle) ]]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
+elif [ "${DISTRO}" == "opensuse" ]; then
+  useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
+  groupadd proxy
+  usermod -a -G proxy proxy
 fi
 
 mkdir /usr/local/squid/etc/ssl_cert -p
@@ -36,8 +52,12 @@ EOL
 chown -R proxy:proxy /etc/squid/blocked.acl
 
 
-if [ "$DISTRO" = centos ]; then
+if [[ "${DISTRO}" == "centos" ]]; then
   yum install -y memcached cyrus-sasl iproute
+elif [ "${DISTRO}" == "oracle" ]; then
+  dnf install -y memcached cyrus-sasl iproute
+elif [ "${DISTRO}" == "opensuse" ]; then
+  zypper install -yn memcached cyrus-sasl iproute2 libatomic1
 else
   apt-get install -y memcached sasl2-bin iproute2
 fi
@@ -52,7 +72,7 @@ log_level: 5
 sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
-KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/faec132e9797ebf09cfa58bd59b60c77b0b1a64b/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.faec13.tar.gz
+KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/d3ec909b9ca2f4c234bd561d015737f44343830c/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.d3ec90.tar.gz
 
 wget -qO- ${KASM_SQUID_ADAPTER} | tar xz -C /etc/squid/
 ls -la /etc/squid
@@ -60,8 +80,12 @@ chmod +x /etc/squid/kasm_squid_adapter
 
 # FIXME - This likely should be moved somewhere else to be more explicit
 # Install Cert utilities
-if [ "$DISTRO" = centos ]; then
+if [[ "${DISTRO}" == "centos" ]]; then
   yum install -y nss-tools
+elif [ "${DISTRO}" == "oracle" ]; then
+  dnf install -y nss-tools
+elif [ "${DISTRO}" == "opensuse" ]; then
+  zypper install -yn mozilla-nss-tools
 else
   apt-get install -y libnss3-tools
 fi

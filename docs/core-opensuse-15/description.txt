@@ -1,0 +1,1 @@
+openSUSE Leap 15 base image for Kasm Workspaces

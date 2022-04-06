@@ -3,7 +3,6 @@ set -e
 
 install_libjpeg_turbo() {
     local libjpeg_deb=libjpeg-turbo.deb
-
     wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.4_amd64.deb" -O "$libjpeg_deb"
     apt-get install -y "./$libjpeg_deb"
     rm "$libjpeg_deb"
@@ -14,7 +13,7 @@ cd /tmp
 
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="ce78879132e679df898b05de491e3c14a52d8ad8"
+COMMIT_ID="6e84e103175fd6923eafb5e185ac271650720b40"
 BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
@@ -25,8 +24,20 @@ then
     else
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_arm64.deb"
     fi
-elif [ "${DISTRO}" == "centos" ] ; then
+elif [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
     BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/centos_core/kasmvncserver-0.9.3~beta-1.el7.x86_64.rpm"
+elif [[ "${DISTRO}" == "oracle8" ]] ; then
+    if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/oracle_8/kasmvncserver-0.9.3~beta-1.el8.x86_64.rpm"
+    else
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/oracle_8/kasmvncserver-0.9.3~beta-1.el8.aarch64.rpm"
+    fi
+elif [[ "${DISTRO}" == "opensuse" ]] ; then
+    if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/opensuse_15/kasmvncserver-0.9.3~beta-leap15.x86_64.rpm"
+    else
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/opensuse_15/kasmvncserver-0.9.3~beta-leap15.aarch64.rpm"
+    fi
 else
     UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
     if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] ; then
@@ -39,11 +50,38 @@ else
 fi
 
 
-if [ "${DISTRO}" == "centos" ] ; then
+if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
     wget "${BUILD_URL}" -O kasmvncserver.rpm
-
     yum localinstall -y kasmvncserver.rpm
     rm kasmvncserver.rpm
+elif [[ "${DISTRO}" == "oracle8" ]] ; then
+    wget "${BUILD_URL}" -O kasmvncserver.rpm
+    dnf localinstall -y kasmvncserver.rpm
+    rm kasmvncserver.rpm
+    dnf clean all
+elif [[ "${DISTRO}" == "opensuse" ]] ; then
+  zypper -n install -y \
+    libglvnd \
+    libgnutls30 \
+    libgomp1 \
+    libjpeg8 \
+    libnettle6 \
+    libpixman-1-0 \
+    libXdmcp6 \
+    libXfont2-2 \
+    libxkbcommon-x11-0 \
+    openssl \
+    perl \
+    x11-tools \
+    xauth \
+    xkbcomp \
+    xkeyboard-config \
+    xrdb
+  mkdir -p /etc/pki/tls/private
+  wget "${BUILD_URL}" -O kasmvncserver.rpm
+  rpm -i kasmvncserver.rpm
+  rm kasmvncserver.rpm
+  zypper clean --all
 else
     if [[ "${UBUNTU_CODENAME}" = "bionic" ]] && [[ ! "$BUILD_ARCH" =~ ^aarch64$ ]] ; then
         # We need to install libjpeg-turbo because the version that comes with bionic is quite old and has performance issues.

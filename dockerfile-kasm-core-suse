@@ -1,7 +1,8 @@
-ARG BASE_IMAGE="centos:centos7"
+ARG BASE_IMAGE="opensuse/leap:15"
 
 FROM $BASE_IMAGE AS install_tools
-ARG DISTRO=centos
+ARG DISTRO=opensuse
+
 
 ### Install common tools
 
@@ -11,8 +12,11 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 FROM install_tools AS squid_builder
 
-RUN wget --progress=dot:giga 'https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/96a014eae9161b234fc4eafb07d3b6dd555b8417/output/kasm-squid-builder_centos_amd64.tar.gz'
-RUN tar -xzf kasm-squid-builder_centos_amd64.tar.gz -C /
+ARG DISTRO=opensuse
+
+RUN ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
+  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/919fdaaa1cb5184deb5f849e28ad6324615129cd/output/kasm-squid-builder_opensuse_${ARCH}.tar.gz"
+RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
 FROM install_tools
 
@@ -22,9 +26,9 @@ LABEL "com.kasmweb.image"="true"
 ### Environment config
 ARG START_XFCE4=0
 ARG START_PULSEAUDIO=0
-ARG BG_IMG=bg_centos.png
+ARG BG_IMG=bg_opensuse.png
 ARG EXTRA_SH=noop.sh
-ARG DISTRO=centos
+ARG DISTRO=opensuse
 ARG LANG='en_US.UTF-8'
 ARG LANGUAGE='en_US:en'
 ARG LC_ALL='en_US.UTF-8'
@@ -64,13 +68,6 @@ EXPOSE $VNC_PORT \
 
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
-
-### Ensure all needed packages are installed.
-### Consider "yum install -y gettext nss_wraper". There's a typo in nss_wraper
-### (should be nss_wrapper), and yum would just ignore it. Thus, a necessary
-### package would be missing. With skip_missing_names_on_install, yum will exit
-### with 1 exit code and that will stop image building.
-RUN yum-config-manager --setopt=skip_missing_names_on_install=False --save
 
 ### Install custom fonts
 COPY ./src/ubuntu/install/fonts $INST_SCRIPTS/fonts/

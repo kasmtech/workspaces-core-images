@@ -168,6 +168,61 @@ build_centos:
   except:
     - schedules
 
+build_oracle_7:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-oracle-7:$SANITIZED_BRANCH -t ${ORG_NAME}/core-oracle-7:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="oraclelinux:7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4="1" --build-arg DISTRO="oracle7" --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-oracle-7-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-oracle-7:$SANITIZED_BRANCH
+    - docker push ${ORG_NAME}/core-oracle-7:$SANITIZED_ROLLING_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_oracle_8:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-oracle-8-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-oracle-8-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-oracle-8:$SANITIZED_BRANCH -t ${ORG_NAME}/core-oracle-8:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="oraclelinux:8" --build-arg DISTRO="oracle8" -f dockerfile-kasm-core-oracle .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_opensuse_15:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
 
 # These jobs should run on the feature/bugfix branches - anything that is not the develop or release branches. It should only push images to the private repos
 build_ubuntu_bionic_dev:
@@ -289,6 +344,53 @@ build_centos_dev:
     - develop
     - /^release\/.*$/
 
+build_oracle_7_dev:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="oraclelinux:7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4="1" --build-arg DISTRO="oracle7"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
+
+build_oracle_8_dev:
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  stage: build
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-oracle-8-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="oraclelinux:8" --build-arg DISTRO="oracle8" -f dockerfile-kasm-core-oracle .
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
+
+build_opensuse_15_dev:
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  stage: build
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
+
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
   stage: build
@@ -405,6 +507,50 @@ build_centos_schedules:
   only:
     - schedules
 
+build_oracle_7_schedules:
+  stage: build
+  script:
+    - docker build -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-oracle-7:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="oraclelinux:7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4="1" --build-arg DISTRO="oracle7"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-oracle-7-private:$SANITIZED_ROLLING_BRANCH
+    - docker push ${ORG_NAME}/core-oracle-7:$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_oracle_8_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-oracle-8-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-oracle-8:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="oraclelinux:8" --build-arg DISTRO="oracle8" -f dockerfile-kasm-core-oracle .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_opensuse_15_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
 
 update_readmes:
   stage: readme
@@ -422,4 +568,4 @@ update_readmes:
       - $README_PASSWORD
   parallel:
     matrix:
-      - KASM_IMAGE: [core-centos-7, core-kali-rolling, core-remnux-bionic, core-remnux-focal, core-cuda-bionic, core-cuda-focal, core-ubuntu-bionic, core-ubuntu-focal, core-nvidia-focal]
+      - KASM_IMAGE: [core-centos-7, core-oracle-7, core-oracle-8, core-opensuse-15, core-kali-rolling, core-remnux-bionic, core-remnux-focal, core-cuda-bionic, core-cuda-focal, core-ubuntu-bionic, core-ubuntu-focal, core-nvidia-focal]

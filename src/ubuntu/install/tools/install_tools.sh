@@ -2,11 +2,15 @@
 set -e
 
 echo "Install some common tools for further installation"
-if [ "${DISTRO}" == "centos" ] ; then
+if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
   yum install -y vim wget net-tools bzip2 python3
-  wget http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/wmctrl-1.07-17.gf.el7.x86_64.rpm
-  yum localinstall -y wmctrl*.rpm
-  rm wmctrl*.rpm
+elif [ "${DISTRO}" == "oracle8" ]; then
+  dnf install -y wget net-tools bzip2 python3 tar vim
+  dnf clean all
+elif [ "${DISTRO}" == "opensuse" ]; then
+  sed -i 's/download.opensuse.org/mirrorcache-us.opensuse.org/g' /etc/zypp/repos.d/*.repo
+  zypper install -yn wget net-tools bzip2 python3 tar vim gzip iputils
+  zypper clean --all
 else
   apt-get update
   # Update tzdata noninteractive (otherwise our script is hung on user input later).
