@@ -81,7 +81,11 @@ function start_window_manager (){
 			DISPLAY=:1 /opt/VirtualGL/bin/vglrun -d "${KASM_EGL_CARD}" /usr/bin/startxfce4 --replace &
 		else
 			echo "Starting XFCE"
-			/usr/bin/startxfce4 --replace &
+			if [ -f '/usr/bin/zypper' ]; then
+				DISPLAY=:1 /usr/bin/dbus-launch /usr/bin/startxfce4 --replace &
+			else
+				/usr/bin/startxfce4 --replace &
+			fi
 		fi
 		KASM_PROCS['window_manager']=$!
 	else
