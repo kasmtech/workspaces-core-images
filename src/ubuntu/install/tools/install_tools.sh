@@ -3,7 +3,7 @@ set -e
 
 echo "Install some common tools for further installation"
 if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
-  yum install -y vim wget net-tools bzip2 python3
+  yum install -y vim wget net-tools bzip2 python3 ca-certificates
 elif [ "${DISTRO}" == "oracle8" ]; then
   dnf install -y wget net-tools bzip2 python3 tar vim
   dnf clean all

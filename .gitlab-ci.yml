@@ -4,7 +4,9 @@ services:
 
 stages:
   - build
+  - manifest
   - readme
+  - test
 
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
@@ -226,128 +228,201 @@ build_opensuse_15:
 
 # These jobs should run on the feature/bugfix branches - anything that is not the develop or release branches. It should only push images to the private repos
 build_ubuntu_bionic_dev:
-  image: ${ORG_NAME}/docker-buildx-private:develop
   stage: build
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:18.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-ubuntu-bionic-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1 
+        --build-arg BASE_IMAGE="ubuntu:18.04"
+        --build-arg BG_IMG=bg_bionic.png
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-ubuntu-bionic-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
 build_ubuntu_focal_dev:
-  image: ${ORG_NAME}/docker-buildx-private:develop
   stage: build
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-focal-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-ubuntu-focal-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg BASE_IMAGE="ubuntu:20.04"
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_focal.png
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-ubuntu-focal-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
 build_cuda_bionic_dev:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04"
+        --build-arg BG_IMG=bg_bionic.png
+        -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 build_cuda_focal_dev:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="nvidia/cuda:11.6.0-devel-ubuntu20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png  -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg BASE_IMAGE="nvidia/cuda:11.6.0-devel-ubuntu20.04"
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_focal.png
+        -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 build_nvidia_focal_dev:
   stage: build
-  image: ${ORG_NAME}/docker-buildx-private:develop
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures    
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core-nvidia .
-  tags:
-    - aws-autoscale
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-nvidia-focal-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="ubuntu:20.04"
+        --build-arg BG_IMG=bg_focal.png
+        -f dockerfile-kasm-core-nvidia .
+    - docker push ${ORG_NAME}/core-nvidia-focal-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
 build_remnux_bionic_dev:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
+        --build-arg BASE_IMAGE="remnux/remnux-distro:bionic"
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_remnux.png
+        --build-arg EXTRA_SH=remnux.sh
+        -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 build_remnux_focal_dev:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="remnux/remnux-distro:focal" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg BASE_IMAGE="remnux/remnux-distro:focal"
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_remnux.png
+        --build-arg EXTRA_SH=remnux.sh
+        -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
-  tags:
-    - aws-autoscale
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 build_kali_rolling_dev:
   stage: build
-  image: ${ORG_NAME}/docker-buildx-private:develop
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-kali-rolling-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest"
+        --build-arg START_PULSEAUDIO="1"
+        --build-arg EXTRA_SH="kali.sh"
+        --build-arg DISTRO="kali"
+        --build-arg LANG=""
+        --build-arg LANGUAGE=""
+        --build-arg LC_ALL=""
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-kali-rolling-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
-  tags: 
-    - aws-autoscale
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
 build_centos_dev:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="centos:centos7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4=1 --build-arg DISTRO="centos"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-centos .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH
+        --build-arg BASE_IMAGE="centos:centos7"
+        --build-arg START_PULSEAUDIO="1"
+        --build-arg START_XFCE4=1
+        --build-arg DISTRO="centos"
+        --build-arg LANG=""
+        --build-arg LANGUAGE=""
+        --build-arg LC_ALL=""
+        -f dockerfile-kasm-core-centos .
     - docker push ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale
 
 build_oracle_7_dev:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH --build-arg BASE_IMAGE="oraclelinux:7" --build-arg START_PULSEAUDIO="1" --build-arg START_XFCE4="1" --build-arg DISTRO="oracle7"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core-oracle .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH
+        --build-arg BASE_IMAGE="oraclelinux:7"
+        --build-arg START_PULSEAUDIO="1"
+        --build-arg START_XFCE4="1"
+        --build-arg DISTRO="oracle7"
+        --build-arg LANG=""
+        --build-arg LANGUAGE=""
+        --build-arg LC_ALL=""
+        -f dockerfile-kasm-core-oracle .
     - docker push ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH
   except:
     - develop
@@ -356,40 +431,141 @@ build_oracle_7_dev:
     - aws-autoscale
 
 build_oracle_8_dev:
-  image: ${ORG_NAME}/docker-buildx-private:develop
   stage: build
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-oracle-8-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="oraclelinux:8" --build-arg DISTRO="oracle8" -f dockerfile-kasm-core-oracle .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-oracle-8-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="oraclelinux:8"
+        --build-arg DISTRO="oracle8"
+        -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-oracle-8-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
 build_opensuse_15_dev:
-  image: ${ORG_NAME}/docker-buildx-private:develop
   stage: build
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="opensuse/leap:15"
+        --build-arg DISTRO="opensuse"
+        -f dockerfile-kasm-core-suse .
+    - docker push ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+test_multi_arch_dev:
+  stage: test
+  script:
+    - docker pull ${ORG_NAME}/kasm-tester:1.10.0
+    - >
+        docker run --rm --privileged
+        -e KASM_PORT=443
+        -e KASM_PATH=/opt/kasm
+        -e KASM_PASSWORD=password123
+        -e PUID=1000
+        -e DOCKERUSER=$DOCKER_HUB_USERNAME
+        -e DOCKERPASS=$DOCKER_HUB_PASSWORD
+        -e TEST_IMAGE="${ORG_NAME}/${KASM_IMAGE}:$(arch)-$SANITIZED_BRANCH"
+        -e AWS_KEY=${KASM_TEST_AWS_KEY}
+        -e AWS_SECRET="${KASM_TEST_AWS_SECRET}"
+        -e SLACK_TOKEN=${SLACK_TOKEN}
+        -e S3_BUCKET=kasm-ci
+        -e COMMIT=${CI_COMMIT_SHA}
+        -e REPO=workspaces-core-images
+        ${ORG_NAME}/kasm-tester:1.10.0
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+        KASM_IMAGE:
+          - core-ubuntu-bionic-private
+          - core-ubuntu-focal-private
+          - core-nvidia-focal-private
+          - core-kali-rolling-private
+          - core-oracle-8-private
+          - core-opensuse-15-private
+
+test_single_arch_dev:
+  stage: test
+  script:
+    - docker pull ${ORG_NAME}/kasm-tester:1.10.0
+    - >
+        docker run --rm --privileged
+        -e KASM_PORT=443
+        -e KASM_PATH=/opt/kasm
+        -e KASM_PASSWORD=password123
+        -e PUID=1000
+        -e DOCKERUSER=$DOCKER_HUB_USERNAME
+        -e DOCKERPASS=$DOCKER_HUB_PASSWORD
+        -e TEST_IMAGE="${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH"
+        -e AWS_KEY=${KASM_TEST_AWS_KEY}
+        -e AWS_SECRET="${KASM_TEST_AWS_SECRET}"
+        -e SLACK_TOKEN=${SLACK_TOKEN}
+        -e S3_BUCKET=kasm-ci
+        -e COMMIT=${CI_COMMIT_SHA}
+        -e REPO=workspaces-core-images
+        ${ORG_NAME}/kasm-tester:1.10.0
   except:
     - develop
     - /^release\/.*$/
   tags:
     - aws-autoscale
+  parallel:
+    matrix:
+      - KASM_IMAGE:
+          - core-cuda-bionic-private
+          - core-cuda-focal-private
+          - core-remnux-bionic-private
+          - core-remnux-focal-private
+          - core-centos-7-private
+          - core-oracle-7-private
+
+manifest_dev:
+  stage: manifest
+  script:
+    - docker pull ${ORG_NAME}/${KASM_IMAGE}:x86_64-$SANITIZED_BRANCH
+    - docker pull ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH
+    - "docker manifest push --purge ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH || :"
+    - docker manifest create ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:x86_64-$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH
+    - docker manifest annotate ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH --os linux --arch arm64 --variant v8
+    - docker manifest push --purge ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
+  parallel:
+    matrix:
+      - KASM_IMAGE:
+          - core-ubuntu-bionic-private
+          - core-ubuntu-focal-private
+          - core-nvidia-focal-private
+          - core-kali-rolling-private
+          - core-oracle-8-private
+          - core-opensuse-15-private
 
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
@@ -455,7 +631,7 @@ build_nvidia_focal_schedules:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_bionic.png -f dockerfile-kasm-core-nvidia .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-nvidia-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-nvidia-focal:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core-nvidia .
   tags:
     - aws-autoscale
   only:
@@ -559,8 +735,22 @@ update_readmes:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@${README_TEMPLATE_REPO}
     - sed -e "/{about}/r docs/$KASM_IMAGE/README.md" -e "/{about}/d" dockerhub-readme-template/TEMPLATE.md > docs/$KASM_IMAGE/FULL_README.md
     - cat docs/$KASM_IMAGE/FULL_README.md
-    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  ${ORG_NAME}/dockerhub-updater:latest
-    - docker run -v $PWD:/workspace -e DOCKER_USERNAME="$README_USERNAME" -e DOCKER_PASSWORD="$README_PASSWORD" -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE" -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md" -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"  ${ORG_NAME}/dockerhub-updater:latest
+    - >
+        docker run -v $PWD:/workspace
+        -e DOCKER_USERNAME="$README_USERNAME"
+        -e DOCKER_PASSWORD="$README_PASSWORD"
+        -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private"
+        -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md"
+        -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt" 
+        ${ORG_NAME}/dockerhub-updater:latest
+    - >
+        docker run -v $PWD:/workspace
+        -e DOCKER_USERNAME="$README_USERNAME"
+        -e DOCKER_PASSWORD="$README_PASSWORD"
+        -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE"
+        -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md"
+        -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"
+        ${ORG_NAME}/dockerhub-updater:latest
 
   only:
     variables:
@@ -568,4 +758,16 @@ update_readmes:
       - $README_PASSWORD
   parallel:
     matrix:
-      - KASM_IMAGE: [core-centos-7, core-oracle-7, core-oracle-8, core-opensuse-15, core-kali-rolling, core-remnux-bionic, core-remnux-focal, core-cuda-bionic, core-cuda-focal, core-ubuntu-bionic, core-ubuntu-focal, core-nvidia-focal]
+      - KASM_IMAGE: 
+          - core-centos-7
+          - core-oracle-7
+          - core-oracle-8
+          - core-opensuse-15
+          - core-kali-rolling
+          - core-remnux-bionic
+          - core-remnux-focal
+          - core-cuda-bionic
+          - core-cuda-focal
+          - core-ubuntu-bionic
+          - core-ubuntu-focal
+          - core-nvidia-focal
