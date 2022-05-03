@@ -57,20 +57,6 @@ build_ubuntu_focal:
   tags:
     - aws-autoscale
 
-build_cuda_bionic:
-  stage: build
-  script:
-    - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
-  only:
-    - develop
-    - /^release\/.*$/
-  except:
-    - schedules
-
 build_cuda_focal:
   stage: build
   script:
@@ -268,24 +254,6 @@ build_ubuntu_focal_dev:
   parallel:
     matrix:
       - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
-
-build_cuda_bionic_dev:
-  stage: build
-  script:
-    - >
-        docker build 
-        -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
-        --build-arg START_PULSEAUDIO=1
-        --build-arg START_XFCE4=1
-        --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04"
-        --build-arg BG_IMG=bg_bionic.png
-        -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_BRANCH
-  except:
-    - develop
-    - /^release\/.*$/
-  tags:
-    - aws-autoscale
 
 build_cuda_focal_dev:
   stage: build
@@ -601,15 +569,6 @@ build_ubuntu_focal_scheduled:
     - schedules
   tags:
     - aws-autoscale
-
-build_cuda_bionic_schedules:
-  stage: build
-  script:
-    - docker build -t ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="nvidia/cuda:11.3.0-devel-ubuntu18.04" --build-arg BG_IMG=bg_bionic.png  -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-cuda-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-cuda-bionic:$SANITIZED_ROLLING_BRANCH
-  only:
-    - schedules
 
 build_cuda_focal_schedules:
   stage: build
