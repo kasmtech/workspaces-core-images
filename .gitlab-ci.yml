@@ -62,6 +62,8 @@ build_remnux_bionic:
     - /^release\/.*$/
   except:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_kali_rolling:
   stage: build
@@ -187,6 +189,8 @@ build_remnux_bionic_schedules:
     - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH
   only:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_kali_rolling_schedules:
   stage: build
