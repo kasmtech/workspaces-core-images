@@ -507,7 +507,6 @@ test_single_arch_dev:
   parallel:
     matrix:
       - KASM_IMAGE:
-          - core-cuda-bionic-private
           - core-cuda-focal-private
           - core-remnux-bionic-private
           - core-remnux-focal-private
@@ -548,7 +547,6 @@ link_tests_single_arch_dev:
   parallel:
     matrix:
       - KASM_IMAGE:
-          - core-cuda-bionic-private
           - core-cuda-focal-private
           - core-remnux-bionic-private
           - core-remnux-focal-private
@@ -765,7 +763,6 @@ update_readmes:
           - core-kali-rolling
           - core-remnux-bionic
           - core-remnux-focal
-          - core-cuda-bionic
           - core-cuda-focal
           - core-ubuntu-bionic
           - core-ubuntu-focal
