@@ -134,20 +134,20 @@ RUN rm -rf "$INST_SCRIPTS/resources/"
 RUN chmod +x /etc/squid/kasm_squid_adapter
 RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
 
-### Setup Container User - Libnss Wrapper
-COPY ./src/ubuntu/install/libnss $INST_SCRIPTS/libnss/
-RUN bash $INST_SCRIPTS/libnss/libnss_wrapper.sh  && rm -rf $INST_SCRIPTS/libnss/
-
 ### configure startup
 COPY ./src/common/scripts/kasm_hook_scripts $STARTUPDIR
 COPY ./src/common/startup_scripts $STARTUPDIR
-RUN bash $STARTUPDIR/set_user_permission.sh $STARTUPDIR $HOME
-
+RUN bash $STARTUPDIR/set_user_permission.sh $STARTUPDIR $HOME && \
+    echo 'source $STARTUPDIR/generate_container_user' >> $HOME/.bashrc
 
 ### extra configurations needed per distro variant
 COPY ./src/ubuntu/install/extra $INST_SCRIPTS/extra/
 RUN bash $INST_SCRIPTS/extra/$EXTRA_SH  && rm -rf $INST_SCRIPTS/extra/
 
+### Create user and home directory for base images that don't already define it
+RUN (groupadd -g 1000 kasm-user \
+    && useradd -M -u 1000 -g 1000 kasm-user \
+    && usermod -a -G kasm-user kasm-user) ; exit 0
 ENV HOME /home/kasm-user
 WORKDIR $HOME
 RUN mkdir -p $HOME && chown -R 1000:0 $HOME

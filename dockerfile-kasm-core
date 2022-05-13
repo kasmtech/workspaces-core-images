@@ -4,6 +4,7 @@ ARG DISTRO=ubuntu
 
 LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
 LABEL "com.kasmweb.image"="true"
+LABEL "com.kasmweb.gpu_acceleration_egl"="nvidia"
 
 ### Environment config
 ARG START_XFCE4=0
@@ -50,6 +51,13 @@ EXPOSE $VNC_PORT \
 
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
+
+# Support NVIDIA gpus for graphics acceleration
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+ENV LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+ENV NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32,utility
+COPY src/ubuntu/install/nvidia/10_nvidia.json /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 
 ### Install common tools
 COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
@@ -109,20 +117,24 @@ RUN rm -rf $INST_SCRIPTS/resources/
 RUN chmod +x /etc/squid/kasm_squid_adapter
 RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
 
-### Setup Container User - Libnss Wrapper
-COPY ./src/ubuntu/install/libnss $INST_SCRIPTS/libnss/
-RUN bash $INST_SCRIPTS/libnss/libnss_wrapper.sh  && rm -rf $INST_SCRIPTS/libnss/
-
 ### configure startup
 COPY ./src/common/scripts/kasm_hook_scripts $STARTUPDIR
 ADD ./src/common/startup_scripts $STARTUPDIR
-RUN bash $STARTUPDIR/set_user_permission.sh $STARTUPDIR $HOME
-
+RUN bash $STARTUPDIR/set_user_permission.sh $STARTUPDIR $HOME && \
+    echo 'source $STARTUPDIR/generate_container_user' >> $HOME/.bashrc
 
 ### extra configurations needed per distro variant
 COPY ./src/ubuntu/install/extra $INST_SCRIPTS/extra/
 RUN bash $INST_SCRIPTS/extra/$EXTRA_SH  && rm -rf $INST_SCRIPTS/extra/
 
+### VirtualGL
+COPY ./src/ubuntu/install/virtualgl $INST_SCRIPTS/virtualgl/
+RUN bash $INST_SCRIPTS/virtualgl/install_virtualgl.sh && rm -rf $INST_SCRIPTS/virtualgl/
+
+### Create user and home directory for base images that don't already define it
+RUN (groupadd -g 1000 kasm-user \
+    && useradd -M -u 1000 -g 1000 kasm-user \
+    && usermod -a -G kasm-user kasm-user) ; exit 0
 ENV HOME /home/kasm-user
 WORKDIR $HOME
 RUN mkdir -p $HOME && chown -R 1000:0 $HOME

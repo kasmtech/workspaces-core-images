@@ -29,7 +29,7 @@ if [[ "${DISTRO}" == @(centos|oracle) ]]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
 elif [ "${DISTRO}" == "opensuse" ]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
-  groupadd proxy
+  groupadd -g 65511 proxy
   usermod -a -G proxy proxy
 fi
 
