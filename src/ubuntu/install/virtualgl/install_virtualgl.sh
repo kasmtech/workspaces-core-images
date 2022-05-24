@@ -10,7 +10,7 @@ if [ "$DISTRO" = "ubuntu" ]; then
     apt-get update && apt-get install -y --no-install-recommends \
         libglvnd0 libgl1 libglx0 libegl1 libgles2
 
-    tar -xf $INST_SCRIPTS/virtualgl/VirtualGL-3.0.80-Linux-arm64.tar.bz2 -C /
+    dpkg -i $INST_SCRIPTS/virtualgl/virtualgl_*arm64.deb
   else
     dpkg --add-architecture i386
     apt-get update && apt-get install -y --no-install-recommends \
