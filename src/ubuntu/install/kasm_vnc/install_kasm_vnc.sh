@@ -13,12 +13,14 @@ cd /tmp
 
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="2959156a25997290ec8a31d40990a421ecb0eb9d"
+COMMIT_ID="330eb47142b9ccd5f1d5e4523832e716e19dfd7c"
 BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 if [ "${DISTRO}" == "kali" ]  ;
 then
+    apt-get update
+    apt-get install -y sgml-base
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_0.9.3_${BRANCH}_${COMMIT_ID_SHORT}_amd64.deb"
     else
