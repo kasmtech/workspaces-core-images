@@ -283,7 +283,7 @@ do
 					# TODO: This will only work if both processes are killed, requires more work
 					start_upload
 					;;
-				custom_script)
+				custom_startup)
 					echo "The custom startup script exited."
 					# custom startup scripts track the target process on their own, they should not exit
 					custom_startup
