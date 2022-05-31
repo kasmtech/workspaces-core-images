@@ -523,7 +523,6 @@ link_tests_multi_arch_dev:
         KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
-          - core-nvidia-focal-private
           - core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
