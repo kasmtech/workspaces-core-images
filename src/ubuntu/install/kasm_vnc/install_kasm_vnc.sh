@@ -13,7 +13,7 @@ cd /tmp
 
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="ac7605f3163354251e37353758b2feda40311078"
+COMMIT_ID="61f08d4986affeb5bd1c1f6dfe949f77f7bbbfd4"
 BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
@@ -93,7 +93,7 @@ else
     wget "${BUILD_URL}" -O kasmvncserver.deb
 
     apt-get update
-    apt-get install -y gettext ssl-cert
+    apt-get install -y gettext ssl-cert libxfont2
     dpkg -i /tmp/kasmvncserver.deb
     apt-get -yf install
     rm -f /tmp/kasmvncserver.deb

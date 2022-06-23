@@ -1,0 +1,1 @@
+Ubuntu Jammy base image for Kasm Workspaces
