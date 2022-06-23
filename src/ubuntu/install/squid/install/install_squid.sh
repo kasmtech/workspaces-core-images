@@ -19,8 +19,14 @@ elif [ "${DISTRO}" == "oracle8" ]; then
 elif [ "${DISTRO}" == "opensuse" ]; then
   SQUID_DISTRO=opensuse
 fi
-
-if [[ "${SQUID_DISTRO}" != @(centos|oracle7|oracle8|opensuse) ]] ; then
+if grep -q Jammy /etc/os-release; then
+  apt-get update
+  apt-get install -y squid-openssl
+  mkdir -p /usr/local/squid/sbin
+  mkdir -p /usr/local/squid/var/logs/
+  ln -s /usr/lib/squid/ /usr/local/squid/libexec
+  ln -s /usr/sbin/squid /usr/local/squid/sbin/squid
+elif [[ "${SQUID_DISTRO}" != @(centos|oracle7|oracle8|opensuse) ]] ; then
   wget -qO- "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${SQUID_DISTRO}_${ARCH}.tar.gz" | tar -xzf - -C /
 fi
 
@@ -84,10 +90,13 @@ if [[ "${DISTRO}" == "centos" ]]; then
   yum install -y nss-tools
 elif [ "${DISTRO}" == "oracle" ]; then
   dnf install -y nss-tools
+  dnf clean all
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -yn mozilla-nss-tools
+  zypper clean --all
 else
   apt-get install -y libnss3-tools
+  apt-get clean -y
 fi
 
 # Create an empty cert9.db. This will be used by applications like Chrome

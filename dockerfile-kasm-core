@@ -161,7 +161,8 @@ RUN touch $STARTUPDIR/wm.log \
     && mkdir -p $STARTUPDIR/kasmrx/Downloads \
     && chown 1000:1000 $STARTUPDIR/kasmrx/Downloads \
     && chown -R root:root /usr/local/bin \
-    && chown 1000:root /var/run/pulse
+    && chown 1000:root /var/run/pulse \
+    && rm -Rf /home/kasm-default-profile/.launchpadlib
 
 USER 1000
 

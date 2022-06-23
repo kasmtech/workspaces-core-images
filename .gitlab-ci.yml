@@ -58,6 +58,26 @@ build_ubuntu_focal:
   tags:
     - aws-autoscale
 
+build_ubuntu_jammy:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-jammy-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-ubuntu-jammy-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-jammy:$SANITIZED_BRANCH -t ${ORG_NAME}/core-ubuntu-jammy:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:22.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_jammy.png -f dockerfile-kasm-core .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_cuda_focal:
   stage: build
   script:
@@ -186,7 +206,7 @@ build_opensuse_15:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.3" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
   only:
     - develop
     - /^release\/.*$/
@@ -229,6 +249,27 @@ build_ubuntu_focal_dev:
         --build-arg BG_IMG=bg_focal.png
         -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-ubuntu-focal-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_ubuntu_jammy_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-ubuntu-jammy-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg BASE_IMAGE="ubuntu:22.04"
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_jammy.png
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-ubuntu-jammy-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
@@ -389,7 +430,7 @@ build_opensuse_15_dev:
         -t ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg START_XFCE4=1
-        --build-arg BASE_IMAGE="opensuse/leap:15"
+        --build-arg BASE_IMAGE="opensuse/leap:15.3"
         --build-arg DISTRO="opensuse"
         -f dockerfile-kasm-core-suse .
     - docker push ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
@@ -436,6 +477,7 @@ test_multi_arch_dev:
           - core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
+          - core-ubuntu-jammy-private
 
 test_single_arch_dev:
   stage: test
@@ -493,6 +535,7 @@ manifest_dev:
           - core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
+          - core-ubuntu-jammy-private
 
 link_tests_single_arch_dev:
   stage: linktests
@@ -526,6 +569,7 @@ link_tests_multi_arch_dev:
           - core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
+          - core-ubuntu-jammy-private
 
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
@@ -557,6 +601,23 @@ build_ubuntu_focal_scheduled:
     - docker buildx create --use
     # build for multiple architectures
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_focal.png -f dockerfile-kasm-core .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_ubuntu_jammy_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-ubuntu-jammy-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-ubuntu-jammy:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:22.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_jammy.png -f dockerfile-kasm-core .
   only:
     - schedules
   tags:
@@ -658,7 +719,7 @@ build_opensuse_15_scheduled:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.3" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
   only:
     - schedules
   tags:
@@ -705,3 +766,4 @@ update_readmes:
           - core-cuda-focal
           - core-ubuntu-bionic
           - core-ubuntu-focal
+          - core-ubuntu-jammy

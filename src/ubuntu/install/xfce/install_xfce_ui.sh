@@ -25,6 +25,7 @@ chmod +x /etc/X11/xinit/xinitrc.d/disable_screensaver.sh
 
 replace_default_xinit() {
 
+  mkdir -p /etc/X11/xinit
   cat >/etc/X11/xinit/xinitrc <<EOL
 #!/bin/sh
 for file in /etc/X11/xinit/xinitrc.d/* ; do
@@ -82,6 +83,9 @@ then
     get_rid_of_policykit_error
 fi
 
+if grep -q Jammy /etc/os-release; then
+  apt-get purge -y xfce4-screensaver
+fi
 
 if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   yum clean all
@@ -93,7 +97,6 @@ else
   apt-get purge -y pm-utils xscreensaver*
   apt-get clean -y
 fi
-
 
 if [[ "${DISTRO}" == @(centos|oracle7|oracle8) ]]; then
   config_xinit_disable_screensaver
