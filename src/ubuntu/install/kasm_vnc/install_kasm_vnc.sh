@@ -13,7 +13,7 @@ cd /tmp
 
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="61f08d4986affeb5bd1c1f6dfe949f77f7bbbfd4"
+COMMIT_ID="924329900dd6942a3336992ad7534a640c7e264d"
 BRANCH="master"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
