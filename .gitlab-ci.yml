@@ -446,7 +446,7 @@ build_opensuse_15_dev:
 test_multi_arch_dev:
   stage: test
   script:
-    - docker pull ${ORG_NAME}/kasm-tester:1.10.0
+    - docker pull ${ORG_NAME}/kasm-tester:1.11.0
     - >
         docker run --rm --privileged
         -e KASM_PORT=443
@@ -462,7 +462,7 @@ test_multi_arch_dev:
         -e S3_BUCKET=kasm-ci
         -e COMMIT=${CI_COMMIT_SHA}
         -e REPO=workspaces-core-images
-        ${ORG_NAME}/kasm-tester:1.10.0
+        ${ORG_NAME}/kasm-tester:1.11.0
   except:
     - develop
     - /^release\/.*$/
@@ -482,7 +482,7 @@ test_multi_arch_dev:
 test_single_arch_dev:
   stage: test
   script:
-    - docker pull ${ORG_NAME}/kasm-tester:1.10.0
+    - docker pull ${ORG_NAME}/kasm-tester:1.11.0
     - >
         docker run --rm --privileged
         -e KASM_PORT=443
@@ -498,7 +498,7 @@ test_single_arch_dev:
         -e S3_BUCKET=kasm-ci
         -e COMMIT=${CI_COMMIT_SHA}
         -e REPO=workspaces-core-images
-        ${ORG_NAME}/kasm-tester:1.10.0
+        ${ORG_NAME}/kasm-tester:1.11.0
   except:
     - develop
     - /^release\/.*$/
