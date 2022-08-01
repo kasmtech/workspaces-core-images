@@ -19,7 +19,7 @@ elif [ "${DISTRO}" == "oracle8" ]; then
 elif [ "${DISTRO}" == "opensuse" ]; then
   SQUID_DISTRO=opensuse
 fi
-if grep -q Jammy /etc/os-release; then
+if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) ; then
   apt-get update
   apt-get install -y squid-openssl
   mkdir -p /usr/local/squid/sbin
