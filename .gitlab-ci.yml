@@ -142,7 +142,7 @@ build_kali_rolling:
     - /^release\/.*$/
   except:
     - schedules
-  tags: 
+  tags:
     - aws-autoscale
 
 build_centos:
@@ -220,10 +220,10 @@ build_ubuntu_bionic_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-ubuntu-bionic-private:$(arch)-$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
-        --build-arg START_XFCE4=1 
+        --build-arg START_XFCE4=1
         --build-arg BASE_IMAGE="ubuntu:18.04"
         --build-arg BG_IMG=bg_bionic.png
         -f dockerfile-kasm-core .
@@ -241,7 +241,7 @@ build_ubuntu_focal_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-ubuntu-focal-private:$(arch)-$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg BASE_IMAGE="ubuntu:20.04"
@@ -283,7 +283,7 @@ build_cuda_focal_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-cuda-focal-private:$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg BASE_IMAGE="nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04"
@@ -301,7 +301,7 @@ build_remnux_bionic_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
         --build-arg BASE_IMAGE="remnux/remnux-distro:bionic"
         --build-arg START_PULSEAUDIO=1
@@ -320,7 +320,7 @@ build_remnux_focal_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg BASE_IMAGE="remnux/remnux-distro:focal"
@@ -339,7 +339,7 @@ build_kali_rolling_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-kali-rolling-private:$(arch)-$SANITIZED_BRANCH
         --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest"
         --build-arg START_PULSEAUDIO="1"
@@ -363,7 +363,7 @@ build_centos_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-centos-7-private:$SANITIZED_BRANCH
         --build-arg BASE_IMAGE="centos:centos7"
         --build-arg START_PULSEAUDIO="1"
@@ -384,7 +384,7 @@ build_oracle_7_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-oracle-7-private:$SANITIZED_BRANCH
         --build-arg BASE_IMAGE="oraclelinux:7"
         --build-arg START_PULSEAUDIO="1"
@@ -405,7 +405,7 @@ build_oracle_8_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-oracle-8-private:$(arch)-$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg START_XFCE4=1
@@ -426,7 +426,7 @@ build_opensuse_15_dev:
   stage: build
   script:
     - >
-        docker build 
+        docker build
         -t ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg START_XFCE4=1
@@ -674,7 +674,7 @@ build_kali_rolling_schedules:
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
   only:
     - schedules
-  tags: 
+  tags:
     - aws-autoscale
 
 build_centos_schedules:
@@ -744,7 +744,7 @@ update_readmes:
         -e DOCKER_PASSWORD="$README_PASSWORD"
         -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private"
         -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md"
-        -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt" 
+        -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"
         ${ORG_NAME}/dockerhub-updater:latest
     - >
         docker run -v $PWD:/workspace
@@ -761,7 +761,7 @@ update_readmes:
       - $README_PASSWORD
   parallel:
     matrix:
-      - KASM_IMAGE: 
+      - KASM_IMAGE:
           - core-centos-7
           - core-oracle-7
           - core-oracle-8

@@ -159,6 +159,20 @@ function start_upload (){
 	fi
 }
 
+function start_gamepad (){
+	if [[ ${KASM_SVC_GAMEPAD:-1} == 1 ]]; then
+		echo 'Starting gamepad server'
+		$STARTUPDIR/gamepad/kasm_gamepad_server --ssl --auth-token "kasm_user:$VNC_PW" --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
+
+		KASM_PROCS['kasm_gamepad']=$!
+
+		if [[ $DEBUG == true ]]; then
+			echo -e "\n------------------ Started Gamepad Websocket  ----------------------------"
+			echo "Kasm Gamepad PID: ${KASM_PROCS['kasm_gamepad']}";
+		fi
+	fi
+}
+
 function custom_startup (){
 	custom_startup_script=/dockerstartup/custom_startup.sh
 	if [ -f "$custom_startup_script" ]; then
@@ -223,6 +237,7 @@ start_audio_out_websocket
 start_audio_out
 start_audio_in
 start_upload
+start_gamepad
 
 STARTUP_COMPLETE=1
 
@@ -282,6 +297,11 @@ do
 					echo "Restarting Upload Service"
 					# TODO: This will only work if both processes are killed, requires more work
 					start_upload
+					;;
+			  kasm_gamepad)
+					echo "Gamepad Service Failed"
+					# TODO: Needs work in python project to support auto restart
+					# start_gamepad
 					;;
 				custom_script)
 					echo "The custom startup script exited."
