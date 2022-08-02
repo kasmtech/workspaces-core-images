@@ -67,18 +67,18 @@ then
     fi
     disable_epel_nss_wrapper_that_breaks_firefox
     yum groupinstall xfce -y
-    yum install -y wmctrl xset xclip
+    yum install -y wmctrl xset xclip xfce4-notifyd
     get_rid_of_policykit_error
     yum remove -y xfce4-power-manager
   elif [ "$DISTRO" = "oracle8" ]; then
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     dnf group install xfce -y
-    dnf install -y wmctrl xset xclip
+    dnf install -y wmctrl xset xclip xfce4-notifyd
     get_rid_of_policykit_error
     dnf remove -y xfce4-power-manager xfce4-screensaver
   elif [ "$DISTRO" = "opensuse" ]; then
     zypper install -yn -t pattern xfce
-    zypper install -yn xset xfce4-terminal xclip
+    zypper install -yn xset xfce4-terminal xclip xfce4-notifyd
     zypper remove -yn xfce4-power-manager
     get_rid_of_policykit_error
 fi
