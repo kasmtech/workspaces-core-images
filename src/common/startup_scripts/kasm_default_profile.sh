@@ -58,9 +58,6 @@ rm -rf $HOME/.config/pulse
 echo "Removing Default Profile Directory"
 rm -rf $DEFAULT_PROFILE_HOME/*
 
-# FIXME Temporary proxy config script
-$STARTUPDIR/browser_proxy_config.sh
-
 # unknown option ==> call command
 echo -e "\n\n------------------ EXECUTE COMMAND ------------------"
 echo "Executing command: '$@'"
