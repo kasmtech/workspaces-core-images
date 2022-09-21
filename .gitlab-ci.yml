@@ -3,14 +3,15 @@ services:
   - docker:dind
 
 stages:
+  - readme
   - build
   - manifest
-  - readme
   - test
   - linktests
 
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
+  KASM_RELEASE: "1.11.0"
 
 before_script:
   - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
@@ -734,31 +735,19 @@ build_opensuse_15_scheduled:
 update_readmes:
   stage: readme
   script:
-    - apk add git
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@${README_TEMPLATE_REPO}
-    - sed -e "/{about}/r docs/$KASM_IMAGE/README.md" -e "/{about}/d" dockerhub-readme-template/TEMPLATE.md > docs/$KASM_IMAGE/FULL_README.md
-    - cat docs/$KASM_IMAGE/FULL_README.md
     - >
-        docker run -v $PWD:/workspace
+        docker run -v $PWD/docs:/docs
+        -e RELEASE="$KASM_RELEASE"
         -e DOCKER_USERNAME="$README_USERNAME"
         -e DOCKER_PASSWORD="$README_PASSWORD"
-        -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE-private"
-        -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md"
-        -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"
-        ${ORG_NAME}/dockerhub-updater:latest
-    - >
-        docker run -v $PWD:/workspace
-        -e DOCKER_USERNAME="$README_USERNAME"
-        -e DOCKER_PASSWORD="$README_PASSWORD"
-        -e DOCKERHUB_REPOSITORY="${ORG_NAME}/$KASM_IMAGE"
-        -e README_FILEPATH="/workspace/docs/$KASM_IMAGE/FULL_README.md"
-        -e DESCRIPTION_FILEPATH="/workspace/docs/$KASM_IMAGE/description.txt"
-        ${ORG_NAME}/dockerhub-updater:latest
-
+        -e DOCKERHUB_REPOSITORY="${ORG_NAME}/${KASM_IMAGE}"
+        kasmweb/dockerhub-updater:develop
   only:
     variables:
       - $README_USERNAME
       - $README_PASSWORD
+  tags:
+    - aws-autoscale
   parallel:
     matrix:
       - KASM_IMAGE:
