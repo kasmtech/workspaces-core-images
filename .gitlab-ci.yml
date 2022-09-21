@@ -3,9 +3,9 @@ services:
   - docker:dind
 
 stages:
+  - readme
   - build
   - manifest
-  - readme
   - test
   - linktests
 
