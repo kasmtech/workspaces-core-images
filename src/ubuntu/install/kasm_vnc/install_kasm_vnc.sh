@@ -10,12 +10,11 @@ install_libjpeg_turbo() {
 
 echo "Install KasmVNC server"
 cd /tmp
-
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="a5b9d75d63f40a62641fc0e6fa1a176ae281115f"
-BRANCH="release"
-KASMVNC_VER="0.9.3.1"
+COMMIT_ID="fdc4a63eda4b0bc77742cf1047434515fdf58d17"
+BRANCH="release" # just use 'release' for a release branch
+KASMVNC_VER="0.9.3.2"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
