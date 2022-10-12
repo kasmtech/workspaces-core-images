@@ -16,10 +16,10 @@ ARG DISTRO=oracle8
 
 RUN if [ "${DISTRO}" == "oracle8" ]; then \
   ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
-  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/96a014eae9161b234fc4eafb07d3b6dd555b8417/output/kasm-squid-builder_oracle_${ARCH}.tar.gz"; \
+  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/de1dffbc94d4132d6c696de8c6dfcd6f08900f61/output/kasm-squid-builder_oracle_${ARCH}.tar.gz"; \
 else \
   ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
-  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/96a014eae9161b234fc4eafb07d3b6dd555b8417/output/kasm-squid-builder_centos_${ARCH}.tar.gz"; \
+  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/de1dffbc94d4132d6c696de8c6dfcd6f08900f61/output/kasm-squid-builder_centos_${ARCH}.tar.gz"; \
 fi
 RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 

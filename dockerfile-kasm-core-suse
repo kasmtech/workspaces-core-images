@@ -15,7 +15,7 @@ FROM install_tools AS squid_builder
 ARG DISTRO=opensuse
 
 RUN ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
-  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/919fdaaa1cb5184deb5f849e28ad6324615129cd/output/kasm-squid-builder_opensuse_${ARCH}.tar.gz"
+  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/de1dffbc94d4132d6c696de8c6dfcd6f08900f61/output/kasm-squid-builder_opensuse_${ARCH}.tar.gz"
 RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
 FROM install_tools
