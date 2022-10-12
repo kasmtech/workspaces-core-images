@@ -4,7 +4,7 @@ set -ex
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 
 # intall squid
-SQUID_COMMIT='6392f7dfb1040c67c0a5d5518abf508282523cc0'
+SQUID_COMMIT='de1dffbc94d4132d6c696de8c6dfcd6f08900f61'
 SQUID_DISTRO=${DISTRO}
 # currently all distros use the ubuntu build of squid except centos/oracle
 if [[ "${SQUID_DISTRO}" != @(centos|oracle7) ]] ; then
@@ -78,7 +78,7 @@ log_level: 5
 sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
-KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/040a19d1f0df7f5caed00f85abb8c0653a66f6a7/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.040a19.tar.gz
+KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/d54ebc03a8696964b12cb99e5863116fb3a26c0b/kasm_squid_adapter_${DISTRO/kali/ubuntu}_${ARCH}_develop.d54ebc.tar.gz
 
 wget -qO- ${KASM_SQUID_ADAPTER} | tar xz -C /etc/squid/
 ls -la /etc/squid

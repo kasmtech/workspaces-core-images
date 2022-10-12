@@ -100,8 +100,7 @@ else
 
     apt-get update
     apt-get install -y gettext ssl-cert libxfont2
-    dpkg -i /tmp/kasmvncserver.deb
-    apt-get -yf install
+    apt-get install -y /tmp/kasmvncserver.deb
     rm -f /tmp/kasmvncserver.deb
 fi
 #mkdir $KASM_VNC_PATH/certs
