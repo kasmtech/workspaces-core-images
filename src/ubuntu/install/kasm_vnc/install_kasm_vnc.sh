@@ -8,13 +8,22 @@ install_libjpeg_turbo() {
     rm "$libjpeg_deb"
 }
 
+prepare_rpm_repo_dependencies() {
+  if [[ "$DISTRO" = "oracle7" ]]; then
+    yum-config-manager --enable ol7_optional_latest
+  elif [[ "$DISTRO" = "oracle8" ]]; then
+    dnf config-manager --set-enabled ol8_codeready_builder
+    dnf install -y oracle-epel-release-el8
+  fi
+}
+
 echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="fdc4a63eda4b0bc77742cf1047434515fdf58d17"
-BRANCH="release" # just use 'release' for a release branch
-KASMVNC_VER="0.9.3.2"
+COMMIT_ID="0ef8a51945eb45520367f7e92f75085f0831e2f6"
+BRANCH="master" # just use 'release' for a release branch
+KASMVNC_VER="0.9.4"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
@@ -33,18 +42,18 @@ then
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_arm64.deb"
     fi
 elif [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
-    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/centos_core/kasmvncserver-0.9.3~beta-1.el7.x86_64.rpm"
+    BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_centos_core_${KASM_VER_NAME_PART}_x86_64.rpm"
 elif [[ "${DISTRO}" == "oracle8" ]] ; then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/oracle_8/kasmvncserver-0.9.3~beta-1.el8.x86_64.rpm"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_oracle_8_${KASM_VER_NAME_PART}_x86_64.rpm"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/oracle_8/kasmvncserver-0.9.3~beta-1.el8.aarch64.rpm"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_oracle_8_${KASM_VER_NAME_PART}_aarch64.rpm"
     fi
 elif [[ "${DISTRO}" == "opensuse" ]] ; then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/opensuse_15/kasmvncserver-0.9.3~beta-leap15.x86_64.rpm"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_opensuse_15_${KASM_VER_NAME_PART}_x86_64.rpm"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/opensuse_15/kasmvncserver-0.9.3~beta-leap15.aarch64.rpm"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_opensuse_15_${KASM_VER_NAME_PART}_aarch64.rpm"
     fi
 else
     UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
@@ -58,6 +67,7 @@ else
 fi
 
 
+prepare_rpm_repo_dependencies
 if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
     wget "${BUILD_URL}" -O kasmvncserver.rpm
     yum localinstall -y kasmvncserver.rpm
@@ -68,26 +78,9 @@ elif [[ "${DISTRO}" == "oracle8" ]] ; then
     rm kasmvncserver.rpm
     dnf clean all
 elif [[ "${DISTRO}" == "opensuse" ]] ; then
-  zypper -n install -y \
-    libglvnd \
-    libgnutls30 \
-    libgomp1 \
-    libjpeg8 \
-    libnettle6 \
-    libpixman-1-0 \
-    libXdmcp6 \
-    libXfont2-2 \
-    libxkbcommon-x11-0 \
-    openssl \
-    perl \
-    x11-tools \
-    xauth \
-    xkbcomp \
-    xkeyboard-config \
-    xrdb
   mkdir -p /etc/pki/tls/private
   wget "${BUILD_URL}" -O kasmvncserver.rpm
-  rpm -i kasmvncserver.rpm
+  zypper install -y --allow-unsigned-rpm ./kasmvncserver.rpm
   rm kasmvncserver.rpm
   zypper clean --all
 else
