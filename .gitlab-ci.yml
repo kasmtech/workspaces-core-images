@@ -127,6 +127,8 @@ build_remnux_focal:
 
 build_kali_rolling:
   stage: build
+  allow_failure: true
+  when: manual
   image: ${ORG_NAME}/docker-buildx-private:develop
   variables:
     BUILD_PLATFORMS: "linux/amd64,linux/arm64"
@@ -337,6 +339,8 @@ build_remnux_focal_dev:
 
 build_kali_rolling_dev:
   stage: build
+  allow_failure: true
+  when: manual
   script:
     - >
         docker build 
@@ -474,7 +478,7 @@ test_multi_arch_dev:
         KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
-          - core-kali-rolling-private
+          #- core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
@@ -532,7 +536,7 @@ manifest_dev:
       - KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
-          - core-kali-rolling-private
+          #- core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
@@ -572,7 +576,7 @@ link_tests_multi_arch_dev:
         KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
-          - core-kali-rolling-private
+          #- core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
