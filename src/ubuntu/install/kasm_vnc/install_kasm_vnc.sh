@@ -3,7 +3,7 @@ set -e
 
 install_libjpeg_turbo() {
     local libjpeg_deb=libjpeg-turbo.deb
-    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.4_amd64.deb" -O "$libjpeg_deb"
+    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.5_amd64.deb" -O "$libjpeg_deb"
     apt-get install -y "./$libjpeg_deb"
     rm "$libjpeg_deb"
 }
@@ -21,7 +21,7 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="b93ead6a249a29ea6de57e5218c0ce917b5fd7cb"
+COMMIT_ID="6b9f28760c41c168488563cfab8fb4ce7038a9cf"
 BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="0.9.4"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
