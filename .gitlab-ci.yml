@@ -469,16 +469,50 @@ test_multi_arch_dev:
     - /^release\/.*$/
   tags:
     - ${TAG}
+  needs:
+    - manifest_dev
   parallel:
     matrix:
       - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
         KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
-          - core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
+
+test_multi_arch_dev_osint:
+  stage: test
+  script:
+    - docker pull ${ORG_NAME}/kasm-tester:1.11.0
+    - >
+        docker run --rm --privileged
+        -e KASM_PORT=443
+        -e KASM_PATH=/opt/kasm
+        -e KASM_PASSWORD=password123
+        -e PUID=1000
+        -e DOCKERUSER=$DOCKER_HUB_USERNAME
+        -e DOCKERPASS=$DOCKER_HUB_PASSWORD
+        -e TEST_IMAGE="${ORG_NAME}/${KASM_IMAGE}:$(arch)-$SANITIZED_BRANCH"
+        -e AWS_KEY=${KASM_TEST_AWS_KEY}
+        -e AWS_SECRET="${KASM_TEST_AWS_SECRET}"
+        -e SLACK_TOKEN=${SLACK_TOKEN}
+        -e S3_BUCKET=kasm-ci
+        -e COMMIT=${CI_COMMIT_SHA}
+        -e REPO=workspaces-core-images
+        ${ORG_NAME}/kasm-tester:1.11.0
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  needs:
+    - manifest_dev_osint
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+        KASM_IMAGE:
+          - core-kali-rolling-private
 
 test_single_arch_dev:
   stage: test
@@ -505,14 +539,50 @@ test_single_arch_dev:
     - /^release\/.*$/
   tags:
     - aws-autoscale
+  needs:
+    - build_cuda_focal_dev
+    - build_centos_dev
+    - build_oracle_7_dev
   parallel:
     matrix:
       - KASM_IMAGE:
           - core-cuda-focal-private
-          - core-remnux-bionic-private
-          - core-remnux-focal-private
           - core-centos-7-private
           - core-oracle-7-private
+
+test_single_arch_dev_osint:
+  stage: test
+  script:
+    - docker pull ${ORG_NAME}/kasm-tester:1.11.0
+    - >
+        docker run --rm --privileged
+        -e KASM_PORT=443
+        -e KASM_PATH=/opt/kasm
+        -e KASM_PASSWORD=password123
+        -e PUID=1000
+        -e DOCKERUSER=$DOCKER_HUB_USERNAME
+        -e DOCKERPASS=$DOCKER_HUB_PASSWORD
+        -e TEST_IMAGE="${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH"
+        -e AWS_KEY=${KASM_TEST_AWS_KEY}
+        -e AWS_SECRET="${KASM_TEST_AWS_SECRET}"
+        -e SLACK_TOKEN=${SLACK_TOKEN}
+        -e S3_BUCKET=kasm-ci
+        -e COMMIT=${CI_COMMIT_SHA}
+        -e REPO=workspaces-core-images
+        ${ORG_NAME}/kasm-tester:1.11.0
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
+  needs:
+    - build_remnux_bionic_dev
+    - build_remnux_focal_dev
+  parallel:
+    matrix:
+      - KASM_IMAGE:
+          - core-remnux-bionic-private
+          - core-remnux-focal-private
 
 manifest_dev:
   stage: manifest
@@ -528,18 +598,45 @@ manifest_dev:
     - /^release\/.*$/
   tags:
     - aws-autoscale
+  needs:
+    - build_ubuntu_bionic_dev
+    - build_ubuntu_focal_dev
+    - build_ubuntu_jammy_dev
+    - build_oracle_8_dev
+    - build_opensuse_15_dev
   parallel:
     matrix:
       - KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
-          - core-kali-rolling-private
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
 
+manifest_dev_osint:
+  stage: manifest
+  script:
+    - docker pull ${ORG_NAME}/${KASM_IMAGE}:x86_64-$SANITIZED_BRANCH
+    - docker pull ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH
+    - "docker manifest push --purge ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH || :"
+    - docker manifest create ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:x86_64-$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH
+    - docker manifest annotate ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH --os linux --arch arm64 --variant v8
+    - docker manifest push --purge ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - aws-autoscale
+  needs:
+    - build_kali_rolling_dev
+  parallel:
+    matrix:
+      - KASM_IMAGE:
+          - core-kali-rolling-private
+
 link_tests_single_arch_dev:
   stage: linktests
+  when: always
   script:
     - apk add curl
     - STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/x86_64/kasmweb/${KASM_IMAGE}/${SANITIZED_BRANCH}/ci-status.yml | awk -F'"' '{print $2}')
@@ -559,6 +656,7 @@ link_tests_single_arch_dev:
 
 link_tests_multi_arch_dev:
   stage: linktests
+  when: always
   script:
     - apk add curl
     - STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/${KASM_IMAGE}/${ARCH}-${SANITIZED_BRANCH}/ci-status.yml | awk -F'"' '{print $2}')
