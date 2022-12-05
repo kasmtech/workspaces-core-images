@@ -6,7 +6,7 @@ These images are based off popular linux distributions and contain the wiring ne
 While these images are primarily built to run inside the Kasm platform, they can also be executed manually.  Please note that certain functionality, such as audio, uploads, downloads, and microphone passthrough are only available within the Kasm platform.
 
 ```
-sudo docker run --rm  -it --shm-size=512m -p 6901:6901 -e VNC_PW=password kasmweb/<image>:<tag>
+sudo docker run --rm  -it --shm-size=512m -p 6901:6901 -e VNC_PW=password --build-arg START_XFCE4=1 kasmweb/<image>:<tag>
 ```
 
 The container is now accessible via a browser : `https://<IP>:6901`
