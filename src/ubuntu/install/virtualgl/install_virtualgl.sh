@@ -26,7 +26,7 @@ if [ "$DISTRO" = "ubuntu" ]; then
         libegl1 libegl1:i386 \
         libgles2 libgles2:i386
 
-    add-apt-repository ppa:kisak/kisak-mesa
+    add-apt-repository ppa:kisak/turtle
     apt full-upgrade -y
     dpkg -i $INST_SCRIPTS/virtualgl/virtualgl_*amd64.deb
   fi
