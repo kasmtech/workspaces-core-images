@@ -92,15 +92,6 @@ COPY ./src/common/install/kasm_vnc/kasmvnc.yaml /etc/kasmvnc/
 COPY ./src/ubuntu/install/kasm_upload_server $INST_SCRIPTS/kasm_upload_server/
 RUN bash $INST_SCRIPTS/kasm_upload_server/install_kasm_upload_server.sh  && rm -rf $INST_SCRIPTS/kasm_upload_server/
 
-
-### Install Audio
-COPY ./src/ubuntu/install/audio $INST_SCRIPTS/audio/
-RUN bash $INST_SCRIPTS/audio/install_audio.sh  && rm -rf $INST_SCRIPTS/audio/
-
-### Install Audio Input
-COPY ./src/ubuntu/install/audio_input $INST_SCRIPTS/audio_input/
-RUN bash $INST_SCRIPTS/audio_input/install_audio_input.sh && rm -rf $INST_SCRIPTS/audio_input/
-
 ### Install Gamepad Service
 COPY ./src/ubuntu/install/gamepad $INST_SCRIPTS/gamepad/
 RUN bash $INST_SCRIPTS/gamepad/install_gamepad.sh && rm -rf $INST_SCRIPTS/gamepad/
