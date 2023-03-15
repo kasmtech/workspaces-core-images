@@ -48,6 +48,7 @@ ENV DISPLAY=:1 \
     VNC_VIEW_ONLY_PW=vncviewonlypassword \
     LD_LIBRARY_PATH=/usr/local/lib/ \
     OMP_WAIT_POLICY=PASSIVE \
+    GOMP_SPINCOUNT=0 \
     SHELL=/bin/bash \
     START_XFCE4=$START_XFCE4 \
     START_PULSEAUDIO=$START_PULSEAUDIO \

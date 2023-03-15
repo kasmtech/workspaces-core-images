@@ -1,3 +1,5 @@
+**This image has been deprecated and will not longer receive updates**
+
 # Live Demo
 
 **Launch a real-time demo in a new browser window:** <a href="https://app.kasmweb.com/#/cast/5350770293" target="_blank">Live Demo</a>.

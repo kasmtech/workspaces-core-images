@@ -33,4 +33,9 @@ if [ "$DISTRO" = "ubuntu" ]; then
 
   apt install -f -y
   rm -rf $INST_SCRIPTS/virtualgl/
+  apt-get autoclean 
+  rm -rf \
+    /var/lib/apt/lists/* \
+    /var/tmp/* \
+    /tmp/*
 fi

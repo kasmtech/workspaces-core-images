@@ -15,7 +15,7 @@ FROM install_tools AS squid_builder
 ARG DISTRO=opensuse
 
 RUN ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
-  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/de1dffbc94d4132d6c696de8c6dfcd6f08900f61/output/kasm-squid-builder_opensuse_${ARCH}.tar.gz"
+    wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/1149fc830c7edcb383eec390cce2beba16befde5/output/kasm-squid-builder_${ARCH}.tar.gz"
 RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
 FROM install_tools
@@ -52,6 +52,7 @@ ENV DISPLAY=:1 \
     VNC_VIEW_ONLY_PW=vncviewonlypassword \
     LD_LIBRARY_PATH=/usr/local/lib/ \
     OMP_WAIT_POLICY=PASSIVE \
+    GOMP_SPINCOUNT=0 \
     SHELL=/bin/bash \
     START_XFCE4=$START_XFCE4 \
     START_PULSEAUDIO=$START_PULSEAUDIO \

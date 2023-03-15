@@ -79,6 +79,26 @@ build_ubuntu_jammy:
   tags:
     - aws-autoscale
 
+build_debian_bullseye:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-debian-bullseye-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-debian-bullseye-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-debian-bullseye:$SANITIZED_BRANCH -t ${ORG_NAME}/core-debian-bullseye:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="debian:bullseye" --build-arg DISTRO="debian" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_debian.svg -f dockerfile-kasm-core .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_cuda_focal:
   stage: build
   script:
@@ -93,26 +113,10 @@ build_cuda_focal:
   except:
     - schedules
 
-build_remnux_bionic:
-  stage: build
-  script:
-    - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1  --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh  -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_BRANCH
-    - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH
-  only:
-    - develop
-    - /^release\/.*$/
-  except:
-    - schedules
-  tags:
-    - aws-autoscale
-
 build_remnux_focal:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="remnux/remnux-distro:focal" --build-arg START_XFCE4=1  --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh  -f dockerfile-kasm-core .
+    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1  --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh  -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
     - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-remnux-focal:$SANITIZED_BRANCH
@@ -137,7 +141,7 @@ build_kali_rolling:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE=""  --build-arg LC_ALL=""   -f dockerfile-kasm-core .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1"  --build-arg DISTRO="kali" --build-arg START_XFCE4=1 --build-arg LANG="" --build-arg LANGUAGE=""  --build-arg LC_ALL=""   -f dockerfile-kasm-core .
   only:
     - develop
     - /^release\/.*$/
@@ -196,6 +200,106 @@ build_oracle_8:
   tags:
     - aws-autoscale
 
+build_oracle_9:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-oracle-9-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-oracle-9-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-oracle-9:$SANITIZED_BRANCH -t ${ORG_NAME}/core-oracle-9:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="oraclelinux:9" --build-arg DISTRO="oracle9" -f dockerfile-kasm-core-oracle .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_rocky_9:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-rockylinux-9-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-rockylinux-9-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-rockylinux-9:$SANITIZED_BRANCH -t ${ORG_NAME}/core-rockylinux-9:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="rockylinux:9.1" --build-arg DISTRO="rockylinux9" --build-arg BG_IMG=bg_rocky.png -f dockerfile-kasm-core-oracle .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_rocky_8:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-rockylinux-8-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-rockylinux-8-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-rockylinux-8:$SANITIZED_BRANCH -t ${ORG_NAME}/core-rockylinux-8:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="rockylinux:8.7" --build-arg DISTRO="rockylinux8" --build-arg BG_IMG=bg_rocky.png -f dockerfile-kasm-core-oracle .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_alma_8:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-almalinux-8-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-almalinux-8-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-almalinux-8:$SANITIZED_BRANCH -t ${ORG_NAME}/core-almalinux-8:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="almalinux:8.7" --build-arg DISTRO="almalinux8" --build-arg BG_IMG=bg_almalinux.png -f dockerfile-kasm-core-oracle .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_alma_9:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-almalinux-9-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-almalinux-9-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-almalinux-9:$SANITIZED_BRANCH -t ${ORG_NAME}/core-almalinux-9:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="almalinux:9.1" --build-arg DISTRO="almalinux9" --build-arg BG_IMG=bg_almalinux.png -f dockerfile-kasm-core-oracle .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_opensuse_15:
   stage: build
   image: ${ORG_NAME}/docker-buildx-private:develop
@@ -208,6 +312,66 @@ build_opensuse_15:
     - docker buildx create --use
     # build for multiple architectures
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.3" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_fedora_37:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-fedora-37-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-fedora-37-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-fedora-37:$SANITIZED_BRANCH -t ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="fedora:37" --build-arg DISTRO="fedora37" -f dockerfile-kasm-core-fedora .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_parrotos_5:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-parrotos-5-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-parrotos-5-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-parrotos-5:$SANITIZED_BRANCH -t ${ORG_NAME}/core-parrotos-5:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_parrotos5.jpg --build-arg BASE_IMAGE="parrotsec/core:latest" --build-arg DISTRO="parrotos5" -f dockerfile-kasm-core .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_alpine_317:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-alpine-317-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-alpine-317-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-alpine-317:$SANITIZED_BRANCH -t ${ORG_NAME}/core-alpine-317:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_alpine.png --build-arg BASE_IMAGE="alpine:3.17" --build-arg DISTRO="alpine" -f dockerfile-kasm-core-alpine .
   only:
     - develop
     - /^release\/.*$/
@@ -280,6 +444,28 @@ build_ubuntu_jammy_dev:
     matrix:
       - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
+build_debian_bullseye_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-debian-bullseye-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg BASE_IMAGE="debian:bullseye"
+        --build-arg DISTRO="debian"
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_debian.svg
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-debian-bullseye-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
 build_cuda_focal_dev:
   stage: build
   script:
@@ -298,25 +484,6 @@ build_cuda_focal_dev:
   tags:
     - aws-autoscale
 
-build_remnux_bionic_dev:
-  stage: build
-  script:
-    - >
-        docker build
-        -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
-        --build-arg BASE_IMAGE="remnux/remnux-distro:bionic"
-        --build-arg START_PULSEAUDIO=1
-        --build-arg START_XFCE4=1
-        --build-arg BG_IMG=bg_remnux.png
-        --build-arg EXTRA_SH=remnux.sh
-        -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_BRANCH
-  except:
-    - develop
-    - /^release\/.*$/
-  tags:
-    - aws-autoscale
-
 build_remnux_focal_dev:
   stage: build
   script:
@@ -324,7 +491,7 @@ build_remnux_focal_dev:
         docker build
         -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
-        --build-arg BASE_IMAGE="remnux/remnux-distro:focal"
+        --build-arg BASE_IMAGE="ubuntu:20.04"
         --build-arg START_XFCE4=1
         --build-arg BG_IMG=bg_remnux.png
         --build-arg EXTRA_SH=remnux.sh
@@ -344,8 +511,8 @@ build_kali_rolling_dev:
         -t ${ORG_NAME}/core-kali-rolling-private:$(arch)-$SANITIZED_BRANCH
         --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest"
         --build-arg START_PULSEAUDIO="1"
-        --build-arg EXTRA_SH="kali.sh"
         --build-arg DISTRO="kali"
+        --build-arg START_XFCE4=1
         --build-arg LANG=""
         --build-arg LANGUAGE=""
         --build-arg LC_ALL=""
@@ -423,6 +590,115 @@ build_oracle_8_dev:
     matrix:
       - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
+build_oracle_9_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-oracle-9-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="oraclelinux:9"
+        --build-arg DISTRO="oracle9"
+        -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-oracle-9-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_rockylinux_9_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-rockylinux-9-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="rockylinux:9.1"
+        --build-arg DISTRO="rockylinux9"
+        --build-arg BG_IMG=bg_rocky.png
+        -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-rockylinux-9-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_rockylinux_8_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-rockylinux-8-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="rockylinux:8.7"
+        --build-arg DISTRO="rockylinux8"
+        --build-arg BG_IMG=bg_rocky.png
+        -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-rockylinux-8-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_almalinux_9_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-almalinux-9-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="almalinux:9.1"
+        --build-arg DISTRO="almalinux9"
+        --build-arg BG_IMG=bg_almalinux.png
+        -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-almalinux-9-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_almalinux_8_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-almalinux-8-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="almalinux:8.7"
+        --build-arg DISTRO="almalinux8"
+        --build-arg BG_IMG=bg_almalinux.png
+        -f dockerfile-kasm-core-oracle .
+    - docker push ${ORG_NAME}/core-almalinux-8-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
 build_opensuse_15_dev:
   stage: build
   script:
@@ -435,6 +711,71 @@ build_opensuse_15_dev:
         --build-arg DISTRO="opensuse"
         -f dockerfile-kasm-core-suse .
     - docker push ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_fedora_37_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-fedora-37-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="fedora:37"
+        --build-arg DISTRO="fedora37"
+        -f dockerfile-kasm-core-fedora .
+    - docker push ${ORG_NAME}/core-fedora-37-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_parrotos_5_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-parrotos-5-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_parrotos5.jpg
+        --build-arg BASE_IMAGE="parrotsec/core:latest"
+        --build-arg DISTRO="parrotos5"
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-parrotos-5-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_alpine_317_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-alpine-317-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_alpine.png
+        --build-arg BASE_IMAGE="alpine:3.17"
+        --build-arg DISTRO="alpine"
+        -f dockerfile-kasm-core-alpine .
+    - docker push ${ORG_NAME}/core-alpine-317-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
@@ -480,39 +821,16 @@ test_multi_arch_dev:
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
-
-test_multi_arch_dev_osint:
-  stage: test
-  script:
-    - docker pull ${ORG_NAME}/kasm-tester:1.12.0
-    - >
-        docker run --rm --privileged
-        -e KASM_PORT=443
-        -e KASM_PATH=/opt/kasm
-        -e KASM_PASSWORD=password123
-        -e PUID=1000
-        -e DOCKERUSER=$DOCKER_HUB_USERNAME
-        -e DOCKERPASS=$DOCKER_HUB_PASSWORD
-        -e TEST_IMAGE="${ORG_NAME}/${KASM_IMAGE}:$(arch)-$SANITIZED_BRANCH"
-        -e AWS_KEY=${KASM_TEST_AWS_KEY}
-        -e AWS_SECRET="${KASM_TEST_AWS_SECRET}"
-        -e SLACK_TOKEN=${SLACK_TOKEN}
-        -e S3_BUCKET=kasm-ci
-        -e COMMIT=${CI_COMMIT_SHA}
-        -e REPO=workspaces-core-images
-        ${ORG_NAME}/kasm-tester:1.12.0
-  except:
-    - develop
-    - /^release\/.*$/
-  tags:
-    - ${TAG}
-  needs:
-    - manifest_dev_osint
-  parallel:
-    matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
-        KASM_IMAGE:
+          - core-fedora-37-private
+          - core-debian-bullseye-private
+          - core-oracle-9-private
+          - core-rockylinux-9-private
+          - core-rockylinux-8-private
+          - core-almalinux-8-private
+          - core-almalinux-9-private
           - core-kali-rolling-private
+          - core-parrotos-5-private
+          - core-alpine-317-private
 
 test_single_arch_dev:
   stage: test
@@ -543,45 +861,13 @@ test_single_arch_dev:
     - build_cuda_focal_dev
     - build_centos_dev
     - build_oracle_7_dev
+    - build_remnux_focal_dev
   parallel:
     matrix:
       - KASM_IMAGE:
           - core-cuda-focal-private
           - core-centos-7-private
           - core-oracle-7-private
-
-test_single_arch_dev_osint:
-  stage: test
-  script:
-    - docker pull ${ORG_NAME}/kasm-tester:1.12.0
-    - >
-        docker run --rm --privileged
-        -e KASM_PORT=443
-        -e KASM_PATH=/opt/kasm
-        -e KASM_PASSWORD=password123
-        -e PUID=1000
-        -e DOCKERUSER=$DOCKER_HUB_USERNAME
-        -e DOCKERPASS=$DOCKER_HUB_PASSWORD
-        -e TEST_IMAGE="${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH"
-        -e AWS_KEY=${KASM_TEST_AWS_KEY}
-        -e AWS_SECRET="${KASM_TEST_AWS_SECRET}"
-        -e SLACK_TOKEN=${SLACK_TOKEN}
-        -e S3_BUCKET=kasm-ci
-        -e COMMIT=${CI_COMMIT_SHA}
-        -e REPO=workspaces-core-images
-        ${ORG_NAME}/kasm-tester:1.12.0
-  except:
-    - develop
-    - /^release\/.*$/
-  tags:
-    - aws-autoscale
-  needs:
-    - build_remnux_bionic_dev
-    - build_remnux_focal_dev
-  parallel:
-    matrix:
-      - KASM_IMAGE:
-          - core-remnux-bionic-private
           - core-remnux-focal-private
 
 manifest_dev:
@@ -603,7 +889,17 @@ manifest_dev:
     - build_ubuntu_focal_dev
     - build_ubuntu_jammy_dev
     - build_oracle_8_dev
+    - build_oracle_9_dev
     - build_opensuse_15_dev
+    - build_fedora_37_dev
+    - build_debian_bullseye_dev
+    - build_rockylinux_9_dev
+    - build_rockylinux_8_dev
+    - build_almalinux_9_dev
+    - build_almalinux_8_dev
+    - build_kali_rolling_dev
+    - build_parrotos_5_dev
+    - build_alpine_317_dev
   parallel:
     matrix:
       - KASM_IMAGE:
@@ -612,27 +908,16 @@ manifest_dev:
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
-
-manifest_dev_osint:
-  stage: manifest
-  script:
-    - docker pull ${ORG_NAME}/${KASM_IMAGE}:x86_64-$SANITIZED_BRANCH
-    - docker pull ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH
-    - "docker manifest push --purge ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH || :"
-    - docker manifest create ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:x86_64-$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH
-    - docker manifest annotate ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH ${ORG_NAME}/${KASM_IMAGE}:aarch64-$SANITIZED_BRANCH --os linux --arch arm64 --variant v8
-    - docker manifest push --purge ${ORG_NAME}/${KASM_IMAGE}:$SANITIZED_BRANCH
-  except:
-    - develop
-    - /^release\/.*$/
-  tags:
-    - aws-autoscale
-  needs:
-    - build_kali_rolling_dev
-  parallel:
-    matrix:
-      - KASM_IMAGE:
+          - core-fedora-37-private
+          - core-debian-bullseye-private
+          - core-oracle-9-private
+          - core-rockylinux-9-private
+          - core-rockylinux-8-private
+          - core-almalinux-9-private
+          - core-almalinux-8-private
           - core-kali-rolling-private
+          - core-parrotos-5-private
+          - core-alpine-317-private
 
 link_tests_single_arch_dev:
   stage: linktests
@@ -649,7 +934,6 @@ link_tests_single_arch_dev:
     matrix:
       - KASM_IMAGE:
           - core-cuda-focal-private
-          - core-remnux-bionic-private
           - core-remnux-focal-private
           - core-centos-7-private
           - core-oracle-7-private
@@ -675,6 +959,15 @@ link_tests_multi_arch_dev:
           - core-oracle-8-private
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
+          - core-fedora-37-private
+          - core-debian-bullseye-private
+          - core-oracle-9-private
+          - core-parrotos-5-private
+          - core-rockylinux-9-private
+          - core-rockylinux-8-private
+          - core-almalinux-9-private
+          - core-almalinux-8-private
+          - core-alpine-317-private
 
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
@@ -728,6 +1021,23 @@ build_ubuntu_jammy_scheduled:
   tags:
     - aws-autoscale
 
+build_debian_bullseye_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-debian-bullseye-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-debian-bullseye:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="debian:bullseye" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_debian.svg --build-arg DISTRO="debian" -f dockerfile-kasm-core .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_cuda_focal_schedules:
   stage: build
   script:
@@ -737,21 +1047,10 @@ build_cuda_focal_schedules:
   only:
     - schedules
 
-build_remnux_bionic_schedules:
-  stage: build
-  script:
-    - docker build -t ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH --build-arg BASE_IMAGE="remnux/remnux-distro:bionic" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
-    - docker push ${ORG_NAME}/core-remnux-bionic-private:$SANITIZED_ROLLING_BRANCH
-    - docker push ${ORG_NAME}/core-remnux-bionic:$SANITIZED_ROLLING_BRANCH
-  only:
-    - schedules
-  tags:
-    - aws-autoscale
-
 build_remnux_focal_schedules:
   stage: build
   script:
-    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="remnux/remnux-distro:focal" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
+    - docker build -t ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="ubuntu:20.04" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_remnux.png --build-arg EXTRA_SH=remnux.sh -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH
   tags:
@@ -770,7 +1069,7 @@ build_kali_rolling_schedules:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg EXTRA_SH="kali.sh"  --build-arg DISTRO="kali"  --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-kali-rolling-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-kali-rolling:$SANITIZED_ROLLING_BRANCH  --build-arg BASE_IMAGE="kalilinux/kali-rolling:latest" --build-arg START_PULSEAUDIO="1" --build-arg DISTRO="kali" --build-arg START_XFCE4=1 --build-arg LANG="" --build-arg LANGUAGE="" --build-arg LC_ALL=""  -f dockerfile-kasm-core .
   only:
     - schedules
   tags:
@@ -813,6 +1112,91 @@ build_oracle_8_scheduled:
   tags:
     - aws-autoscale
 
+build_oracle_9_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-oracle-9-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-oracle-9:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="oraclelinux:9" --build-arg DISTRO="oracle9" -f dockerfile-kasm-core-oracle .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_rockylinux_9_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-rockylinux-9-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-rockylinux-9:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="rockylinux:9.1" --build-arg DISTRO="rockylinux9" --build-arg BG_IMG=bg_rocky.png -f dockerfile-kasm-core-oracle .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_rockylinux_8_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-rockylinux-8-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-rockylinux-8:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="rockylinux:8.7" --build-arg DISTRO="rockylinux8" --build-arg BG_IMG=bg_rocky.png -f dockerfile-kasm-core-oracle .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_almalinux_9_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-almalinux-9-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-almalinux-9:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="almalinux:9.1" --build-arg DISTRO="almalinux9" --build-arg BG_IMG=bg_almalinux.png -f dockerfile-kasm-core-oracle .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_almalinux_8_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-almalinux-8-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-almalinux-8:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="almalinux:8.7" --build-arg DISTRO="almalinux8" --build-arg BG_IMG=bg_almalinux.png -f dockerfile-kasm-core-oracle .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_opensuse_15_scheduled:
   stage: build
   image: ${ORG_NAME}/docker-buildx-private:develop
@@ -825,6 +1209,57 @@ build_opensuse_15_scheduled:
     - docker buildx create --use
     # build for multiple architectures
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.3" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_fedora_37_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-fedora-37-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="fedora:37" --build-arg DISTRO="fedora37" -f dockerfile-kasm-core-fedora .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_parrotos_5_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-parrotos-5-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-parrotos-5:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_parrotos5.jpg --build-arg BASE_IMAGE="parrotsec/core:latest" --build-arg DISTRO="parrotos5" -f dockerfile-kasm-core .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_parrotos_5_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-alpine-317-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-alpine-317:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_alpine.png --build-arg BASE_IMAGE="alpine:3.17" --build-arg DISTRO="alpine" -f dockerfile-kasm-core-alpine .
   only:
     - schedules
   tags:
@@ -860,3 +1295,12 @@ update_readmes:
           - core-ubuntu-bionic
           - core-ubuntu-focal
           - core-ubuntu-jammy
+          - core-fedora-37
+          - core-debian-bullseye
+          - core-oracle-9
+          - core-parrotos-5
+          - core-rockylinux-9
+          - core-rockylinux-8
+          - core-almalinux-9
+          - core-almalinux-8
+          - core-alpine-317
