@@ -9,13 +9,19 @@ set -ex
 
     if [ -f /etc/centos-release ]; then
         DISTRO=centos
-    elif [ -f /etc/oracle-release ]; then
+    elif [ -f /etc/oracle-release ] || [ -f /etc/rocky-release ] || [ -f /etc/almalinux-release ]; then
         DISTRO=oracle7
     elif [ -f /usr/bin/zypper ]; then
         DISTRO=opensuse
+    elif [ -f /etc/fedora-release ]; then
+        DISTRO=fedora
+    elif [ -f /etc/dpkg/origins/parrot ]; then
+        DISTRO=parrotos5
+    elif [ -f /etc/alpine-release ]; then
+        DISTRO=alpine
     fi
 
-    if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
+    if [[ "${DISTRO}" == @(centos|oracle7|fedora) ]]; then
         CERT_FILE=/etc/pki/ca-trust/source/anchors/squid.crt
     elif [ "${DISTRO}" == "opensuse" ]; then
         CERT_FILE=/usr/share/pki/trust/anchors/squid.crt
@@ -28,7 +34,7 @@ set -ex
     openssl x509 -in myCA.pem -outform DER -out myCA.der
     cp myCA.pem  ${CERT_FILE}
     cp myCA.pem  /usr/local/squid/etc/ssl_cert/squid.pem
-    if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
+    if [[ "${DISTRO}" == @(centos|oracle7|fedora) ]]; then
         update-ca-trust
     else
         update-ca-certificates
@@ -47,7 +53,7 @@ set -ex
 
     export MEMCACHE_PASSWORD="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 )"
     echo $MEMCACHE_PASSWORD | saslpasswd2 -a memcached -c -f /etc/sasl2/memcached-sasldb2 kasm
-    if [[ "${DISTRO}" == @(centos|oracle7|opensuse) ]]; then
+    if [[ "${DISTRO}" == @(centos|oracle7|opensuse|fedora|alpine) ]]; then
         MEMCACHE_USER=memcached
     else
         MEMCACHE_USER=memcache
@@ -55,7 +61,7 @@ set -ex
     chown $MEMCACHE_USER:$MEMCACHE_USER /etc/sasl2/memcached-sasldb2
 
 
-    if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
+    if [[ "${DISTRO}" == @(centos|oracle7|fedora|parrotos5|alpine) ]]; then
         /usr/bin/memcached -u $MEMCACHE_USER &
     elif [ "${DISTRO}" == "opensuse" ]; then
         /usr/sbin/memcached -u $MEMCACHE_USER &

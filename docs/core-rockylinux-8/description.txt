@@ -1,0 +1,1 @@
+Rocky Linux 8 base image for Kasm Workspaces

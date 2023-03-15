@@ -1,0 +1,1 @@
+Oracle Linux 9 base image for Kasm Workspaces

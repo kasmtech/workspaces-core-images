@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
 set -xe
 
-# Remnux installs firefox by default. We need to update this install to utilze the system's certificate store
-#   in order for web filtering to work
 
-apt-get install -y p11-kit-modules
+# Install remnux base
+apt-get update
+apt-get install -y wget gnupg git
+if $(grep -q Focal /etc/os-release); then
+  wget -nv -O - https://repo.saltproject.io/py3/ubuntu/20.04/amd64/latest/salt-archive-keyring.gpg | apt-key add -
+  echo deb [arch=amd64] https://repo.saltproject.io/py3/ubuntu/20.04/amd64/3004 focal main > /etc/apt/sources.list.d/saltstack.list
+elif $(grep -q Bionic /etc/os-release); then
+  wget -nv -O - https://repo.saltproject.io/py3/ubuntu/18.04/amd64/latest/salt-archive-keyring.gpg | apt-key add -
+  echo deb [arch=amd64] https://repo.saltproject.io/py3/ubuntu/18.04/amd64/3004 bionic main > /etc/apt/sources.list.d/saltstack.list
+fi
+apt-get update
+apt-get install -y salt-common 
+git clone https://github.com/REMnux/salt-states.git /srv/salt
 
-rm /usr/lib/firefox/libnssckbi.so
-ln /usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-trust.so /usr/lib/firefox/libnssckbi.so
+# Cleanup
+apt-get autoclean
+rm -rf \
+  /var/lib/apt/lists/* \
+  /var/tmp/* \
+  /tmp/*
 
-
-# Remnux includes bluetooth drivers which try to autoload causing pluse audio to fail
-sed -i "s/module-bluetooth-discover.so/module-bluetooth-discover.so.ignore/g"  /etc/pulse/default.pa
