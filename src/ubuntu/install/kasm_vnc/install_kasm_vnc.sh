@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-install_libjpeg_turbo() {
-    local libjpeg_deb=libjpeg-turbo.deb
-    wget "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/${UBUNTU_CODENAME}/libjpeg-turbo_2.1.5_amd64.deb" -O "$libjpeg_deb"
-    apt-get install -y "./$libjpeg_deb"
-    rm "$libjpeg_deb"
-}
-
 prepare_rpm_repo_dependencies() {
   if [[ "$DISTRO" = "oracle7" ]]; then
     yum-config-manager --enable ol7_optional_latest
@@ -21,9 +14,9 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="779c54f7eecc0bd5975636c9e314395ebf1ed95a"
+COMMIT_ID="9a8bfce25fd81a44e815937db72a84399635e4ef"
 BRANCH="master" # just use 'release' for a release branch
-KASMVNC_VER="1.0.1"
+KASMVNC_VER="1.0.2"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
@@ -59,8 +52,6 @@ else
     UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
     if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] ; then
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_arm64.deb"
-    elif [ "${UBUNTU_CODENAME}" == "bionic" ] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_libjpeg-turbo-latest_amd64.deb"
     else
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_amd64.deb"
     fi
@@ -84,11 +75,6 @@ elif [[ "${DISTRO}" == "opensuse" ]] ; then
   rm kasmvncserver.rpm
   zypper clean --all
 else
-    if [[ "${UBUNTU_CODENAME}" = "bionic" ]] && [[ ! "$BUILD_ARCH" =~ ^aarch64$ ]] ; then
-        # We need to install libjpeg-turbo because the version that comes with bionic is quite old and has performance issues.
-        install_libjpeg_turbo
-    fi
-
     wget "${BUILD_URL}" -O kasmvncserver.deb
 
     apt-get update
