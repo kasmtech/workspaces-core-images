@@ -322,16 +322,38 @@ build_opensuse_15:
 
 build_fedora_37:
   stage: build
-  image: ${ORG_NAME}/docker-buildx-private:develop
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-fedora-37-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-fedora-37-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-fedora-37:$SANITIZED_BRANCH -t ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="fedora:37" --build-arg DISTRO="fedora37" -f dockerfile-kasm-core-fedora .
+    - >
+        docker build
+        -t ${ORG_NAME}/core-fedora-37:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="fedora:37"
+        --build-arg DISTRO="fedora37"
+        -f dockerfile-kasm-core-fedora .
+    - docker push ${ORG_NAME}/core-fedora-37:$(arch)-$SANITIZED_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+manifest_fedora_37:
+  stage: manifest
+  script:
+    - docker pull ${ORG_NAME}/core-fedora-37:x86_64-$SANITIZED_BRANCH
+    - docker pull ${ORG_NAME}/core-fedora-37:aarch64-$SANITIZED_BRANCH
+    - "docker manifest push --purge ${ORG_NAME}/core-fedora-37:$SANITIZED_BRANCH || :"
+    - docker manifest create ${ORG_NAME}/core-fedora-37:$SANITIZED_BRANCH ${ORG_NAME}/core-fedora-37:x86_64-$SANITIZED_BRANCH ${ORG_NAME}/core-fedora-37:aarch64-$SANITIZED_BRANCH
+    - docker manifest annotate ${ORG_NAME}/core-fedora-37:$SANITIZED_BRANCH ${ORG_NAME}/core-fedora-37:aarch64-$SANITIZED_BRANCH --os linux --arch arm64 --variant v8
+    - docker manifest push --purge ${ORG_NAME}/core-fedora-37:$SANITIZED_BRANCH
+  needs:
+    - build_fedora_37
   only:
     - develop
     - /^release\/.*$/
@@ -1216,16 +1238,35 @@ build_opensuse_15_scheduled:
 
 build_fedora_37_scheduled:
   stage: build
-  image: ${ORG_NAME}/docker-buildx-private:develop
-  variables:
-    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   script:
-    # get qemu ready
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    # prep the buildx env
-    - docker buildx create --use
-    # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-fedora-37-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="fedora:37" --build-arg DISTRO="fedora37" -f dockerfile-kasm-core-fedora .
+    - >
+        docker build
+        -t ${ORG_NAME}/core-fedora-37:$(arch)-$SANITIZED_ROLLING_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="fedora:37"
+        --build-arg DISTRO="fedora37"
+        -f dockerfile-kasm-core-fedora .
+    - docker push ${ORG_NAME}/core-fedora-37:$(arch)-$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+manifest_fedora_37_scheduled:
+  stage: manifest
+  script:
+    - docker pull ${ORG_NAME}/core-fedora-37:x86_64-$SANITIZED_ROLLING_BRANCH
+    - docker pull ${ORG_NAME}/core-fedora-37:aarch64-$SANITIZED_ROLLING_BRANCH
+    - "docker manifest push --purge ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH || :"
+    - docker manifest create ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH ${ORG_NAME}/core-fedora-37:x86_64-$SANITIZED_ROLLING_BRANCH ${ORG_NAME}/core-fedora-37:aarch64-$SANITIZED_ROLLING_BRANCH
+    - docker manifest annotate ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH ${ORG_NAME}/core-fedora-37:aarch64-$SANITIZED_ROLLING_BRANCH --os linux --arch arm64 --variant v8
+    - docker manifest push --purge ${ORG_NAME}/core-fedora-37:$SANITIZED_ROLLING_BRANCH
+  needs:
+    - build_fedora_37_scheduled
   only:
     - schedules
   tags:
