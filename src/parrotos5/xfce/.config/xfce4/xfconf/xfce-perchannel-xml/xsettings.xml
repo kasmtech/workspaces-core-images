@@ -14,11 +14,11 @@
     <property name="EnableInputFeedbackSounds" type="bool" value="true"/>
   </property>
   <property name="Xft" type="empty">
-    <property name="DPI" type="empty"/>
+    <property name="DPI" type="int" value="96"/>
     <property name="Antialias" type="int" value="1"/>
-    <property name="Hinting" type="int" value="0"/>
-    <property name="HintStyle" type="string" value="hintnone"/>
-    <property name="RGBA" type="string" value="none"/>
+    <property name="Hinting" type="int" value="1"/>
+    <property name="HintStyle" type="string" value="hintslight"/>
+    <property name="RGBA" type="string" value="rgb"/>
   </property>
   <property name="Gtk" type="empty">
     <property name="CanChangeAccels" type="bool" value="true"/>
