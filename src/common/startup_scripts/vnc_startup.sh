@@ -182,6 +182,20 @@ function start_gamepad (){
 	fi
 }
 
+function start_webcam (){
+	if [[ ${KASM_SVC_WEBCAM:-1} == 1 ]] && [[ -e /dev/video0 ]]; then
+		echo 'Starting webcam server'
+		$STARTUPDIR/webcam/kasm_webcam_server --debug --port 4905 --ssl --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
+
+		KASM_PROCS['kasm_webcam']=$!
+
+		if [[ $DEBUG == true ]]; then
+			echo -e "\n------------------ Started Webcam Websocket  ----------------------------"
+			echo "Kasm Webcam PID: ${KASM_PROCS['kasm_webcam']}";
+		fi
+	fi
+}
+
 function custom_startup (){
 	custom_startup_script=/dockerstartup/custom_startup.sh
 	if [ -f "$custom_startup_script" ]; then
@@ -247,6 +261,7 @@ start_audio_out
 start_audio_in
 start_upload
 start_gamepad
+start_webcam
 
 STARTUP_COMPLETE=1
 
@@ -307,10 +322,15 @@ do
 					# TODO: This will only work if both processes are killed, requires more work
 					start_upload
 					;;
-			  kasm_gamepad)
+                                kasm_gamepad)
 					echo "Gamepad Service Failed"
 					# TODO: Needs work in python project to support auto restart
 					# start_gamepad
+					;;
+				kasm_webcam)
+					echo "Webcam Service Failed"
+					# TODO: Needs work in python project to support auto restart
+					start_webcam
 					;;
 				custom_script)
 					echo "The custom startup script exited."
