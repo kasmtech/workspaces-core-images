@@ -11,7 +11,7 @@ stages:
 
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
-  KASM_RELEASE: "1.12.0"
+  KASM_RELEASE: "1.13.0"
 
 before_script:
   - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
