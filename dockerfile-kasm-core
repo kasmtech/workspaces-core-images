@@ -44,6 +44,7 @@ ENV DISPLAY=:1 \
     LC_ALL=$LC_ALL \
     KASMVNC_AUTO_RECOVER=true \
     PULSE_RUNTIME_PATH=/var/run/pulse \
+    DISTRO=$DISTRO \
     SDL_GAMECONTROLLERCONFIG="030000005e040000be02000014010000,XInput Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b16,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7"
 
 EXPOSE $VNC_PORT \
