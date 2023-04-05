@@ -17,9 +17,9 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="d00c1819fe4dc965baeb5d852810a2eaa28bb04f"
-BRANCH="master" # just use 'release' for a release branch
-KASMVNC_VER="1.0.2"
+COMMIT_ID="56c840fc947d891f054bf251d2a02454d3e6f686"
+BRANCH="release" # just use 'release' for a release branch
+KASMVNC_VER="1.1.0"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
@@ -170,4 +170,3 @@ chown -R 0:0 $KASM_VNC_PATH
 chmod -R og-w $KASM_VNC_PATH
 #chown -R 1000:0 $KASM_VNC_PATH/certs
 chown -R 1000:0 $KASM_VNC_PATH/www/Downloads
-ln -s $KASM_VNC_PATH/www/index.html $KASM_VNC_PATH/www/vnc.html
