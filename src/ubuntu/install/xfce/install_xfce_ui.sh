@@ -10,19 +10,6 @@ disable_epel_nss_wrapper_that_breaks_firefox() {
   yum-config-manager --setopt=epel.exclude=nss_wrapper --save
 }
 
-config_xinit_disable_screensaver() {
-  mkdir -p /etc/X11/xinit/xinitrc.d/
-  cat >/etc/X11/xinit/xinitrc.d/disable_screensaver.sh <<EOL
-#!/bin/sh
-set -x
-xset -dpms
-xset s off
-xset q
-EOL
-
-chmod +x /etc/X11/xinit/xinitrc.d/disable_screensaver.sh
-}
-
 replace_default_xinit() {
 
   mkdir -p /etc/X11/xinit
@@ -173,13 +160,10 @@ else
     /tmp/*
 fi
 
-if [[ "${DISTRO}" == @(centos|oracle7|oracle8|fedora37|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9) ]]; then
-  config_xinit_disable_screensaver
-elif [ "${DISTRO}" == "alpine" ]; then
+if [[ "${DISTRO}" == @(centos|oracle7|oracle8|fedora37|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
   echo ""
 else
   replace_default_xinit
-  config_xinit_disable_screensaver
   if [ "${START_XFCE4}" == "1" ] ; then
     replace_default_99x11_common_start
   fi

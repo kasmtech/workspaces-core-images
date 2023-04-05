@@ -62,18 +62,28 @@ function start_kasmvnc (){
 	    || echo "no locks present"
 	fi
 
-    rm -rf $HOME/.vnc/*.pid
-    echo "exit 0" > $HOME/.vnc/xstartup
-    chmod +x $HOME/.vnc/xstartup
+	rm -rf $HOME/.vnc/*.pid
+	echo "exit 0" > $HOME/.vnc/xstartup
+	chmod +x $HOME/.vnc/xstartup
 
-		VNCOPTIONS="$VNCOPTIONS -select-de manual"
-    if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
+	VNCOPTIONS="$VNCOPTIONS -select-de manual"
+	if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
 		LD_PRELOAD=/lib/aarch64-linux-gnu/libgcc_s.so.1 vncserver $DISPLAY $KASMVNC_HW3D -drinode $DRINODE -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 -BlacklistThreshold=0 -FreeKeyMappings $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
 	else
 		vncserver $DISPLAY $KASMVNC_HW3D -drinode $DRINODE -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 -BlacklistThreshold=0 -FreeKeyMappings $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
 	fi
 
 	KASM_PROCS['kasmvnc']=$(cat $HOME/.vnc/*${DISPLAY_NUM}.pid)
+
+	#Disable X11 Screensaver
+	if [ "${DISTRO}" != "alpine" ]; then
+		echo "Disabling X Screensaver Functionality"
+		xset -dpms
+		xset s off
+		xset q
+	else
+		echo "Disabling of X Screensaver Functionality for $DISTRO is not required."
+	fi
 
 	if [[ $DEBUG == true ]]; then
 	  echo -e "\n------------------ Started Websockify  ----------------------------"
