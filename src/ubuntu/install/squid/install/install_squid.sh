@@ -90,19 +90,12 @@ if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   yum install -y nss-tools
 elif [[ "${DISTRO}" == @(oracle8|fedora37|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
   dnf install -y nss-tools
-  dnf clean all
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -yn mozilla-nss-tools
-  zypper clean --all
 elif [ "${DISTRO}" == "alpine" ]; then
   apk add --no-cache nss-tools
 else
   apt-get install -y libnss3-tools
-  apt-get autoclean 
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
 fi
 
 # Create an empty cert9.db. This will be used by applications like Chrome

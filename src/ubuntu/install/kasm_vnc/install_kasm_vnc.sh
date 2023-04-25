@@ -95,7 +95,6 @@ elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|alma
     dnf localinstall -y kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-    dnf clean all
 elif [[ "${DISTRO}" == "fedora37" ]] ; then
     dnf install -y xorg-x11-drv-amdgpu xorg-x11-drv-ati
     if [ "${BUILD_ARCH}" == "x86_64" ]; then
@@ -105,7 +104,6 @@ elif [[ "${DISTRO}" == "fedora37" ]] ; then
     dnf localinstall -y --allowerasing kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-    dnf clean all
 elif [[ "${DISTRO}" == "opensuse" ]] ; then
     mkdir -p /etc/pki/tls/private
     wget "${BUILD_URL}" -O kasmvncserver.rpm
@@ -117,7 +115,6 @@ elif [[ "${DISTRO}" == "opensuse" ]] ; then
     fi
     zypper install -y --allow-unsigned-rpm ./kasmvncserver.rpm
     rm kasmvncserver.rpm
-    zypper clean --all
 elif [[ "${DISTRO}" == "alpine" ]] ; then
     apk add --no-cache \
         libgomp \
@@ -158,11 +155,6 @@ else
     apt-get install -y gettext ssl-cert libxfont2
     apt-get install -y /tmp/kasmvncserver.deb
     rm -f /tmp/kasmvncserver.deb
-    apt-get autoclean 
-    rm -rf \
-        /var/lib/apt/lists/* \
-        /var/tmp/* \
-        /tmp/*
 fi
 #mkdir $KASM_VNC_PATH/certs
 mkdir -p $KASM_VNC_PATH/www/Downloads

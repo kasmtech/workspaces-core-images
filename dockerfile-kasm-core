@@ -1,66 +1,36 @@
+#### Build Stage ####
 ARG BASE_IMAGE="ubuntu:20.04"
-FROM $BASE_IMAGE AS install_tools
-ARG DISTRO=ubuntu
-
-LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
-LABEL "com.kasmweb.image"="true"
-LABEL "com.kasmweb.gpu_acceleration_egl"="nvidia"
+FROM $BASE_IMAGE AS base_layer
 
 ### Environment config
-ARG START_XFCE4=0
-ARG START_PULSEAUDIO=0
 ARG BG_IMG=bg_kasm.png
 ARG EXTRA_SH=noop.sh
 ARG DISTRO=ubuntu
 ARG LANG='en_US.UTF-8'
 ARG LANGUAGE='en_US:en'
 ARG LC_ALL='en_US.UTF-8'
-ENV DISPLAY=:1 \
-    VNC_PORT=5901 \
-    NO_VNC_PORT=6901 \
-    VNC_PORT=5901 \
-    AUDIO_PORT=4901 \
-    VNC_RESOLUTION=1280x720 \
-    MAX_FRAME_RATE=24 \
-    VNCOPTIONS="-PreferBandwidth -DynamicQualityMin=4 -DynamicQualityMax=7 -DLP_ClipDelay=0" \
+ENV DEBIAN_FRONTEND=noninteractive \
+    DISTRO=$DISTRO \
     HOME=/home/kasm-default-profile \
-    TERM=xterm \
-    STARTUPDIR=/dockerstartup \
     INST_SCRIPTS=/dockerstartup/install \
     KASM_VNC_PATH=/usr/share/kasmvnc \
-    DEBIAN_FRONTEND=noninteractive \
-    VNC_COL_DEPTH=24 \
-    VNC_RESOLUTION=1280x1024 \
-    VNC_PW=vncpassword \
-    VNC_VIEW_ONLY_PW=vncviewonlypassword \
-    LD_LIBRARY_PATH=/opt/libjpeg-turbo/lib64/:/usr/local/lib/ \
-    OMP_WAIT_POLICY=PASSIVE \
-    GOMP_SPINCOUNT=0 \
-    SHELL=/bin/bash \
-    START_XFCE4=$START_XFCE4 \
-    START_PULSEAUDIO=$START_PULSEAUDIO \
     LANG=$LANG \
     LANGUAGE=$LANGUAGE \
     LC_ALL=$LC_ALL \
-    KASMVNC_AUTO_RECOVER=true \
-    PULSE_RUNTIME_PATH=/var/run/pulse \
-    DISTRO=$DISTRO \
-    SDL_GAMECONTROLLERCONFIG="030000005e040000be02000014010000,XInput Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b16,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7"
+    STARTUPDIR=/dockerstartup
 
-EXPOSE $VNC_PORT \
-       $NO_VNC_PORT \
-       $UPLOAD_PORT \
-       $AUDIO_PORT
-
+### Home setup
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
 
-# Support NVIDIA gpus for graphics acceleration
+### Support NVIDIA gpus for graphics acceleration
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-ENV LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
-ENV NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32,utility
 COPY src/ubuntu/install/nvidia/10_nvidia.json /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
+### Setup package rules
+COPY ./src/ubuntu/install/package_rules $INST_SCRIPTS/package_rules/
+RUN bash $INST_SCRIPTS/package_rules/package_rules.sh && rm -rf $INST_SCRIPTS/package_rules/
 
 ### Install common tools
 COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
@@ -94,7 +64,6 @@ COPY ./src/common/install/kasm_vnc/kasmvnc.yaml /etc/kasmvnc/
 COPY ./src/ubuntu/install/kasm_upload_server $INST_SCRIPTS/kasm_upload_server/
 RUN bash $INST_SCRIPTS/kasm_upload_server/install_kasm_upload_server.sh  && rm -rf $INST_SCRIPTS/kasm_upload_server/
 
-
 ### Install Audio
 COPY ./src/ubuntu/install/audio $INST_SCRIPTS/audio/
 RUN bash $INST_SCRIPTS/audio/install_audio.sh  && rm -rf $INST_SCRIPTS/audio/
@@ -121,7 +90,6 @@ RUN chown proxy:proxy /usr/local/squid/share/icons/SN.png
 COPY ./src/ubuntu/install/squid/resources/error_message/access_denied.html /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
 RUN chown proxy:proxy /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
 RUN rm -rf $INST_SCRIPTS/resources/
-
 RUN chmod +x /etc/squid/kasm_squid_adapter
 RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
 
@@ -143,7 +111,7 @@ RUN bash $INST_SCRIPTS/virtualgl/install_virtualgl.sh && rm -rf $INST_SCRIPTS/vi
 RUN (groupadd -g 1000 kasm-user \
     && useradd -M -u 1000 -g 1000 kasm-user \
     && usermod -a -G kasm-user kasm-user) ; exit 0
-ENV HOME /home/kasm-user
+ENV HOME=/home/kasm-user
 WORKDIR $HOME
 RUN mkdir -p $HOME && chown -R 1000:0 $HOME
 
@@ -173,6 +141,67 @@ RUN touch $STARTUPDIR/wm.log \
     && chown 1000:root /var/run/pulse \
     && rm -Rf /home/kasm-default-profile/.launchpadlib
 
+### Cleanup job
+COPY ./src/ubuntu/install/cleanup $INST_SCRIPTS/cleanup/
+RUN bash $INST_SCRIPTS/cleanup/cleanup.sh && rm -rf $INST_SCRIPTS/cleanup/
+
+#### Runtime Stage ####
+FROM scratch
+COPY --from=base_layer / /
+
+### Labels
+LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
+LABEL "com.kasmweb.image"="true"
+LABEL "com.kasmweb.gpu_acceleration_egl"="nvidia"
+
+### Environment config
+ARG DISTRO=ubuntu
+ARG EXTRA_SH=noop.sh
+ARG LANG='en_US.UTF-8'
+ARG LANGUAGE='en_US:en'
+ARG LC_ALL='en_US.UTF-8'
+ARG START_PULSEAUDIO=1
+ARG START_XFCE4=1
+ENV AUDIO_PORT=4901 \
+    DEBIAN_FRONTEND=noninteractive \
+    DISPLAY=:1 \
+    DISTRO=$DISTRO \
+    GOMP_SPINCOUNT=0 \
+    HOME=/home/kasm-user \
+    INST_SCRIPTS=/dockerstartup/install \
+    KASMVNC_AUTO_RECOVER=true \
+    KASM_VNC_PATH=/usr/share/kasmvnc \
+    LANG=$LANG \
+    LANGUAGE=$LANGUAGE \
+    LC_ALL=$LC_ALL \
+    LD_LIBRARY_PATH=/opt/libjpeg-turbo/lib64/:/usr/local/lib/ \
+    LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}:/usr/local/nvidia/lib:/usr/local/nvidia/lib64 \
+    MAX_FRAME_RATE=24 \
+    NO_VNC_PORT=6901 \
+    NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32,utility \
+    OMP_WAIT_POLICY=PASSIVE \
+    PULSE_RUNTIME_PATH=/var/run/pulse \
+    SDL_GAMECONTROLLERCONFIG="030000005e040000be02000014010000,XInput Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b16,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7" \
+    SHELL=/bin/bash \
+    START_PULSEAUDIO=$START_PULSEAUDIO \
+    STARTUPDIR=/dockerstartup \
+    START_XFCE4=$START_XFCE4 \
+    TERM=xterm \
+    VNC_COL_DEPTH=24 \
+    VNCOPTIONS="-PreferBandwidth -DynamicQualityMin=4 -DynamicQualityMax=7 -DLP_ClipDelay=0" \
+    VNC_PORT=5901 \
+    VNC_PORT=5901 \
+    VNC_PW=vncpassword \
+    VNC_RESOLUTION=1280x1024 \
+    VNC_RESOLUTION=1280x720 \
+    VNC_VIEW_ONLY_PW=vncviewonlypassword
+
+### Ports and user
+EXPOSE $VNC_PORT \
+       $NO_VNC_PORT \
+       $UPLOAD_PORT \
+       $AUDIO_PORT
+WORKDIR $HOME
 USER 1000
 
 ENTRYPOINT ["/dockerstartup/kasm_default_profile.sh", "/dockerstartup/vnc_startup.sh", "/dockerstartup/kasm_startup.sh"]

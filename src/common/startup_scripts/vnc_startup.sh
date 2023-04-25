@@ -4,6 +4,12 @@ set -e
 
 no_proxy="localhost,127.0.0.1"
 
+# Set lang values
+if [ "${LC_ALL}" != "en_US.UTF-8" ]; then
+  export LANG=${LC_ALL}
+  export LANGUAGE=${LC_ALL}
+fi
+
 # dict to store processes
 declare -A KASM_PROCS
 

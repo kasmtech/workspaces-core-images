@@ -10,20 +10,20 @@ LOCALES="aa_DJ aa_ER aa_ET af_ZA am_ET an_ES ar_AE ar_BH ar_DZ ar_EG ar_IN ar_IQ
 
 echo "Installing fonts and languages"
 if [[ "${DISTRO}" == "oracle7" ]]; then
+  yum-config-manager --enable ol7_optional_latest
   yum install -y \
     google-noto-emoji-fonts \
+    google-noto-sans-cjk-fonts \
     google-noto-sans-fonts 
-  yum clean all
 elif [[ "${DISTRO}" == "centos" ]]; then
   yum install -y \
     google-noto-emoji-fonts \
     google-noto-sans-cjk-fonts \
     google-noto-sans-fonts 
-  yum clean all
-elif [[ "${DISTRO}" == @(fedora37|oracle8|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
+elif [[ "${DISTRO}" == "fedora37" ]]; then
   dnf install -y \
     glibc-locale-source \
-    google-noto-cjk-fonts-common \
+    google-noto-cjk-fonts \
     google-noto-emoji-fonts \
     google-noto-sans-fonts \
     ${LOCALES_RHEL}
@@ -31,13 +31,33 @@ elif [[ "${DISTRO}" == @(fedora37|oracle8|oracle9|rockylinux9|rockylinux8|almali
     echo "Generating Locale for ${LOCALE}"
     localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
   done
-  dnf clean all
+elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
+  dnf install -y \
+    glibc-locale-source \
+    google-noto-emoji-fonts \
+    google-noto-sans-cjk-ttc-fonts \
+    google-noto-sans-fonts \
+    ${LOCALES_RHEL}
+  for LOCALE in ${LOCALES}; do
+    echo "Generating Locale for ${LOCALE}"
+    localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
+  done
 elif [ "${DISTRO}" == "opensuse" ]; then
-  zypper install -ny wqy-zenhei-fonts
-  zypper clean --all
+  zypper addrepo -G \
+    https://ftp.lysator.liu.se/pub/opensuse/repositories/M17N:/fonts/openSUSE_Leap_15.3/ fonts-x86_64
+  zypper install -ny \
+    glibc-i18ndata \
+    glibc-locale \
+    google-noto-coloremoji-fonts \
+    google-noto-sans-cjk-fonts \
+    noto-sans-fonts
+  for LOCALE in ${LOCALES}; do
+    echo "Generating Locale for ${LOCALE}"
+    localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
+  done
 elif [ "${DISTRO}" == "alpine" ]; then
   apk add --no-cache \
-    font-noto \
+    font-noto-all \
     font-noto-cjk \
     font-noto-emoji
 elif [[ "${DISTRO}" == @(debian|parrotos5|kali) ]]; then
@@ -51,11 +71,6 @@ elif [[ "${DISTRO}" == @(debian|parrotos5|kali) ]]; then
     echo "Generating Locale for ${LOCALE}"
     localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
   done
-  apt-get autoclean
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
 elif $(grep -q Bionic /etc/os-release); then
   apt-get update
   apt-get install -y \
@@ -64,11 +79,6 @@ elif $(grep -q Bionic /etc/os-release); then
     fonts-noto-hinted \
     fonts-noto-unhinted \
     ${LOCALES_UBUNTU}
-  apt-get autoclean
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
 else
   apt-get update
   apt-get install -y \
@@ -76,9 +86,4 @@ else
     fonts-noto-cjk \
     fonts-noto-color-emoji \
     ${LOCALES_UBUNTU}
-  apt-get autoclean 
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
 fi

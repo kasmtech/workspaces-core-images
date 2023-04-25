@@ -15,11 +15,3 @@ fi
 apt-get update
 apt-get install -y salt-common 
 git clone https://github.com/REMnux/salt-states.git /srv/salt
-
-# Cleanup
-apt-get autoclean
-rm -rf \
-  /var/lib/apt/lists/* \
-  /var/tmp/* \
-  /tmp/*
-
