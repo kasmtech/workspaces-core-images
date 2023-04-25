@@ -1,8 +1,7 @@
+#### Build Stage ####
 ARG BASE_IMAGE="alpine:3.17"
-
 FROM $BASE_IMAGE AS install_tools
 ARG DISTRO=alpine
-
 
 ### Install common tools
 RUN apk add --no-cache bash
@@ -11,66 +10,31 @@ RUN bash "$INST_SCRIPTS/tools/install_tools.sh" && rm -rf "$INST_SCRIPTS/tools/"
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 FROM install_tools AS squid_builder
-
 ARG DISTRO=alpine
 
 RUN ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
     wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/f2b6ac26e7f91240e57d6d6e1dad4cc2704445ee/output/kasm-squid-builder_alpine_${ARCH}.tar.gz"
 RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
-FROM install_tools
-
-MAINTAINER Kasm Tech "info@kasmweb.com"
-LABEL "com.kasmweb.image"="true"
+FROM install_tools as base_layer
 
 ### Environment config
-ARG START_XFCE4=1
-ARG START_PULSEAUDIO=1
 ARG BG_IMG=bg_alpine.png
 ARG EXTRA_SH=noop.sh
 ARG DISTRO=alpine
 ARG LANG='en_US.UTF-8'
 ARG LANGUAGE='en_US:en'
 ARG LC_ALL='en_US.UTF-8'
-ENV DISPLAY=:1 \
-    VNC_PORT=5901 \
-    NO_VNC_PORT=6901 \
-    VNC_PORT=5901 \
-    AUDIO_PORT=4901 \
-    VNC_RESOLUTION=1280x720 \
-    MAX_FRAME_RATE=24 \
-    VNCOPTIONS="-PreferBandwidth -DynamicQualityMin=4 -DynamicQualityMax=7 -DLP_ClipDelay=0" \
+ENV DISTRO=$DISTRO \
     HOME=/home/kasm-default-profile \
-    TERM=xterm \
-    STARTUPDIR=/dockerstartup \
     INST_SCRIPTS=/dockerstartup/install \
     KASM_VNC_PATH=/usr/share/kasmvnc \
-    DEBIAN_FRONTEND=noninteractive \
-    VNC_COL_DEPTH=24 \
-    VNC_RESOLUTION=1280x1024 \
-    VNC_PW=vncpassword \
-    VNC_VIEW_ONLY_PW=vncviewonlypassword \
-    LD_LIBRARY_PATH=/usr/local/lib/ \
-    PERL5LIB=/usr/local/bin \
-    OMP_WAIT_POLICY=PASSIVE \
-    GOMP_SPINCOUNT=0 \
-    SHELL=/bin/bash \
-    START_XFCE4=$START_XFCE4 \
-    START_PULSEAUDIO=$START_PULSEAUDIO \
     LANG=$LANG \
     LANGUAGE=$LANGUAGE \
     LC_ALL=$LC_ALL \
-    SINGLE_APPLICATION=0 \
-    KASMVNC_AUTO_RECOVER=true \
-    PULSE_RUNTIME_PATH=/var/run/pulse \
-    DISTRO=$DISTRO \
-    SDL_GAMECONTROLLERCONFIG="030000005e040000be02000014010000,XInput Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b16,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7"
+    STARTUPDIR=/dockerstartup
 
-EXPOSE $VNC_PORT \
-       $NO_VNC_PORT \
-       $UPLOAD_PORT \
-       $AUDIO_PORT
-
+### Home setup
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
 
@@ -170,6 +134,70 @@ RUN touch $STARTUPDIR/wm.log \
     && chown -R root:root /usr/local/bin \
     && chown 1000:root /var/run/pulse
 
+### Language Packs
+COPY ./src/ubuntu/install/langpacks $INST_SCRIPTS/langpacks/
+RUN bash $INST_SCRIPTS/langpacks/install_langpacks.sh && rm -rf $INST_SCRIPTS/langpacks/
+
+### Cleanup Job
+COPY ./src/ubuntu/install/cleanup $INST_SCRIPTS/cleanup/
+RUN bash $INST_SCRIPTS/cleanup/cleanup.sh && rm -rf $INST_SCRIPTS/cleanup/
+
+#### Runtime Stage ####
+FROM scratch
+COPY --from=base_layer / /
+
+### Labels
+LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
+LABEL "com.kasmweb.image"="true"
+
+### Environment config
+ARG DISTRO=alpine
+ARG EXTRA_SH=noop.sh
+ARG LANG='en_US.UTF-8'
+ARG LANGUAGE='en_US:en'
+ARG LC_ALL='en_US.UTF-8'
+ARG START_PULSEAUDIO=1
+ARG START_XFCE4=1
+ENV AUDIO_PORT=4901 \
+    DEBIAN_FRONTEND=noninteractive \
+    DISPLAY=:1 \
+    DISTRO=$DISTRO \
+    GOMP_SPINCOUNT=0 \
+    HOME=/home/kasm-user \
+    INST_SCRIPTS=/dockerstartup/install \
+    KASMVNC_AUTO_RECOVER=true \
+    KASM_VNC_PATH=/usr/share/kasmvnc \
+    LANG=$LANG \
+    LANGUAGE=$LANGUAGE \
+    LC_ALL=$LC_ALL \
+    LD_LIBRARY_PATH=/usr/local/lib/ \
+    MAX_FRAME_RATE=24 \
+    NO_VNC_PORT=6901 \
+    NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32,utility \
+    OMP_WAIT_POLICY=PASSIVE \
+    PERL5LIB=/usr/local/bin \
+    PULSE_RUNTIME_PATH=/var/run/pulse \
+    SDL_GAMECONTROLLERCONFIG="030000005e040000be02000014010000,XInput Controller,platform:Linux,a:b0,b:b1,x:b2,y:b3,back:b8,guide:b16,start:b9,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:b12,dpdown:b13,dpleft:b14,dpright:b15,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7" \
+    SHELL=/bin/bash \
+    START_PULSEAUDIO=$START_PULSEAUDIO \
+    STARTUPDIR=/dockerstartup \
+    START_XFCE4=$START_XFCE4 \
+    TERM=xterm \
+    VNC_COL_DEPTH=24 \
+    VNCOPTIONS="-PreferBandwidth -DynamicQualityMin=4 -DynamicQualityMax=7 -DLP_ClipDelay=0" \
+    VNC_PORT=5901 \
+    VNC_PORT=5901 \
+    VNC_PW=vncpassword \
+    VNC_RESOLUTION=1280x1024 \
+    VNC_RESOLUTION=1280x720 \
+    VNC_VIEW_ONLY_PW=vncviewonlypassword
+
+### Ports and user
+EXPOSE $VNC_PORT \
+       $NO_VNC_PORT \
+       $UPLOAD_PORT \
+       $AUDIO_PORT
+WORKDIR $HOME
 USER 1000
 
 ENTRYPOINT ["/dockerstartup/kasm_default_profile.sh", "/dockerstartup/vnc_startup.sh", "/dockerstartup/kasm_startup.sh"]

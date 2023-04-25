@@ -6,11 +6,9 @@ if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
   yum install -y vim wget net-tools bzip2 python3 ca-certificates
 elif [[ "${DISTRO}" == @(fedora37|oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9) ]]; then
   dnf install -y wget net-tools bzip2 python3 tar vim hostname procps-ng
-  dnf clean all
 elif [ "${DISTRO}" == "opensuse" ]; then
   sed -i 's/download.opensuse.org/mirrorcache-us.opensuse.org/g' /etc/zypp/repos.d/*.repo
   zypper install -yn wget net-tools bzip2 python3 tar vim gzip iputils
-  zypper clean --all
 elif [ "${DISTRO}" == "alpine" ]; then
   apk add --no-cache \
     ca-certificates \
@@ -31,13 +29,8 @@ else
   # Update tzdata noninteractive (otherwise our script is hung on user input later).
   DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
   apt-get install -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils
-  apt-get autoclean 
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/* 
 
-  echo "generate locales für en_US.UTF-8"
+  echo "generate locales for en_US.UTF-8"
   locale-gen en_US.UTF-8
 fi
 
@@ -46,9 +39,4 @@ if [ "$DISTRO" = "ubuntu" ]; then
   add-apt-repository ppa:kisak/turtle
   apt-get update
   apt full-upgrade -y
-  apt-get autoclean 
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
 fi
