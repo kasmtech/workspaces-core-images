@@ -952,6 +952,8 @@ link_tests_single_arch_dev:
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale-nano
   parallel:
     matrix:
       - KASM_IMAGE:
@@ -971,6 +973,8 @@ link_tests_multi_arch_dev:
   except:
     - develop
     - /^release\/.*$/
+  tags:
+    - aws-autoscale-nano
   parallel:
     matrix:
       - ARCH: [ aarch64, x86_64 ]
