@@ -112,6 +112,8 @@ build_cuda_focal:
     - /^release\/.*$/
   except:
     - schedules
+  tags:
+    - aws-autoscale
 
 build_remnux_focal:
   stage: build
