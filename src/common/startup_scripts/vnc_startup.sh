@@ -4,6 +4,12 @@ set -e
 
 no_proxy="localhost,127.0.0.1"
 
+# Set lang values
+if [ "${LC_ALL}" != "en_US.UTF-8" ]; then
+  export LANG=${LC_ALL}
+  export LANGUAGE=${LC_ALL}
+fi
+
 # dict to store processes
 declare -A KASM_PROCS
 
@@ -62,18 +68,28 @@ function start_kasmvnc (){
 	    || echo "no locks present"
 	fi
 
-    rm -rf $HOME/.vnc/*.pid
-    echo "exit 0" > $HOME/.vnc/xstartup
-    chmod +x $HOME/.vnc/xstartup
+	rm -rf $HOME/.vnc/*.pid
+	echo "exit 0" > $HOME/.vnc/xstartup
+	chmod +x $HOME/.vnc/xstartup
 
-		VNCOPTIONS="$VNCOPTIONS -select-de manual"
-    if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
+	VNCOPTIONS="$VNCOPTIONS -select-de manual"
+	if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
 		LD_PRELOAD=/lib/aarch64-linux-gnu/libgcc_s.so.1 vncserver $DISPLAY $KASMVNC_HW3D -drinode $DRINODE -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 -BlacklistThreshold=0 -FreeKeyMappings $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
 	else
 		vncserver $DISPLAY $KASMVNC_HW3D -drinode $DRINODE -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 -BlacklistThreshold=0 -FreeKeyMappings $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
 	fi
 
 	KASM_PROCS['kasmvnc']=$(cat $HOME/.vnc/*${DISPLAY_NUM}.pid)
+
+	#Disable X11 Screensaver
+	if [ "${DISTRO}" != "alpine" ]; then
+		echo "Disabling X Screensaver Functionality"
+		xset -dpms
+		xset s off
+		xset q
+	else
+		echo "Disabling of X Screensaver Functionality for $DISTRO is not required."
+	fi
 
 	if [[ $DEBUG == true ]]; then
 	  echo -e "\n------------------ Started Websockify  ----------------------------"
@@ -185,7 +201,11 @@ function start_gamepad (){
 function start_webcam (){
 	if [[ ${KASM_SVC_WEBCAM:-1} == 1 ]] && [[ -e /dev/video0 ]]; then
 		echo 'Starting webcam server'
-		$STARTUPDIR/webcam/kasm_webcam_server --debug --port 4905 --ssl --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
+                if [[ $DEBUG == true ]]; then
+			$STARTUPDIR/webcam/kasm_webcam_server --debug --port 4905 --ssl --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
+		else
+			$STARTUPDIR/webcam/kasm_webcam_server --port 4905 --ssl --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
+		fi
 
 		KASM_PROCS['kasm_webcam']=$!
 

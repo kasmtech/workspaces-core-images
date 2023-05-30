@@ -2,25 +2,8 @@
 ### every exit != 0 fails the script
 set -e
 
-get_rid_of_policykit_error() {
-  rm -f /etc/xdg/autostart/xfce-polkit.desktop
-}
-
 disable_epel_nss_wrapper_that_breaks_firefox() {
   yum-config-manager --setopt=epel.exclude=nss_wrapper --save
-}
-
-config_xinit_disable_screensaver() {
-  mkdir -p /etc/X11/xinit/xinitrc.d/
-  cat >/etc/X11/xinit/xinitrc.d/disable_screensaver.sh <<EOL
-#!/bin/sh
-set -x
-xset -dpms
-xset s off
-xset q
-EOL
-
-chmod +x /etc/X11/xinit/xinitrc.d/disable_screensaver.sh
 }
 
 replace_default_xinit() {
@@ -82,9 +65,25 @@ if [ "${DISTRO}" == "kali" ]; then
     xfce4-taskmanager \
     xfce4-whiskermenu-plugin
 elif [[ "$DISTRO" = @(ubuntu|debian) ]]; then
-  apt-get install -y 	dbus-x11 supervisor xfce4 xfce4-terminal xterm xclip
+  apt-get install -y \
+    dbus-x11 \
+    supervisor \
+    xfce4 \
+    xfce4-terminal \
+    xterm \
+    xclip
 elif [[ "$DISTRO" = "parrotos5" ]]; then
-  apt-get install -y maia-icon-theme parrot-themes parrot-wallpapers desktop-base xclip dbus-x11 supervisor xfce4 xfce4-terminal parrot-menu
+  apt-get install -y \
+    dbus-x11 \
+    desktop-base \
+    maia-icon-theme \
+    parrot-menu \
+    parrot-themes \
+    parrot-wallpapers \
+    supervisor \
+    xclip \
+    xfce4 \
+    xfce4-terminal
   echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
   locale-gen
 elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
@@ -95,47 +94,64 @@ elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   fi
   disable_epel_nss_wrapper_that_breaks_firefox
   yum groupinstall xfce -y
-  yum install -y wmctrl xset xclip xfce4-notifyd
-  get_rid_of_policykit_error
-  yum remove -y xfce4-power-manager
+  yum install -y \
+    wmctrl \
+    xclip \
+    xfce4-notifyd \
+    xset
 elif [ "$DISTRO" = "oracle8" ]; then
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   dnf group install xfce -y
-  dnf install -y wmctrl xset xclip xfce4-notifyd
-  get_rid_of_policykit_error
-  dnf remove -y xfce4-power-manager xfce4-screensaver
+  dnf install -y \
+    wmctrl \
+    xclip \
+    xfce4-notifyd \
+    xset
 elif [ "$DISTRO" = "oracle9" ]; then
   dnf config-manager --set-enabled ol9_codeready_builder
   dnf config-manager --set-enabled ol9_distro_builder
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
   dnf group install xfce -y -x oracle-backgrounds
-  dnf install -y wmctrl xset xclip xfce4-notifyd dbus-x11
-  get_rid_of_policykit_error
-  dnf remove -y xfce4-power-manager xfce4-screensaver
+  dnf install -y \
+    dbus-x11 \
+    wmctrl \
+    xclip \
+    xfce4-notifyd \
+    xset
 elif [[ "$DISTRO" == @(rockylinux9|almalinux9) ]]; then
   dnf config-manager --set-enabled crb
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
   dnf group install xfce -y
-  dnf install -y wmctrl xset xclip xfce4-notifyd dbus-x11
-  dnf remove -y xfce4-power-manager xfce4-screensaver
-  echo "exit 0" > /usr/libexec/xfce-polkit
+  dnf install -y \
+    dbus-x11 \
+    wmctrl \
+    xclip \
+    xfce4-notifyd \
+    xset
 elif [[ "$DISTRO" == @(rockylinux8|almalinux8) ]]; then
   dnf config-manager --set-enabled powertools
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   dnf group install xfce -y
-  dnf install -y wmctrl xset xclip xfce4-notifyd dbus-x11
-  dnf remove -y xfce4-power-manager xfce4-screensaver
-  echo "exit 0" > /usr/libexec/xfce-polkit
+  dnf install -y \
+    dbus-x11 \
+    wmctrl \
+    xclip \
+    xfce4-notifyd \
+    xset
 elif [ "$DISTRO" = "opensuse" ]; then
   zypper install -yn -t pattern xfce
-  zypper install -yn xset xfce4-terminal xclip xfce4-notifyd
-  zypper remove -yn xfce4-power-manager
-  get_rid_of_policykit_error
+  zypper install -yn \
+    xclip \
+    xfce4-notifyd \
+    xfce4-terminal \
+    xset
 elif [ "$DISTRO" = "fedora37" ]; then
   dnf group install xfce -y
-  dnf install -y wmctrl xset xclip xfce4-notifyd
-  get_rid_of_policykit_error
-  dnf remove -y xfce4-power-manager xfce4-screensaver
+  dnf install -y \
+    wmctrl \
+    xclip \
+    xfce4-notifyd \
+    xset
 elif [ "$DISTRO" = "alpine" ]; then
   apk add --no-cache \
     dbus-x11 \
@@ -152,34 +168,8 @@ elif [ "$DISTRO" = "alpine" ]; then
   rm -f /usr/share/xfce4/panel/plugins/power-manager-plugin.desktop
 fi
 
-if grep -q Jammy /etc/os-release; then
-  apt-get purge -y xfce4-screensaver
-fi
-
-if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
-  yum clean all
-elif [[ "${DISTRO}" == @(fedora37|oracle8|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
-  dnf clean all
-elif [ "${DISTRO}" == "opensuse" ]; then
-  zypper clean --all
-elif [ "${DISTRO}" == "alpine" ]; then
-  rm -Rf /tmp/*
-else
-  apt-get purge -y pm-utils xscreensaver*
-  apt-get autoclean
-  rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
-fi
-
-if [[ "${DISTRO}" == @(centos|oracle7|oracle8|fedora37|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9) ]]; then
-  config_xinit_disable_screensaver
-elif [ "${DISTRO}" == "alpine" ]; then
-  echo ""
-else
+if [[ "${DISTRO}" != @(centos|oracle7|oracle8|fedora37|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
   replace_default_xinit
-  config_xinit_disable_screensaver
   if [ "${START_XFCE4}" == "1" ] ; then
     replace_default_99x11_common_start
   fi

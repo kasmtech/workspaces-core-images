@@ -17,9 +17,9 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="9a8bfce25fd81a44e815937db72a84399635e4ef"
-BRANCH="master" # just use 'release' for a release branch
-KASMVNC_VER="1.0.2"
+COMMIT_ID="56c840fc947d891f054bf251d2a02454d3e6f686"
+BRANCH="release" # just use 'release' for a release branch
+KASMVNC_VER="1.1.0"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
@@ -95,7 +95,6 @@ elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|alma
     dnf localinstall -y kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-    dnf clean all
 elif [[ "${DISTRO}" == "fedora37" ]] ; then
     dnf install -y xorg-x11-drv-amdgpu xorg-x11-drv-ati
     if [ "${BUILD_ARCH}" == "x86_64" ]; then
@@ -105,7 +104,6 @@ elif [[ "${DISTRO}" == "fedora37" ]] ; then
     dnf localinstall -y --allowerasing kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-    dnf clean all
 elif [[ "${DISTRO}" == "opensuse" ]] ; then
     mkdir -p /etc/pki/tls/private
     wget "${BUILD_URL}" -O kasmvncserver.rpm
@@ -117,7 +115,6 @@ elif [[ "${DISTRO}" == "opensuse" ]] ; then
     fi
     zypper install -y --allow-unsigned-rpm ./kasmvncserver.rpm
     rm kasmvncserver.rpm
-    zypper clean --all
 elif [[ "${DISTRO}" == "alpine" ]] ; then
     apk add --no-cache \
         libgomp \
@@ -158,11 +155,6 @@ else
     apt-get install -y gettext ssl-cert libxfont2
     apt-get install -y /tmp/kasmvncserver.deb
     rm -f /tmp/kasmvncserver.deb
-    apt-get autoclean 
-    rm -rf \
-        /var/lib/apt/lists/* \
-        /var/tmp/* \
-        /tmp/*
 fi
 #mkdir $KASM_VNC_PATH/certs
 mkdir -p $KASM_VNC_PATH/www/Downloads
@@ -170,4 +162,3 @@ chown -R 0:0 $KASM_VNC_PATH
 chmod -R og-w $KASM_VNC_PATH
 #chown -R 1000:0 $KASM_VNC_PATH/certs
 chown -R 1000:0 $KASM_VNC_PATH/www/Downloads
-ln -s $KASM_VNC_PATH/www/index.html $KASM_VNC_PATH/www/vnc.html
