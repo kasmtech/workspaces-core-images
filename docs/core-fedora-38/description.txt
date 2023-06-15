@@ -1,0 +1,1 @@
+Fedora 38 base image for Kasm Workspaces

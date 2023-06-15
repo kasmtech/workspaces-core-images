@@ -9,7 +9,7 @@ elif [[ "${DISTRO}" == "debian" ]] ; then
   sed -i \
     '/locale/d' \
     /etc/dpkg/dpkg.cfg.d/docker
-elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora37|oracle8|oracle9|rockylinux8|rockylinux9) ]]; then
+elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora37|fedora38|oracle8|oracle9|rockylinux8|rockylinux9) ]]; then
   rm -f /etc/rpm/macros.image-language-conf
 elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   sed -i \

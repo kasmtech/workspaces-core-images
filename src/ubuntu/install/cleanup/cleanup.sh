@@ -4,7 +4,7 @@ set -ex
 # Distro package cleanup
 if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
   yum clean all
-elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora37|oracle8|oracle9|rockylinux8|rockylinux9) ]]; then
+elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora37|fedora38|oracle8|oracle9|rockylinux8|rockylinux9) ]]; then
   dnf clean all
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper clean --all
@@ -21,6 +21,11 @@ rm -Rf \
   /var/lib/apt/lists/* \
   /var/tmp/*
 mkdir -m 1777 /tmp
+
+# Remove xfce4-screensaver bin if it exists
+if which xfce4-screensaver; then
+  rm -f $(which xfce4-screensaver)
+fi
 
 # Services we don't want to start disable in xfce init
 rm -f \

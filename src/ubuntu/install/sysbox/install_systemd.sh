@@ -15,7 +15,7 @@ if [[ "${DISTRO}" == @(ubuntu|debian|parrotos5|kali) ]] ; then
     systemd \
     systemd-sysv \
     udev
-elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8|fedora37) ]]; then
+elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8|fedora37|fedora38) ]]; then
   # Install deps
   dnf install -y \
     dbus \

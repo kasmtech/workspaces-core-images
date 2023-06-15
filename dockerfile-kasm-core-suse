@@ -1,5 +1,5 @@
 #### Build Stage ####
-ARG BASE_IMAGE="opensuse/leap:15.3"
+ARG BASE_IMAGE="opensuse/leap:15.5"
 
 FROM $BASE_IMAGE AS install_tools
 ARG DISTRO=opensuse
