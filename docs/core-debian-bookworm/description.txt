@@ -1,0 +1,1 @@
+Debian Bookworm base image for Kasm Workspaces

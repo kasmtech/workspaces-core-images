@@ -17,9 +17,9 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="56c840fc947d891f054bf251d2a02454d3e6f686"
-BRANCH="release" # just use 'release' for a release branch
-KASMVNC_VER="1.1.0"
+COMMIT_ID="9450157af1e16f9a27c12170ac0ebfd28ee50ebc"
+BRANCH="master" # just use 'release' for a release branch
+KASMVNC_VER="1.1.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
@@ -63,17 +63,39 @@ elif [[ "${DISTRO}" == "fedora37" ]] ; then
     else
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyseven_${KASM_VER_NAME_PART}_aarch64.rpm"
     fi
-elif [[ "${DISTRO}" = @(debian|parrotos5) ]] ; then
+elif [[ "${DISTRO}" == "fedora38" ]] ; then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyeight_${KASM_VER_NAME_PART}_x86_64.rpm"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_arm64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyeight_${KASM_VER_NAME_PART}_aarch64.rpm"
+    fi
+elif [[ "${DISTRO}" = @(debian|parrotos5) ]] ; then
+    if grep -q bookworm /etc/os-release; then
+        if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bookworm_${KASM_VER_NAME_PART}_amd64.deb"
+        else
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bookworm_${KASM_VER_NAME_PART}_arm64.deb"
+        fi
+    else
+        if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_amd64.deb"
+        else
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_arm64.deb"
+        fi
     fi
 elif [[ "${DISTRO}" == "alpine" ]] ; then
-    if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_317/kasmvnc.alpine_317_x86_64.tgz"
+    if grep -q v3.18 /etc/os-release; then
+        if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_318/kasmvnc.alpine_318_x86_64.tgz"
+        else
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_318/kasmvnc.alpine_318_aarch64.tgz"
+        fi
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_317/kasmvnc.alpine_317_aarch64.tgz"
+        if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_317/kasmvnc.alpine_317_x86_64.tgz"
+        else
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_317/kasmvnc.alpine_317_aarch64.tgz"
+        fi
     fi
 else
     UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
@@ -95,7 +117,7 @@ elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|alma
     dnf localinstall -y kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-elif [[ "${DISTRO}" == "fedora37" ]] ; then
+elif [[ "${DISTRO}" == @(fedora37|fedora38) ]] ; then
     dnf install -y xorg-x11-drv-amdgpu xorg-x11-drv-ati
     if [ "${BUILD_ARCH}" == "x86_64" ]; then
         dnf install -y xorg-x11-drv-intel
@@ -150,7 +172,6 @@ elif [[ "${DISTRO}" == "alpine" ]] ; then
     ln -s /usr/local/lib/kasmvnc /usr/lib/kasmvncserver
 else
     wget "${BUILD_URL}" -O kasmvncserver.deb
-
     apt-get update
     apt-get install -y gettext ssl-cert libxfont2
     apt-get install -y /tmp/kasmvncserver.deb

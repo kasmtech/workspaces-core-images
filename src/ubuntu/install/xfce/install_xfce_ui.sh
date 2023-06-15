@@ -30,7 +30,7 @@ EOL
 }
 
 echo "Install Xfce4 UI components"
-if [[ "${DISTRO}" != @(centos|oracle7|oracle8|opensuse|fedora37|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
+if [[ "${DISTRO}" != @(centos|oracle7|oracle8|opensuse|fedora37|fedora38|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
   apt-get update
 fi
 
@@ -145,7 +145,7 @@ elif [ "$DISTRO" = "opensuse" ]; then
     xfce4-notifyd \
     xfce4-terminal \
     xset
-elif [ "$DISTRO" = "fedora37" ]; then
+elif [[ "$DISTRO" = @(fedora37|fedora38) ]]; then
   dnf group install xfce -y
   dnf install -y \
     wmctrl \
@@ -168,7 +168,7 @@ elif [ "$DISTRO" = "alpine" ]; then
   rm -f /usr/share/xfce4/panel/plugins/power-manager-plugin.desktop
 fi
 
-if [[ "${DISTRO}" != @(centos|oracle7|oracle8|fedora37|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
+if [[ "${DISTRO}" != @(centos|oracle7|oracle8|fedora37|fedora38|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
   replace_default_xinit
   if [ "${START_XFCE4}" == "1" ] ; then
     replace_default_99x11_common_start
@@ -205,3 +205,12 @@ cat >>/etc/xdg/Thunar/accels.scm<<EOL
 (gtk_accel_path "<Actions>/ThunarLauncher/trash-delete-2" "")
 (gtk_accel_path "<Actions>/ThunarLauncher/trash-delete" "")
 EOL
+
+# Support desktop icon trust
+cat >>/etc/xdg/autostart/desktop-icons.desktop<<EOL
+[Desktop Entry]
+Type=Application
+Name=Desktop Icon Trust
+Exec=/dockerstartup/trustdesktop.sh
+EOL
+chmod +x /etc/xdg/autostart/desktop-icons.desktop

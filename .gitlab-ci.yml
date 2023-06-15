@@ -99,6 +99,26 @@ build_debian_bullseye:
   tags:
     - aws-autoscale
 
+build_debian_bookworm:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-debian-bookworm-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-debian-bookworm-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-debian-bookworm:$SANITIZED_BRANCH -t ${ORG_NAME}/core-debian-bookworm:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="debian:bookworm-slim" --build-arg DISTRO="debian" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_debian.svg -f dockerfile-kasm-core .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_cuda_focal:
   stage: build
   script:
@@ -313,7 +333,7 @@ build_opensuse_15:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.3" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.5" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
   only:
     - develop
     - /^release\/.*$/
@@ -364,6 +384,48 @@ manifest_fedora_37:
   tags:
     - aws-autoscale
 
+build_fedora_38:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-fedora-38:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="fedora:38"
+        --build-arg DISTRO="fedora38"
+        -f dockerfile-kasm-core-fedora .
+    - docker push ${ORG_NAME}/core-fedora-38:$(arch)-$SANITIZED_BRANCH
+  only:
+    - develop
+    - /^release\/.*$/ 
+  except:
+    - schedules
+  tags:
+    - ${TAG} 
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+manifest_fedora_38:
+  stage: manifest
+  script:
+    - docker pull ${ORG_NAME}/core-fedora-38:x86_64-$SANITIZED_BRANCH
+    - docker pull ${ORG_NAME}/core-fedora-38:aarch64-$SANITIZED_BRANCH
+    - "docker manifest push --purge ${ORG_NAME}/core-fedora-38:$SANITIZED_BRANCH || :"
+    - docker manifest create ${ORG_NAME}/core-fedora-38:$SANITIZED_BRANCH ${ORG_NAME}/core-fedora-38:x86_64-$SANITIZED_BRANCH ${ORG_NAME}/core-fedora-38:aarch64-$SANITIZED_BRANCH
+    - docker manifest annotate ${ORG_NAME}/core-fedora-38:$SANITIZED_BRANCH ${ORG_NAME}/core-fedora-38:aarch64-$SANITIZED_BRANCH --os linux --arch arm64 --variant v8
+    - docker manifest push --purge ${ORG_NAME}/core-fedora-38:$SANITIZED_BRANCH
+  needs:
+    - build_fedora_38
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_parrotos_5:
   stage: build
   image: ${ORG_NAME}/docker-buildx-private:develop
@@ -396,6 +458,26 @@ build_alpine_317:
     - docker buildx create --use
     # build for multiple architectures
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-alpine-317-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-alpine-317-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-alpine-317:$SANITIZED_BRANCH -t ${ORG_NAME}/core-alpine-317:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_alpine.png --build-arg BASE_IMAGE="alpine:3.17" --build-arg DISTRO="alpine" -f dockerfile-kasm-core-alpine .
+  only:
+    - develop
+    - /^release\/.*$/
+  except:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_alpine_318:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-alpine-318-private:$SANITIZED_BRANCH -t  ${ORG_NAME}/core-alpine-318-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-alpine-318:$SANITIZED_BRANCH -t ${ORG_NAME}/core-alpine-318:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_alpine.png --build-arg BASE_IMAGE="alpine:3.18" --build-arg DISTRO="alpine" -f dockerfile-kasm-core-alpine .
   only:
     - develop
     - /^release\/.*$/
@@ -481,6 +563,28 @@ build_debian_bullseye_dev:
         --build-arg BG_IMG=bg_debian.svg
         -f dockerfile-kasm-core .
     - docker push ${ORG_NAME}/core-debian-bullseye-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_debian_bookworm_dev:
+  stage: build
+  script:
+    - >
+        docker build 
+        -t ${ORG_NAME}/core-debian-bookworm-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg BASE_IMAGE="debian:bookworm-slim"
+        --build-arg DISTRO="debian"
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_debian.svg
+        -f dockerfile-kasm-core .
+    - docker push ${ORG_NAME}/core-debian-bookworm-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
@@ -731,7 +835,7 @@ build_opensuse_15_dev:
         -t ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
         --build-arg START_PULSEAUDIO=1
         --build-arg START_XFCE4=1
-        --build-arg BASE_IMAGE="opensuse/leap:15.3"
+        --build-arg BASE_IMAGE="opensuse/leap:15.5"
         --build-arg DISTRO="opensuse"
         -f dockerfile-kasm-core-suse .
     - docker push ${ORG_NAME}/core-opensuse-15-private:$(arch)-$SANITIZED_BRANCH
@@ -756,6 +860,27 @@ build_fedora_37_dev:
         --build-arg DISTRO="fedora37"
         -f dockerfile-kasm-core-fedora .
     - docker push ${ORG_NAME}/core-fedora-37-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG}
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
+build_fedora_38_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-fedora-38-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="fedora:38"
+        --build-arg DISTRO="fedora38"
+        -f dockerfile-kasm-core-fedora .
+    - docker push ${ORG_NAME}/core-fedora-38-private:$(arch)-$SANITIZED_BRANCH
   except:
     - develop
     - /^release\/.*$/
@@ -809,6 +934,28 @@ build_alpine_317_dev:
     matrix:
       - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
 
+build_alpine_318_dev:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-alpine-318-private:$(arch)-$SANITIZED_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BG_IMG=bg_alpine.png
+        --build-arg BASE_IMAGE="alpine:3.18"
+        --build-arg DISTRO="alpine"
+        -f dockerfile-kasm-core-alpine .
+    - docker push ${ORG_NAME}/core-alpine-318-private:$(arch)-$SANITIZED_BRANCH
+  except:
+    - develop
+    - /^release\/.*$/
+  tags:
+    - ${TAG} 
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+
 test_multi_arch_dev:
   stage: test
   script:
@@ -846,7 +993,9 @@ test_multi_arch_dev:
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
           - core-fedora-37-private
+          - core-fedora-38-private
           - core-debian-bullseye-private
+          - core-debian-bookworm-private
           - core-oracle-9-private
           - core-rockylinux-9-private
           - core-rockylinux-8-private
@@ -855,6 +1004,7 @@ test_multi_arch_dev:
           - core-kali-rolling-private
           - core-parrotos-5-private
           - core-alpine-317-private
+          - core-alpine-318-private
 
 test_single_arch_dev:
   stage: test
@@ -916,7 +1066,9 @@ manifest_dev:
     - build_oracle_9_dev
     - build_opensuse_15_dev
     - build_fedora_37_dev
+    - build_fedora_38_dev
     - build_debian_bullseye_dev
+    - build_debian_bookworm_dev
     - build_rockylinux_9_dev
     - build_rockylinux_8_dev
     - build_almalinux_9_dev
@@ -924,6 +1076,7 @@ manifest_dev:
     - build_kali_rolling_dev
     - build_parrotos_5_dev
     - build_alpine_317_dev
+    - build_alpine_318_dev
   parallel:
     matrix:
       - KASM_IMAGE:
@@ -933,7 +1086,9 @@ manifest_dev:
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
           - core-fedora-37-private
+          - core-fedora-38-private
           - core-debian-bullseye-private
+          - core-debian-bookworm-private
           - core-oracle-9-private
           - core-rockylinux-9-private
           - core-rockylinux-8-private
@@ -942,6 +1097,7 @@ manifest_dev:
           - core-kali-rolling-private
           - core-parrotos-5-private
           - core-alpine-317-private
+          - core-alpine-318-private
 
 link_tests_single_arch_dev:
   stage: linktests
@@ -988,7 +1144,9 @@ link_tests_multi_arch_dev:
           - core-opensuse-15-private
           - core-ubuntu-jammy-private
           - core-fedora-37-private
+          - core-fedora-38-private
           - core-debian-bullseye-private
+          - core-debian-bookworm-private
           - core-oracle-9-private
           - core-parrotos-5-private
           - core-rockylinux-9-private
@@ -996,6 +1154,7 @@ link_tests_multi_arch_dev:
           - core-almalinux-9-private
           - core-almalinux-8-private
           - core-alpine-317-private
+          - core-alpine-318-private
 
 # These jobs are for the "rolling" release of the images. They should only run for scheduled jobs and should only push the rolling tags
 build_ubuntu_bionic_scheduled:
@@ -1061,6 +1220,23 @@ build_debian_bullseye_scheduled:
     - docker buildx create --use
     # build for multiple architectures
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-debian-bullseye-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-debian-bullseye:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="debian:bullseye-slim" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_debian.svg --build-arg DISTRO="debian" -f dockerfile-kasm-core .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_debian_bookworm_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-debian-bookworm-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-debian-bookworm:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg BASE_IMAGE="debian:bookworm-slim" --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_debian.svg --build-arg DISTRO="debian" -f dockerfile-kasm-core .
   only:
     - schedules
   tags:
@@ -1236,7 +1412,7 @@ build_opensuse_15_scheduled:
     # prep the buildx env
     - docker buildx create --use
     # build for multiple architectures
-    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.3" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-opensuse-15-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-opensuse-15:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BASE_IMAGE="opensuse/leap:15.5" --build-arg DISTRO="opensuse" -f dockerfile-kasm-core-suse .
   only:
     - schedules
   tags:
@@ -1278,6 +1454,42 @@ manifest_fedora_37_scheduled:
   tags:
     - aws-autoscale
 
+build_fedora_38_scheduled:
+  stage: build
+  script:
+    - >
+        docker build
+        -t ${ORG_NAME}/core-fedora-38:$(arch)-$SANITIZED_ROLLING_BRANCH
+        --build-arg START_PULSEAUDIO=1
+        --build-arg START_XFCE4=1
+        --build-arg BASE_IMAGE="fedora:38"
+        --build-arg DISTRO="fedora38"
+        -f dockerfile-kasm-core-fedora .
+    - docker push ${ORG_NAME}/core-fedora-38:$(arch)-$SANITIZED_ROLLING_BRANCH
+  only:
+    - schedules
+  tags:
+    - ${TAG} 
+  parallel:
+    matrix:
+      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+    
+manifest_fedora_38_scheduled:
+  stage: manifest
+  script:
+    - docker pull ${ORG_NAME}/core-fedora-38:x86_64-$SANITIZED_ROLLING_BRANCH
+    - docker pull ${ORG_NAME}/core-fedora-38:aarch64-$SANITIZED_ROLLING_BRANCH
+    - "docker manifest push --purge ${ORG_NAME}/core-fedora-38:$SANITIZED_ROLLING_BRANCH || :"
+    - docker manifest create ${ORG_NAME}/core-fedora-38:$SANITIZED_ROLLING_BRANCH ${ORG_NAME}/core-fedora-38:x86_64-$SANITIZED_ROLLING_BRANCH ${ORG_NAME}/core-fedora-38:aarch64-$SANITIZED_ROLLING_BRANCH
+    - docker manifest annotate ${ORG_NAME}/core-fedora-38:$SANITIZED_ROLLING_BRANCH ${ORG_NAME}/core-fedora-38:aarch64-$SANITIZED_ROLLING_BRANCH --os linux --arch arm64 --variant v8
+    - docker manifest push --purge ${ORG_NAME}/core-fedora-38:$SANITIZED_ROLLING_BRANCH
+  needs:
+    - build_fedora_38_scheduled
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
 build_parrotos_5_scheduled:
   stage: build
   image: ${ORG_NAME}/docker-buildx-private:develop
@@ -1295,7 +1507,7 @@ build_parrotos_5_scheduled:
   tags:
     - aws-autoscale
 
-build_parrotos_5_scheduled:
+build_alpine_317_scheduled:
   stage: build
   image: ${ORG_NAME}/docker-buildx-private:develop
   variables:
@@ -1307,6 +1519,23 @@ build_parrotos_5_scheduled:
     - docker buildx create --use
     # build for multiple architectures
     - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-alpine-317-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-alpine-317:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_alpine.png --build-arg BASE_IMAGE="alpine:3.17" --build-arg DISTRO="alpine" -f dockerfile-kasm-core-alpine .
+  only:
+    - schedules
+  tags:
+    - aws-autoscale
+
+build_alpine_318_scheduled:
+  stage: build
+  image: ${ORG_NAME}/docker-buildx-private:develop
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  script:
+    # get qemu ready
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # prep the buildx env
+    - docker buildx create --use
+    # build for multiple architectures
+    - docker buildx build --push --platform $BUILD_PLATFORMS -t ${ORG_NAME}/core-alpine-318-private:$SANITIZED_ROLLING_BRANCH -t ${ORG_NAME}/core-alpine-318:$SANITIZED_ROLLING_BRANCH --build-arg START_PULSEAUDIO=1 --build-arg START_XFCE4=1 --build-arg BG_IMG=bg_alpine.png --build-arg BASE_IMAGE="alpine:3.18" --build-arg DISTRO="alpine" -f dockerfile-kasm-core-alpine .
   only:
     - schedules
   tags:
@@ -1343,7 +1572,9 @@ update_readmes:
           - core-ubuntu-focal
           - core-ubuntu-jammy
           - core-fedora-37
+          - core-fedora-38
           - core-debian-bullseye
+          - core-debian-bookworm
           - core-oracle-9
           - core-parrotos-5
           - core-rockylinux-9
@@ -1351,3 +1582,4 @@ update_readmes:
           - core-almalinux-9
           - core-almalinux-8
           - core-alpine-317
+          - core-alpine-318

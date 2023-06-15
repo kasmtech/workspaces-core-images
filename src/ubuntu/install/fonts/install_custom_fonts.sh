@@ -20,7 +20,7 @@ elif [[ "${DISTRO}" == "centos" ]]; then
     google-noto-emoji-fonts \
     google-noto-sans-cjk-fonts \
     google-noto-sans-fonts 
-elif [[ "${DISTRO}" == "fedora37" ]]; then
+elif [[ "${DISTRO}" == @(fedora37|fedora38) ]]; then
   dnf install -y \
     glibc-locale-source \
     google-noto-cjk-fonts \
