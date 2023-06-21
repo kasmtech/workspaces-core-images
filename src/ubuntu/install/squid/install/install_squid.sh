@@ -82,7 +82,7 @@ log_level: 5
 sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
-KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/e46edd9bb45327359bc42f96cd2f299e23760904/kasm_squid_adapter_${ARCH}_develop.e46edd.tar.gz
+KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/91af1e223afd9b3ecf1b44cc32f96bbcc1fd7622/kasm_squid_adapter_${ARCH}_feature_KASM-4507_dev_api_creds.91af1e.tar.gz
 
 wget -qO- ${KASM_SQUID_ADAPTER} | tar xz -C /etc/squid/
 ls -la /etc/squid
