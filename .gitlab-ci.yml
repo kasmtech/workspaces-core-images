@@ -66,7 +66,7 @@ build_multi_containers:
   parallel:
     matrix:
       - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
-      - BUILD_META: *MULTI_ARCH_BUILDS
+        BUILD_META: *MULTI_ARCH_BUILDS
 
 build_single_containers:
   stage: build
@@ -105,7 +105,7 @@ test_multi:
   parallel:
     matrix:
       - ARCH: [ "x86_64", "aarch64" ]
-      - BUILD_META: *MULTI_ARCH_BUILDS
+        BUILD_META: *MULTI_ARCH_BUILDS
 
 test_single:
   stage: test
