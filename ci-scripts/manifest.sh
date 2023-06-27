@@ -7,10 +7,6 @@ FAILED="false"
 ## Parse input ##
 NAME1=$(echo $1| awk -F'|' '{print $1}')
 NAME2=$(echo $1| awk -F'|' '{print $2}')
-BASE=$(echo $1| awk -F'|' '{print $3}')
-BG=$(echo $1| awk -F'|' '{print $4}')
-DISTRO=$(echo $1| awk -F'|' '{print $5}')
-DOCKERFILE=$(echo $1| awk -F'|' '{print $6}')
 TYPE=$2
 REVERT_PIPELINE_ID=$3
 IS_ROLLING=$4
@@ -48,7 +44,7 @@ if [ -z "${REVERT_PIPELINE_ID}" ]; then
   for ARCH in "${ARCHES[@]}"; do
 
     # Determine test status
-    STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-${KASM_IMAGE}-${PULL_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
+    STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
     if [ "${STATUS}" == "PASS" ]; then
       STATE=success
     else
@@ -57,7 +53,7 @@ if [ -z "${REVERT_PIPELINE_ID}" ]; then
     fi
 
     # Ping gitlab api with link output
-    curl --request POST --header "PRIVATE-TOKEN:${GITLAB_API_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/statuses/${CI_COMMIT_SHA}?state=${STATE}&name=${KASM_IMAGE}_${ARCH}&target_url=https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-${KASM_IMAGE}-${PULL_BRANCH}-${CI_PIPELINE_ID}/index.html"
+    curl --request POST --header "PRIVATE-TOKEN:${GITLAB_API_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/statuses/${CI_COMMIT_SHA}?state=${STATE}&name=core-${NAME1}-${NAME2}_${ARCH}&target_url=https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}/index.html"
 
   done
 fi
