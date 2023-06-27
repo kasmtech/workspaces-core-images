@@ -13,7 +13,7 @@ stages:
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   KASM_RELEASE: "1.14.0"
-  TEST_INSTALLER: "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_backend/d8bade9119097d704c85505b3a949b3a54174b72/kasm_workspaces_develop_1.13.0.d8bade.tar.gz"
+  TEST_INSTALLER: "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_backend/642f6a032aacc41decd1d782262d1b59cec216c5/kasm_workspaces_develop_1.13.0.642f6a.tar.gz"
 before_script:
   - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
   - export SANITIZED_BRANCH="$(echo $CI_COMMIT_REF_NAME | sed -r 's#^release/##' | sed 's/\//_/g')"
