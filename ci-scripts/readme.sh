@@ -4,7 +4,7 @@
 NAME1=$(echo $1| awk -F'|' '{print $1}')
 NAME2=$(echo $1| awk -F'|' '{print $2}')
 
-# Run readme updater
+## Run readme updater ##
 docker run -v $PWD/docs:/docs \
   -e RELEASE="$KASM_RELEASE" \
   -e DOCKER_USERNAME="$README_USERNAME" \
