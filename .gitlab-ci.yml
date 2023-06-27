@@ -93,7 +93,7 @@ test_multi:
   when: always
   script:
     - apk add bash
-    - bash ci-scripts/test.sh "${BUILD_META}" "${ARCH}"
+    - bash ci-scripts/test.sh "${BUILD_META}" "${ARCH}" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   except:
     variables:
       - $README_USERNAME
@@ -112,7 +112,7 @@ test_single:
   when: always
   script:
     - apk add bash
-    - bash ci-scripts/test.sh "${BUILD_META}" "x86_64"
+    - bash ci-scripts/test.sh "${BUILD_META}" "x86_64" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   except:
     variables:
       - $README_USERNAME

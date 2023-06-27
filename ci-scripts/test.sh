@@ -9,6 +9,13 @@ BG=$(echo $1| awk -F'|' '{print $4}')
 DISTRO=$(echo $1| awk -F'|' '{print $5}')
 DOCKERFILE=$(echo $1| awk -F'|' '{print $6}')
 ARCH=$2
+AWS_ID=$3
+AWS_KEY=$4
+
+# Setup aws cli
+export AWS_ACCESS_KEY_ID="${AWS_ID}"
+export AWS_SECRET_ACCESS_KEY="${AWS_KEY}"
+export AWS_DEFAULT_REGION=us-east-1
 
 # Install tools for testing
 apk add \
