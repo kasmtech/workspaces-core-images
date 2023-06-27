@@ -194,27 +194,27 @@ ready_check
 docker pull ${ORG_NAME}/kasm-tester:1.14.0
 
 # Run test
-  cp /root/.ssh/id_rsa $(dirname ${CI_PROJECT_DIR})/sshkey
-  chmod 777 $(dirname ${CI_PROJECT_DIR})/sshkey
-  docker pull kasmweb/kasm-tester:1.14.0
-  docker run --rm \
-    -e TZ=US/Pacific \
-    -e KASM_HOST=${IPS[0]} \
-    -e KASM_PORT=443 \
-    -e KASM_PASSWORD="${RAND}" \
-    -e SSH_USER=$USER \
-    -e DOCKERUSER=$DOCKER_HUB_USERNAME \
-    -e DOCKERPASS=$DOCKER_HUB_PASSWORD \
-    -e TEST_IMAGE="${ORG_NAME}/image-cache-private:$(arch)-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}" \
-    -e AWS_KEY=${KASM_TEST_AWS_KEY} \
-    -e AWS_SECRET="${KASM_TEST_AWS_SECRET}" \
-    -e SLACK_TOKEN=${SLACK_TOKEN} \
-    -e S3_BUCKET=kasm-ci \
-    -e COMMIT=${CI_COMMIT_SHA} \
-    -e REPO=workspaces-core-images \
-    -e AUTOMATED=true \
-    -v $(dirname ${CI_PROJECT_DIR})/sshkey:/sshkey:ro  ${SLIM_FLAG} \
-    kasmweb/kasm-tester:1.14.0
+cp /root/.ssh/id_rsa $(dirname ${CI_PROJECT_DIR})/sshkey
+chmod 777 $(dirname ${CI_PROJECT_DIR})/sshkey
+docker pull kasmweb/kasm-tester:1.14.0
+docker run --rm \
+  -e TZ=US/Pacific \
+  -e KASM_HOST=${IPS[0]} \
+  -e KASM_PORT=443 \
+  -e KASM_PASSWORD="${RAND}" \
+  -e SSH_USER=$USER \
+  -e DOCKERUSER=$DOCKER_HUB_USERNAME \
+  -e DOCKERPASS=$DOCKER_HUB_PASSWORD \
+  -e TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}" \
+  -e AWS_KEY=${KASM_TEST_AWS_KEY} \
+  -e AWS_SECRET="${KASM_TEST_AWS_SECRET}" \
+  -e SLACK_TOKEN=${SLACK_TOKEN} \
+  -e S3_BUCKET=kasm-ci \
+  -e COMMIT=${CI_COMMIT_SHA} \
+  -e REPO=workspaces-core-images \
+  -e AUTOMATED=true \
+  -v $(dirname ${CI_PROJECT_DIR})/sshkey:/sshkey:ro  ${SLIM_FLAG} \
+  kasmweb/kasm-tester:1.14.0
 
 # Shutdown Instances
 turnoff
