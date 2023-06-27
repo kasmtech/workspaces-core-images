@@ -10,6 +10,13 @@ DISTRO=$(echo $1| awk -F'|' '{print $5}')
 DOCKERFILE=$(echo $1| awk -F'|' '{print $6}')
 ARCH=$2
 
+# Install tools for testing
+apk add \
+  aws-cli \
+  curl \
+  jq \
+  openssh-client
+
 ## Functions ##
 # Ami locater
 getami () {
@@ -50,13 +57,6 @@ else
   TYPE=c6g.large
   USER=ubuntu
 fi
-
-# Install tools for testing
-apk add \
-  aws-cli \
-  curl \
-  jq \
-  openssh-client
 
 # Setup SSH Key
 mkdir -p /root/.ssh
