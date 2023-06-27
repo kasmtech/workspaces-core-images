@@ -101,7 +101,7 @@ test_multi:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale-nano
+    - aws-autoscale
   parallel:
     matrix:
       - ARCH: [ "x86_64", "aarch64" ]
@@ -120,7 +120,7 @@ test_single:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale-nano
+    - aws-autoscale
   parallel:
     matrix:
       - BUILD_META: *SINGLE_ARCH_BUILDS
