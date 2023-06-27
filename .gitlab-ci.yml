@@ -36,7 +36,7 @@ before_script:
   - "rockylinux|9|rockylinux:9|bg_rocky.png|rockylinux9|dockerfile-kasm-core-oracle"
   - "almalinux|8|almalinux:8|bg_almalinux.png|almalinux8|dockerfile-kasm-core-oracle"
   - "almalinux|9|almalinux:9|bg_almalinux.png|almalinux9|dockerfile-kasm-core-oracle"
-  - "opensuse|15|opensuse:15.5|bg_opensuse.png|opensuse|dockerfile-kasm-core-suse"
+  - "opensuse|15|opensuse/leap:15.5|bg_opensuse.png|opensuse|dockerfile-kasm-core-suse"
   - "fedora|37|fedora:37|bg_fedora.png|fedora37|dockerfile-kasm-core-fedora"
   - "fedora|38|fedora:38|bg_fedora.png|fedora38|dockerfile-kasm-core-fedora"
   - "parrotos|5|parrotsec/core:latest|bg_parrotos5.jpg|parrotos5|dockerfile-kasm-core"
