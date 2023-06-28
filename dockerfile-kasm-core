@@ -60,6 +60,10 @@ COPY ./src/ubuntu/install/kasm_vnc $INST_SCRIPTS/kasm_vnc/
 RUN bash $INST_SCRIPTS/kasm_vnc/install_kasm_vnc.sh && rm -rf $INST_SCRIPTS/kasm_vnc/
 COPY ./src/common/install/kasm_vnc/kasmvnc.yaml /etc/kasmvnc/
 
+### Install Kasm Profile Sync
+COPY ./src/ubuntu/install/profile_sync $INST_SCRIPTS/profile_sync/
+RUN bash $INST_SCRIPTS/profile_sync/install_profile_sync.sh
+
 ### Install Kasm Upload Server
 COPY ./src/ubuntu/install/kasm_upload_server $INST_SCRIPTS/kasm_upload_server/
 RUN bash $INST_SCRIPTS/kasm_upload_server/install_kasm_upload_server.sh  && rm -rf $INST_SCRIPTS/kasm_upload_server/

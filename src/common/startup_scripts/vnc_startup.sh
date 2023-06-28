@@ -4,6 +4,10 @@ set -e
 
 no_proxy="localhost,127.0.0.1"
 
+if [ -f /usr/bin/kasm-profile-sync ]; then
+	kasm_profile_sync_found=1
+fi
+
 # Set lang values
 if [ "${LC_ALL}" != "en_US.UTF-8" ]; then
   export LANG=${LC_ALL}
@@ -20,7 +24,11 @@ VNC_VIEW_ONLY_PW=$tmpval
 tmpval=$VNC_PW
 unset VNC_PW
 VNC_PW=$tmpval
+
 BUILD_ARCH=$(uname -p)
+if [ -z ${KASM_PROFILE_CHUNK_SIZE} ]; then
+  KASM_PROFILE_CHUNK_SIZE=100000
+fi
 if [ -z ${DRINODE+x} ]; then
   DRINODE="/dev/dri/renderD128"
 fi
@@ -47,6 +55,70 @@ function help (){
 
 		Fore more information see: https://github.com/ConSol/docker-headless-vnc-container
 		"
+}
+
+trap cleanup SIGINT SIGTERM SIGQUIT SIGHUP ERR
+
+function pull_profile (){
+	if [ ! -z "$KASM_PROFILE_LDR" ]; then
+		if [ -z "$kasm_profile_sync_found" ]; then
+			echo >&2 "Profile sync not available"
+			sleep 3
+			http_proxy="" https_proxy="" curl -k "https://${KASM_API_HOST}:${KASM_API_PORT}/api/set_kasm_session_status?token=${KASM_API_JWT}" -H 'Content-Type: application/json' -d '{"status": "running"}'
+			return
+		fi
+
+		echo "Downloading and unpacking user profile from object storage."
+		set +e
+		http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
+		PROCESS_SYNC_EXIT_CODE=$?
+		set -e
+		if (( PROCESS_SYNC_EXIT_CODE > 1 )); then
+			echo "Profile-sync failed with a non-recoverable error. See server side logs for more details."
+			exit 1
+		fi
+		echo "Profile load complete."
+		# Update the status of the container to running
+		sleep 3
+		http_proxy="" https_proxy="" curl -k "https://${KASM_API_HOST}:${KASM_API_PORT}/api/set_kasm_session_status?token=${KASM_API_JWT}" -H 'Content-Type: application/json' -d '{"status": "running"}'
+
+	fi
+}
+
+function  push_profile(){
+	if [ ! -z "$KASM_PROFILE_LDR" ]; then
+		if [ -z "$kasm_profile_sync_found" ]; then
+			echo >&2 "Profile sync not available"
+			return
+		fi
+
+		echo "Packing and uploading user profile to object storage."
+		/usr/bin/kasm-profile-sync --upload /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
+		echo "Profile upload complete."
+	fi
+}
+
+function profile_size_check(){
+	if [ ! -z "$KASM_PROFILE_SIZE_LIMIT" ]
+	then
+		SIZE_CHECK_FAILED=false
+		while true
+		do
+			sleep 60
+			CURRENT_SIZE=$(du -s $HOME | grep -Po '^\d+')
+			SIZE_LIMIT_MB=$(echo "$KASM_PROFILE_SIZE_LIMIT / 1000" | bc)
+			if [[ $CURRENT_SIZE -gt KASM_PROFILE_SIZE_LIMIT ]]
+			then
+				notify-send "Profile Size Exceeds Limit" "Your home profile has exceeded the size limit of ${SIZE_LIMIT_MB}MB. Changes on your desktop will not be saved between sessions until you reduce the size of your profile." -i /usr/share/icons/ubuntu-mono-dark/apps/22/dropboxstatus-x.svg -t 57000
+				SIZE_CHECK_FAILED=true
+			else
+				if [ "$SIZE_CHECK_FAILED" = true ] ; then
+					SIZE_CHECK_FAILED=false
+					notify-send "Profile Size" "Your home profile size is now under the limit and will be saved when your session is terminated." -i /usr/share/icons/ubuntu-mono-dark/apps/22/dropboxstatus-logo.svg -t 57000
+				fi
+			fi
+		done
+	fi
 }
 
 ## correct forwarding of shutdown signal
@@ -236,6 +308,9 @@ if [[ $1 =~ -h|--help ]]; then
     exit 0
 fi
 
+# Syncronize user-space loaded persistent profiles
+pull_profile
+
 # should also source $STARTUPDIR/generate_container_user
 if [ -f $HOME/.bashrc ]; then
     source $HOME/.bashrc
@@ -246,8 +321,6 @@ if [[ ${KASM_DEBUG:-0} == 1 ]]; then
     export DEBUG=true
     set -x
 fi
-
-trap cleanup SIGINT SIGTERM
 
 ## resolve_vnc_connection
 VNC_IP=$(hostname -i)
@@ -281,6 +354,7 @@ start_audio_out
 start_audio_in
 start_upload
 start_gamepad
+profile_size_check &
 start_webcam
 
 STARTUP_COMPLETE=1
