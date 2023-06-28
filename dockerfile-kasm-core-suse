@@ -38,7 +38,7 @@ ENV HOME=/home/kasm-default-profile \
     LANGUAGE=$LANGUAGE \
     LC_ALL=$LC_ALL \
     PULSE_RUNTIME_PATH=/var/run/pulse \
-    DISTRO=$DISTRO 
+    DISTRO=$DISTRO
 
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
@@ -58,6 +58,10 @@ COPY /src/common/resources/images/$BG_IMG /usr/share/backgrounds/bg_default.png
 COPY ./src/ubuntu/install/kasm_vnc $INST_SCRIPTS/kasm_vnc/
 RUN bash $INST_SCRIPTS/kasm_vnc/install_kasm_vnc.sh && rm -rf $INST_SCRIPTS/kasm_vnc/
 COPY ./src/common/install/kasm_vnc/kasmvnc.yaml /etc/kasmvnc/
+
+### Install Kasm Profile Sync
+COPY ./src/ubuntu/install/profile_sync $INST_SCRIPTS/profile_sync/
+RUN bash $INST_SCRIPTS/profile_sync/install_profile_sync.sh
 
 ### Install Kasm Upload Server
 COPY ./src/ubuntu/install/kasm_upload_server $INST_SCRIPTS/kasm_upload_server/
