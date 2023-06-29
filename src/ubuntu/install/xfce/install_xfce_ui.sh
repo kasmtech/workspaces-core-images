@@ -63,7 +63,8 @@ if [ "${DISTRO}" == "kali" ]; then
     xfce4-genmon-plugin \
     xfce4-screenshooter \
     xfce4-taskmanager \
-    xfce4-whiskermenu-plugin
+    xfce4-whiskermenu-plugin \
+    xfce4-notifyd
 elif [[ "$DISTRO" = @(ubuntu|debian) ]]; then
   apt-get install -y \
     dbus-x11 \
