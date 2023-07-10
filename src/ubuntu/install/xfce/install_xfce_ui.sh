@@ -96,6 +96,7 @@ elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   disable_epel_nss_wrapper_that_breaks_firefox
   yum groupinstall xfce -y
   yum install -y \
+    gvfs \
     wmctrl \
     xclip \
     xfce4-notifyd \
@@ -104,6 +105,7 @@ elif [ "$DISTRO" = "oracle8" ]; then
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   dnf group install xfce -y
   dnf install -y \
+    gvfs \
     wmctrl \
     xclip \
     xfce4-notifyd \
@@ -115,6 +117,7 @@ elif [ "$DISTRO" = "oracle9" ]; then
   dnf group install xfce -y -x oracle-backgrounds
   dnf install -y \
     dbus-x11 \
+    gvfs \
     wmctrl \
     xclip \
     xfce4-notifyd \
@@ -124,6 +127,7 @@ elif [[ "$DISTRO" == @(rockylinux9|almalinux9) ]]; then
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
   dnf group install xfce -y
   dnf install -y \
+    gvfs \
     dbus-x11 \
     wmctrl \
     xclip \
@@ -134,6 +138,7 @@ elif [[ "$DISTRO" == @(rockylinux8|almalinux8) ]]; then
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   dnf group install xfce -y
   dnf install -y \
+    gvfs \
     dbus-x11 \
     wmctrl \
     xclip \
@@ -142,6 +147,7 @@ elif [[ "$DISTRO" == @(rockylinux8|almalinux8) ]]; then
 elif [ "$DISTRO" = "opensuse" ]; then
   zypper install -yn -t pattern xfce
   zypper install -yn \
+    gvfs \
     xclip \
     xfce4-notifyd \
     xfce4-terminal \
@@ -149,6 +155,7 @@ elif [ "$DISTRO" = "opensuse" ]; then
 elif [[ "$DISTRO" = @(fedora37|fedora38) ]]; then
   dnf group install xfce -y
   dnf install -y \
+    gvfs \
     wmctrl \
     xclip \
     xfce4-notifyd \
@@ -159,6 +166,7 @@ elif [ "$DISTRO" = "alpine" ]; then
     faenza-icon-theme \
     faenza-icon-theme-xfce4-appfinder \
     faenza-icon-theme-xfce4-panel \
+    gvfs \
     mesa \
     mesa-dri-gallium \
     mesa-gl \

@@ -116,6 +116,10 @@ RUN bash $STARTUPDIR/set_user_permission.sh $STARTUPDIR $HOME && \
 COPY ./src/ubuntu/install/extra $INST_SCRIPTS/extra/
 RUN bash $INST_SCRIPTS/extra/$EXTRA_SH  && rm -rf $INST_SCRIPTS/extra/
 
+### Custom Folder Emblems
+COPY ./src/ubuntu/install/emblems $INST_SCRIPTS/emblems/
+RUN bash $INST_SCRIPTS/emblems/install_emblems.sh && rm -rf $INST_SCRIPTS/emblems/
+
 ### Create user and home directory for base images that don't already define it
 RUN (groupadd -g 1000 kasm-user \
     && useradd -M -u 1000 -g 1000 kasm-user \
