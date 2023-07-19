@@ -32,6 +32,7 @@ ARG DISTRO=fedora37
 ARG LANG='en_US.UTF-8'
 ARG LANGUAGE='en_US:en'
 ARG LC_ALL='en_US.UTF-8'
+ARG TZ='Etc/UTC'
 ENV HOME=/home/kasm-default-profile \
     TERM=xterm \
     STARTUPDIR=/dockerstartup \
@@ -41,6 +42,7 @@ ENV HOME=/home/kasm-default-profile \
     LANG=$LANG \
     LANGUAGE=$LANGUAGE \
     LC_ALL=$LC_ALL \
+    TZ=$TZ \
     DISTRO=$DISTRO
 
 WORKDIR $HOME
@@ -182,6 +184,7 @@ ARG LANGUAGE='en_US:en'
 ARG LC_ALL='en_US.UTF-8'
 ARG START_PULSEAUDIO=1
 ARG START_XFCE4=1
+ARG TZ='Etc/UTC'
 ENV AUDIO_PORT=4901 \
     DISPLAY=:1 \
     DISTRO=$DISTRO \
@@ -212,7 +215,8 @@ ENV AUDIO_PORT=4901 \
     VNC_PW=vncpassword \
     VNC_RESOLUTION=1280x1024 \
     VNC_RESOLUTION=1280x720 \
-    VNC_VIEW_ONLY_PW=vncviewonlypassword
+    VNC_VIEW_ONLY_PW=vncviewonlypassword \
+    TZ=$TZ
 
 ### Ports and user
 EXPOSE $VNC_PORT \
