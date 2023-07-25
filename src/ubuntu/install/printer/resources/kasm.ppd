@@ -1,0 +1,21 @@
+*PPD-Adobe: "4.3"
+*FormatVersion:	"4.3"
+*FileVersion:	"1.1"
+*LanguageVersion: English
+*LanguageEncoding: ISOLatin1
+*PCFileName:	"kasm.PPD"
+*Manufacturer:	"Kasm"
+*Product:	"(CUPS v1.1)"
+*ModelName:     "Kasm Virtual Printer"
+*ShortNickName: "Kasm Virtual Printer"
+*NickName:      "Kasm Virtual Printer (no options)"
+*1284DeviceID:  "MFG:Kasm;MDL:Kasm Virtual Printer;DES:Kasm Virtual Printer Printer;CLS:PRINTER;CMD:POSTSCRIPT;"
+*% cupsFilter:    "application/vnd.cups-postscript 0 pstitleiconv"
+*PSVersion:	"(2017.000) 0"
+*LanguageLevel:	"2"
+*ColorDevice:	True
+*DefaultColorSpace: RGB
+*FileSystem:	False
+*Throughput:	"8"
+*LandscapeOrientation: Plus90
+*TTRasterizer:	Type42

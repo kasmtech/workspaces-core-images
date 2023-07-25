@@ -91,6 +91,12 @@ RUN bash $INST_SCRIPTS/gamepad/install_gamepad.sh && rm -rf $INST_SCRIPTS/gamepa
 COPY ./src/ubuntu/install/webcam $INST_SCRIPTS/webcam/
 RUN bash $INST_SCRIPTS/webcam/install_webcam.sh && rm -rf $INST_SCRIPTS/webcam/
 
+### Install Printer
+COPY ./src/ubuntu/install/printer $INST_SCRIPTS/printer/
+COPY ./src/ubuntu/install/printer/start_cups.sh /etc/cups/start_cups.sh
+RUN bash $INST_SCRIPTS/printer/install_printer.sh && rm -rf $INST_SCRIPTS/printer
+COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
+
 ### Copy built Squid
 COPY --from=squid_builder /usr/local/squid /usr/local/squid
 

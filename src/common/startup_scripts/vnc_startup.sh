@@ -145,6 +145,11 @@ function start_kasmvnc (){
 	chmod +x $HOME/.vnc/xstartup
 
 	VNCOPTIONS="$VNCOPTIONS -select-de manual"
+
+	if [[ ${KASM_SVC_PRINTER:-1} == 1 ]]; then
+		VNCOPTIONS="$VNCOPTIONS -UnixRelay printer:/tmp/printer"
+	fi
+
 	if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
 		LD_PRELOAD=/lib/aarch64-linux-gnu/libgcc_s.so.1 vncserver $DISPLAY $KASMVNC_HW3D -drinode $DRINODE -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION -websocketPort $NO_VNC_PORT -httpd ${KASM_VNC_PATH}/www -sslOnly -FrameRate=$MAX_FRAME_RATE -interface 0.0.0.0 -BlacklistThreshold=0 -FreeKeyMappings $VNCOPTIONS $KASM_SVC_SEND_CUT_TEXT $KASM_SVC_ACCEPT_CUT_TEXT
 	else
@@ -288,6 +293,24 @@ function start_webcam (){
 	fi
 }
 
+function start_printer (){
+		if [[ ${KASM_SVC_PRINTER:-1} == 1 ]]; then
+			echo 'Starting printer service'
+            if [[ $DEBUG == true ]]; then
+			    $STARTUPDIR/printer/kasm_printer_service --debug --directory $HOME/PDF --relay /tmp/printer
+		    else
+			    $STARTUPDIR/printer/kasm_printer_service --directory $HOME/PDF --relay /tmp/printer
+		    fi
+
+		KASM_PROCS['kasm_printer']=$!
+
+		if [[ $DEBUG == true ]]; then
+			echo -e "\n------------------ Started Printer Service  ----------------------------"
+			echo "Kasm Printer PID: ${KASM_PROCS['kasm_printer']}";
+		fi
+	fi
+}
+
 function custom_startup (){
 	custom_startup_script=/dockerstartup/custom_startup.sh
 	if [ -f "$custom_startup_script" ]; then
@@ -356,6 +379,7 @@ start_upload
 start_gamepad
 profile_size_check &
 start_webcam
+start_printer
 
 STARTUP_COMPLETE=1
 
