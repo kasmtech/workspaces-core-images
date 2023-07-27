@@ -62,7 +62,7 @@ if [ ! -z "$KASM_PROFILE_LDR" ]; then
         echo >&2 "Profile sync not available"
     else
         echo "Packing and uploading user profile to object storage."
-        http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --upload /home/kasm-user --insecure --filter "${KASM_PROFILE_FILTER}" --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} --bigfiles skip
+        http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --upload /home/kasm-user --insecure --filter "${KASM_PROFILE_FILTER}" --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
         echo "Profile upload complete."
     fi
 fi
