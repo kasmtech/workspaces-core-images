@@ -85,19 +85,6 @@ function pull_profile (){
 	fi
 }
 
-function  push_profile(){
-	if [ ! -z "$KASM_PROFILE_LDR" ]; then
-		if [ -z "$kasm_profile_sync_found" ]; then
-			echo >&2 "Profile sync not available"
-			return
-		fi
-
-		echo "Packing and uploading user profile to object storage."
-		/usr/bin/kasm-profile-sync --upload /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
-		echo "Profile upload complete."
-	fi
-}
-
 function profile_size_check(){
 	if [ ! -z "$KASM_PROFILE_SIZE_LIMIT" ]
 	then
