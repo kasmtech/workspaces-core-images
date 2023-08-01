@@ -297,9 +297,9 @@ function start_printer (){
 		if [[ ${KASM_SVC_PRINTER:-1} == 1 ]]; then
 			echo 'Starting printer service'
             if [[ $DEBUG == true ]]; then
-			    $STARTUPDIR/printer/kasm_printer_service --debug --directory $HOME/PDF --relay /tmp/printer
+			    $STARTUPDIR/printer/kasm_printer_service --debug --directory $HOME/PDF --relay /tmp/printer &
 		    else
-			    $STARTUPDIR/printer/kasm_printer_service --directory $HOME/PDF --relay /tmp/printer
+			    $STARTUPDIR/printer/kasm_printer_service --directory $HOME/PDF --relay /tmp/printer &
 		    fi
 
 		KASM_PROCS['kasm_printer']=$!
