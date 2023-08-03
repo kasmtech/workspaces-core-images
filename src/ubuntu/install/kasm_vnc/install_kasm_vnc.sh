@@ -59,7 +59,7 @@ elif [[ "${DISTRO}" == "opensuse" ]] ; then
     fi
 elif [[ "${DISTRO}" == "fedora37" ]] ; then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyseven_${KASM_VER_NAME_PART}_x86_64.rpm" 
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyseven_${KASM_VER_NAME_PART}_x86_64.rpm"
     else
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyseven_${KASM_VER_NAME_PART}_aarch64.rpm"
     fi
@@ -152,6 +152,8 @@ elif [[ "${DISTRO}" == "alpine" ]] ; then
         perl-switch \
         perl-try-tiny \
         perl-yaml-tiny \
+        perl-datetime \
+        perl-datetime-timezone \
         pixman \
         py3-xdg \
         python3 \
