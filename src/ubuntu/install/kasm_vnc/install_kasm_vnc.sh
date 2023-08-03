@@ -17,8 +17,8 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="6a73d1cb49f5028a340c1dfe5a35cb390aec31bd"
-BRANCH="bugfix_KASM-4765-fix-opensuse-datetime-dependency" # just use 'release' for a release branch
+COMMIT_ID="fa884809145e0ba6e5e1da49887a82b5cab0a1d1"
+BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.1.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
