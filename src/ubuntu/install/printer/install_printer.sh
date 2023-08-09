@@ -5,17 +5,17 @@ set -e
 echo $DISTRO
 
 if [ "${DISTRO}" == "oracle7" ] || [ "${DISTRO}" == "centos" ]; then
-  yum install -y cups cups-pdf
+  yum install -y cups cups-client cups-pdf
 elif [[ "${DISTRO}" == @(almalinux8|almalinux9|oracle8|oracle9|rockylinux8|rockylinux9|fedora37|fedora38) ]]; then
-  dnf install -y cups cups-pdf
+  dnf install -y cups cups-client cups-pdf
 elif [ "${DISTRO}" == "opensuse" ]; then
-  zypper install -y cups cups-pdf
+  zypper install -y cups cups-client cups-pdf
 elif [ "${DISTRO}" == "alpine" ]; then
   echo '@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
-  apk add --no-cache cups cups-pdf@testing
+  apk add --no-cache cups cups-client cups-pdf@testing
 else
   apt-get update
-  apt-get install -y cups cups-pdf
+  apt-get install -y cups cups-client cups-pdf
 fi
 
 COMMIT_ID="049908cfa22a536a1ea9c2e0d42528711b013625"

@@ -18,7 +18,7 @@ cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
 COMMIT_ID="fa884809145e0ba6e5e1da49887a82b5cab0a1d1"
-BRANCH="release" # just use 'release' for a release branch
+BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.1.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
