@@ -91,6 +91,12 @@ RUN bash $INST_SCRIPTS/gamepad/install_gamepad.sh && rm -rf $INST_SCRIPTS/gamepa
 COPY ./src/ubuntu/install/webcam $INST_SCRIPTS/webcam/
 RUN bash $INST_SCRIPTS/webcam/install_webcam.sh && rm -rf $INST_SCRIPTS/webcam/
 
+### Install Printer
+COPY ./src/ubuntu/install/printer $INST_SCRIPTS/printer/
+COPY ./src/ubuntu/install/printer/start_cups.sh /etc/cups/start_cups.sh
+RUN bash $INST_SCRIPTS/printer/install_printer.sh && rm -rf $INST_SCRIPTS/printer
+COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
+
 ### Copy built Squid
 COPY --from=squid_builder /usr/local/squid /usr/local/squid
 
@@ -149,6 +155,7 @@ RUN touch $STARTUPDIR/wm.log \
     && chmod 755 $STARTUPDIR/gamepad/kasm_gamepad_server \
     && chmod 755 $STARTUPDIR/webcam/kasm_webcam_server \
     && chmod 755 $STARTUPDIR/generate_container_user \
+    && chmod 755 $STARTUPDIR/printer/kasm_printer_service \
     && chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux \
     && rm -rf $STARTUPDIR/install \
     && mkdir -p $STARTUPDIR/kasmrx/Downloads \

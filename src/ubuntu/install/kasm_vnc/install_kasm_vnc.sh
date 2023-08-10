@@ -147,6 +147,7 @@ elif [[ "${DISTRO}" == "alpine" ]] ; then
         mesa-gbm \
         pciutils-libs \
         perl \
+        perl-datetime \
         perl-hash-merge-simple \
         perl-list-moreutils \
         perl-switch \
