@@ -18,8 +18,8 @@ else
   apt-get install -y cups cups-client cups-pdf
 fi
 
-COMMIT_ID="049908cfa22a536a1ea9c2e0d42528711b013625"
-BRANCH="feature_KASM-4608_kasm_printing"
+COMMIT_ID="225c06d9a5c63819716b5d4815cbea10b72a3199"
+BRANCH="develop"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
