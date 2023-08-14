@@ -4,7 +4,7 @@ set -ex
 {
     IP=$(ip route get 1.1.1.1 | grep -oP "src \\K\\S+")
 
-    mkdir /tmp/working_certs
+    mkdir -p /tmp/working_certs
     cd /tmp/working_certs
 
     if [ -f /etc/centos-release ]; then
@@ -29,11 +29,18 @@ set -ex
         CERT_FILE=/usr/local/share/ca-certificates/squid.crt
     fi
     CERT_NAME="Squid Root CA"
-    openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -extensions v3_ca -subj "/C=US/ST=CA/O=Kasm Technologies/CN=kasm.localhost.net" -keyout myCA.pem  -out myCA.pem
-    openssl x509 -in myCA.pem -outform DER -out myCA.der
-    openssl x509 -in myCA.pem -outform DER -out myCA.der
-    cp myCA.pem  ${CERT_FILE}
-    cp myCA.pem  /usr/local/squid/etc/ssl_cert/squid.pem
+
+    if [ ! -f "/usr/local/squid/etc/ssl_cert/squid.pem" ]; then
+        echo "Generating Squid Cert"
+        openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 -extensions v3_ca -subj "/C=US/ST=CA/O=Kasm Technologies/CN=kasm.localhost.net" -keyout myCA.pem  -out myCA.pem
+        openssl x509 -in myCA.pem -outform DER -out myCA.der
+        openssl x509 -in myCA.pem -outform DER -out myCA.der
+        cp myCA.pem  ${CERT_FILE}
+        cp myCA.pem  /usr/local/squid/etc/ssl_cert/squid.pem
+    else
+        cp /usr/local/squid/etc/ssl_cert/squid.pem ${CERT_FILE}
+    fi
+
     if [[ "${DISTRO}" == @(centos|oracle7|fedora) ]]; then
         update-ca-trust
     else
