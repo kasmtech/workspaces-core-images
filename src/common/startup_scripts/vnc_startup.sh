@@ -437,6 +437,11 @@ do
 					# TODO: Needs work in python project to support auto restart
 					start_webcam
 					;;
+				kasm_printer)
+					echo "Printer Service Failed"
+					# TODO: Needs work in python project to support auto restart
+					start_printer
+					;;
 				custom_script)
 					echo "The custom startup script exited."
 					# custom startup scripts track the target process on their own, they should not exit

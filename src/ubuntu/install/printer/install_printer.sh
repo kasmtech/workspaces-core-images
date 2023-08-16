@@ -18,7 +18,11 @@ else
   apt-get install -y cups cups-client cups-pdf
 fi
 
-COMMIT_ID="225c06d9a5c63819716b5d4815cbea10b72a3199"
+# change the default path where pdfs are saved
+# to the one watched by the printer service
+sed -i -r -e "s:^(Out\s).*:\1/home/kasm-user/PDF:" /etc/cups/cups-pdf.conf
+
+COMMIT_ID="ea156adceb0161d6aeb7eeb5371dc09fc5807867"
 BRANCH="develop"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 

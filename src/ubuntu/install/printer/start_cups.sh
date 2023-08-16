@@ -9,6 +9,7 @@ set -ex
 
     echo "Creating a virtual printer: $PRINTER_NAME"
     lpadmin -p $PRINTER_NAME -E -v cups-pdf:/ -P /etc/cups/ppd/kasm.ppd
+    lpadmin -p $PRINTER_NAME -o print-color-mode-default=color
 
     echo "Done!"
 } 2>&1 | tee /tmp/start_cups.log
