@@ -6,12 +6,10 @@ ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 # intall squid
 SQUID_COMMIT='1149fc830c7edcb383eec390cce2beba16befde5'
 if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) ; then
-  apt-get update
-  apt-get install -y squid-openssl
-  mkdir -p /usr/local/squid/sbin
-  mkdir -p /usr/local/squid/var/logs/
-  ln -s /usr/lib/squid/ /usr/local/squid/libexec
-  ln -s /usr/sbin/squid /usr/local/squid/sbin/squid
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
+  wget https://kasm-ci.s3.amazonaws.com/libssl1.1.${ARCH}.deb
+  dpkg -i libssl1.1.${ARCH}.deb
+  rm -f libssl1.1.${ARCH}.deb
 elif [[ "${DISTRO}" != @(centos|oracle7|oracle8|oracle9|opensuse|fedora37|fedora38|rockylinux9|rockylinux8|almalinux9|almalinux8|alpine) ]] ; then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
 fi
