@@ -76,8 +76,8 @@ download_and_symlink() {
 }
 
 ARCH=$(arch)
-BRANCH="feature_KASM-5013_support_put"
-COMMIT_ID="a941651fd3fc081361b25e63fb363c1e12747888"
+BRANCH="release_1.0.1"
+COMMIT_ID="a2ed6b21848b835c5b33524b90894b8b4d6fed52"
 
 convert_local_distro_to_profile_sync_distro
 check_distro_is_supported
