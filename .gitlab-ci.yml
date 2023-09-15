@@ -1,9 +1,9 @@
 ############
 # Settings #
 ############
-image: docker
+image: docker:24.0.6
 services:
-  - docker:dind
+  - docker:24.0.6-dind
 stages:
   - readme
   - revert
@@ -11,6 +11,8 @@ stages:
   - test
   - manifest
 variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   KASM_RELEASE: "1.14.0"
   TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.14.0.7f3582.tar.gz"
@@ -66,7 +68,7 @@ build_multi_containers:
   retry: 1
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
         BUILD_META: *MULTI_ARCH_BUILDS
 
 build_single_containers:
@@ -81,7 +83,7 @@ build_single_containers:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
   retry: 1
   parallel:
     matrix:
@@ -103,7 +105,7 @@ test_multi:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale-nano
+    - oci-fixed-amd
   retry: 1
   parallel:
     matrix:
@@ -123,7 +125,7 @@ test_single:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale-nano
+    - oci-fixed-amd
   retry: 1
   parallel:
     matrix:
@@ -145,7 +147,7 @@ manifest_multi:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale-nano
+    - oci-fixed-amd
   parallel:
     matrix:
       - BUILD_META: *MULTI_ARCH_BUILDS
@@ -163,7 +165,7 @@ manifest_single:
       - $DOCKERHUB_REVERT
       - $REVERT_IS_ROLLING
   tags:
-    - aws-autoscale-nano
+    - oci-fixed-amd
   parallel:
     matrix:
       - BUILD_META: *SINGLE_ARCH_BUILDS
@@ -183,7 +185,7 @@ update_readmes_multi:
       - $README_USERNAME
       - $README_PASSWORD
   tags:
-    - aws-autoscale-nano
+    - oci-fixed-amd
   parallel:
     matrix:
       - BUILD_META: *MULTI_ARCH_BUILDS
@@ -198,7 +200,7 @@ update_readmes_single:
       - $README_USERNAME
       - $README_PASSWORD
   tags:
-    - aws-autoscale-nano
+    - oci-fixed-amd
   parallel:
     matrix:
       - BUILD_META: *SINGLE_ARCH_BUILDS
