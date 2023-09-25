@@ -1,8 +1,8 @@
 #! /bin/bash
 
 ## Parse input ##
-NAME1=$(echo $1| awk -F'|' '{print $1}')
-NAME2=$(echo $1| awk -F'|' '{print $2}')
+NAME1=$1
+NAME2=$2
 
 ## Run readme updater ##
 docker run -v $PWD/docs:/docs \

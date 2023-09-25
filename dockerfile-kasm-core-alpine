@@ -16,6 +16,7 @@ RUN ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
     wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/f2b6ac26e7f91240e57d6d6e1dad4cc2704445ee/output/kasm-squid-builder_alpine_${ARCH}.tar.gz"
 RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
+### Layer from squid changes
 FROM install_tools as base_layer
 
 ### Environment config

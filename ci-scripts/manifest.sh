@@ -5,11 +5,11 @@ FAILED="false"
 
 # Ingest cli variables
 ## Parse input ##
-NAME1=$(echo $1| awk -F'|' '{print $1}')
-NAME2=$(echo $1| awk -F'|' '{print $2}')
-TYPE=$2
-REVERT_PIPELINE_ID=$3
-IS_ROLLING=$4
+NAME1=$1
+NAME2=$2
+TYPE=$3
+REVERT_PIPELINE_ID=$4
+IS_ROLLING=$5
 PULL_BRANCH=${SANITIZED_BRANCH}
 
 # Determine if this is a private or public build

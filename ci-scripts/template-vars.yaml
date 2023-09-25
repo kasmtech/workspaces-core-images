@@ -1,0 +1,244 @@
+files: &UNIVERSAL_CHANGE_FILES
+  - src/common/**
+  - src/ubuntu/install/audio/**
+  - src/ubuntu/install/audio_input/**
+  - src/ubuntu/install/cleanup/**
+  - src/ubuntu/install/cursors/**
+  - src/ubuntu/install/emblems/**
+  - src/ubuntu/install/fonts/**
+  - src/ubuntu/install/gamepad/**
+  - src/ubuntu/install/kasm_upload_server/**
+  - src/ubuntu/install/kasm_vnc/**
+  - src/ubuntu/install/langpacks/**
+  - src/ubuntu/install/maximize_script/**
+  - src/ubuntu/install/package_rules/**
+  - src/ubuntu/install/printer/**
+  - src/ubuntu/install/profile_sync/**
+  - src/ubuntu/install/squid/**
+  - src/ubuntu/install/tools/**
+  - src/ubuntu/install/webcam/**
+  - ci-scripts/**
+  - .gitlab-ci.yml
+
+multiImages:
+  - name1: ubuntu
+    name2: bionic
+    base: ubuntu:18.04
+    bg: bg_bionic.png
+    distro: ubuntu
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/ubuntu/xfce/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: ubuntu
+    name2: focal
+    base: ubuntu:20.04
+    bg: bg_focal.png
+    distro: ubuntu
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/ubuntu/xfce/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: ubuntu
+    name2: jammy
+    base: ubuntu:22.04
+    bg: bg_jammy.png
+    distro: ubuntu
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/ubuntu/xfce/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: debian
+    name2: bullseye
+    base: debian:bullseye-slim
+    bg: bg_debian.svg
+    distro: debian
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/debian/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: debian
+    name2: bookworm
+    base: debian:bookworm-slim
+    bg: bg_debian.svg
+    distro: debian
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/debian/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: kali
+    name2: rolling
+    base: kalilinux/kali-rolling:latest
+    bg: bg_kasm.png
+    distro: kali
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/kali/**
+      - src/ubuntu/install/extra/kali.sh
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: oracle
+    name2: 8
+    base: oraclelinux:8
+    bg: bg_oracle.png
+    distro: oracle8
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/oracle8/**
+      - src/ubuntu/sysbox/**
+  - name1: oracle
+    name2: 9
+    base: oraclelinux:9
+    bg: bg_oracle.png
+    distro: oracle9
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/oracle9/**
+      - src/ubuntu/sysbox/**
+  - name1: rockylinux
+    name2: 8
+    base: rockylinux:8
+    bg: bg_rocky.png
+    distro: rockylinux8
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/rockylinux8/**
+      - src/ubuntu/sysbox/**
+  - name1: rockylinux
+    name2: 9
+    base: rockylinux:9
+    bg: bg_rocky.png
+    distro: rockylinux9
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/rockylinux9/**
+      - src/ubuntu/sysbox/**
+  - name1: almalinux
+    name2: 8
+    base: almalinux:8
+    bg: bg_almalinux.png
+    distro: almalinux8
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/almalinux8/**
+      - src/ubuntu/sysbox/**
+  - name1: almalinux
+    name2: 9
+    base: almalinux:9
+    bg: bg_almalinux.png
+    distro: almalinux9
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/almalinux9/**
+      - src/ubuntu/sysbox/**
+  - name1: opensuse
+    name2: 15
+    base: opensuse/leap:15.5
+    bg: bg_opensuse.png
+    distro: opensuse
+    dockerfile: dockerfile-kasm-core-suse
+    changeFiles:
+      - dockerfile-kasm-core-suse
+      - src/opensuse/**
+      - src/ubuntu/sysbox/**
+  - name1: fedora
+    name2: 37
+    base: fedora:37
+    bg: bg_fedora.png
+    distro: fedora37
+    dockerfile: dockerfile-kasm-core-fedora
+    changeFiles:
+      - dockerfile-kasm-core-fedora
+      - src/fedora37/**
+  - name1: fedora
+    name2: 38
+    base: fedora:38
+    bg: bg_fedora.png
+    distro: fedora38
+    dockerfile: dockerfile-kasm-core-fedora
+    changeFiles:
+      - dockerfile-kasm-core-fedora
+      - src/fedora37/**
+  - name1: parrotos
+    name2: 5
+    base: parrotsec/core:latest
+    bg: bg_parrotos5.jpg
+    distro: parrotos5
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/parrotos5/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: alpine
+    name2: 317
+    base: alpine:3.17
+    bg: bg_alpine.png
+    distro: alpine
+    dockerfile: dockerfile-kasm-core-alpine
+    changeFiles:
+      - dockerfile-kasm-core-alpine
+      - src/alpine/**
+  - name1: alpine
+    name2: 318
+    base: alpine:3.18
+    bg: bg_alpine.png
+    distro: alpine
+    dockerfile: dockerfile-kasm-core-alpine
+    changeFiles:
+      - dockerfile-kasm-core-alpine
+      - src/alpine/**
+singleImages:
+  - name1: cuda
+    name2: focal
+    base: nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04
+    bg: bg_focal.png
+    distro: ubuntu
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/ubuntu/xfce/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+  - name1: centos
+    name2: 7
+    base: centos:centos7
+    bg: bg_centos.png
+    distro: centos
+    dockerfile: dockerfile-kasm-core-centos
+    changeFiles:
+      - dockerfile-kasm-core-centos
+      - src/centos/**
+  - name1: oracle
+    name2: 7
+    base: oraclelinux:7
+    bg: bg_oracle.png
+    distro: oracle7
+    dockerfile: dockerfile-kasm-core-oracle
+    changeFiles:
+      - dockerfile-kasm-core-oracle
+      - src/oracle7/**

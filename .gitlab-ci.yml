@@ -5,227 +5,31 @@ image: docker:24.0.6
 services:
   - docker:24.0.6-dind
 stages:
-  - readme
-  - revert
-  - build
-  - test
-  - manifest
+  - template
+  - run
 variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   KASM_RELEASE: "1.14.0"
   TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.14.0.7f3582.tar.gz"
 before_script:
-  - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
   - export SANITIZED_BRANCH="$(echo $CI_COMMIT_REF_NAME | sed -r 's#^release/##' | sed 's/\//_/g')"
 
-################
-# YAML anchors #
-################
-
-# Metadata format - name-part1|name-part2|baseimage|wallpaper|distro|dockerfile
-.MULTI_ARCH_BUILDS: &MULTI_ARCH_BUILDS
-  - "ubuntu|bionic|ubuntu:18.04|bg_bionic.png|ubuntu|dockerfile-kasm-core"
-  - "ubuntu|focal|ubuntu:20.04|bg_focal.png|ubuntu|dockerfile-kasm-core"
-  - "ubuntu|jammy|ubuntu:22.04|bg_jammy.png|ubuntu|dockerfile-kasm-core"
-  - "debian|bullseye|debian:bullseye-slim|bg_debian.svg|debian|dockerfile-kasm-core"
-  - "debian|bookworm|debian:bookworm-slim|bg_debian.svg|debian|dockerfile-kasm-core"
-  - "kali|rolling|kalilinux/kali-rolling:latest|bg_kasm.png|kali|dockerfile-kasm-core"
-  - "oracle|8|oraclelinux:8|bg_oracle.png|oracle8|dockerfile-kasm-core-oracle"
-  - "oracle|9|oraclelinux:9|bg_oracle.png|oracle9|dockerfile-kasm-core-oracle"
-  - "rockylinux|8|rockylinux:8|bg_rocky.png|rockylinux8|dockerfile-kasm-core-oracle"
-  - "rockylinux|9|rockylinux:9|bg_rocky.png|rockylinux9|dockerfile-kasm-core-oracle"
-  - "almalinux|8|almalinux:8|bg_almalinux.png|almalinux8|dockerfile-kasm-core-oracle"
-  - "almalinux|9|almalinux:9|bg_almalinux.png|almalinux9|dockerfile-kasm-core-oracle"
-  - "opensuse|15|opensuse/leap:15.5|bg_opensuse.png|opensuse|dockerfile-kasm-core-suse"
-  - "fedora|37|fedora:37|bg_fedora.png|fedora37|dockerfile-kasm-core-fedora"
-  - "fedora|38|fedora:38|bg_fedora.png|fedora38|dockerfile-kasm-core-fedora"
-  - "parrotos|5|parrotsec/core:latest|bg_parrotos5.jpg|parrotos5|dockerfile-kasm-core"
-  - "alpine|317|alpine:3.17|bg_alpine.png|alpine|dockerfile-kasm-core-alpine"
-  - "alpine|318|alpine:3.18|bg_alpine.png|alpine|dockerfile-kasm-core-alpine"
-.SINGLE_ARCH_BUILDS: &SINGLE_ARCH_BUILDS
-  - "cuda|focal|nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04|bg_focal.png|ubuntu|dockerfile-kasm-core"
-  - "centos|7|centos:centos7|bg_centos.png|centos|dockerfile-kasm-core-centos"
-  - "oracle|7|oraclelinux:7|bg_oracle.png|oracle7|dockerfile-kasm-core-oracle"
-
-###############################################
-# Build Containers and push to cache endpoint #
-###############################################
-build_multi_containers:
-  stage: build
+#######################
+# Build from template #
+#######################
+template:
+  stage: template
   script:
-    - apk add bash
-    - bash ci-scripts/build.sh "${BUILD_META}"
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  tags:
-    - ${TAG}
-  retry: 1
-  parallel:
-    matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
-        BUILD_META: *MULTI_ARCH_BUILDS
-
-build_single_containers:
-  stage: build
-  script:
-    - apk add bash
-    - bash ci-scripts/build.sh "${BUILD_META}"
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
+    - apk add py3-jinja2 py3-yaml
+    - cd ci-scripts
+    - python3 template-gitlab.py
   tags:
     - oci-fixed-amd
-  retry: 1
-  parallel:
-    matrix:
-      - BUILD_META: *SINGLE_ARCH_BUILDS
-
-######################################
-# Test containers and upload results #
-######################################
-test_multi:
-  stage: test
-  when: always
-  script:
-    - apk add bash
-    - bash ci-scripts/test.sh "${BUILD_META}" "${ARCH}" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  tags:
-    - oci-fixed-amd
-  retry: 1
-  parallel:
-    matrix:
-      - ARCH: [ "x86_64", "aarch64" ]
-        BUILD_META: *MULTI_ARCH_BUILDS
-
-test_single:
-  stage: test
-  when: always
-  script:
-    - apk add bash
-    - bash ci-scripts/test.sh "${BUILD_META}" "x86_64" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  tags:
-    - oci-fixed-amd
-  retry: 1
-  parallel:
-    matrix:
-      - BUILD_META: *SINGLE_ARCH_BUILDS
-
-############################################
-# Manifest Containers if their test passed #
-############################################
-manifest_multi:
-  stage: manifest
-  when: always
-  script:
-    - apk add bash
-    - bash ci-scripts/manifest.sh "${BUILD_META}" "multi"
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  tags:
-    - oci-fixed-amd
-  parallel:
-    matrix:
-      - BUILD_META: *MULTI_ARCH_BUILDS
-
-manifest_single:
-  stage: manifest
-  when: always
-  script:
-    - apk add bash
-    - bash ci-scripts/manifest.sh "${BUILD_META}" "single"
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  tags:
-    - oci-fixed-amd
-  parallel:
-    matrix:
-      - BUILD_META: *SINGLE_ARCH_BUILDS
-
-####################
-# Helper Functions #
-####################
-
-## Update Readmes ##
-update_readmes_multi:
-  stage: readme
-  script:
-    - apk add bash
-    - bash ci-scripts/readme.sh "${BUILD_META}"
-  only:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-  tags:
-    - oci-fixed-amd
-  parallel:
-    matrix:
-      - BUILD_META: *MULTI_ARCH_BUILDS
-
-update_readmes_single:
-  stage: readme
-  script:
-    - apk add bash
-    - bash ci-scripts/readme.sh "${BUILD_META}"
-  only:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-  tags:
-    - oci-fixed-amd
-  parallel:
-    matrix:
-      - BUILD_META: *SINGLE_ARCH_BUILDS
-
-## Revert Images to specific build id ##
-dockerhub_revert_multi:
-  stage: revert
-  script:
-    - /bin/bash ci-scripts/manifest.sh "${BUILD_META}" "multi" "${DOCKERHUB_REVERT}" "${REVERT_IS_ROLLING}"
-  only:
-    variables:
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  parallel:
-    matrix:
-      - BUILD_META: *MULTI_ARCH_BUILDS
-
-dockerhub_revert_single:
-  stage: revert
-  script:
-    - /bin/bash ci-scripts/manifest.sh "${BUILD_META}" "single" "${DOCKERHUB_REVERT}" "${REVERT_IS_ROLLING}"
-  only:
-    variables:
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
-  parallel:
-    matrix:
-      - BUILD_META: *SINGLE_ARCH_BUILDS
+  artifacts:
+    paths:
+      - gitlab-ci.yml
+pipeline:
+  stage: run
+  trigger:
+    include:
+      - artifact: gitlab-ci.yml
+        job: template
