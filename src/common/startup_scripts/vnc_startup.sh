@@ -70,7 +70,7 @@ function pull_profile (){
 
 		echo "Downloading and unpacking user profile from object storage."
 		set +e
-		http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
+		http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} --verbose
 		PROCESS_SYNC_EXIT_CODE=$?
 		set -e
 		if (( PROCESS_SYNC_EXIT_CODE > 1 )); then
