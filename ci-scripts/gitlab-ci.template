@@ -8,6 +8,7 @@ stages:
   - readme
   - revert
   - build
+  - scan
   - test
   - manifest
 variables:
