@@ -156,6 +156,10 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   tags:
     - oci-fixed-amd
   retry: 1
+  artifacts:
+    reports:
+      junit:
+        - $CI_PROJECT_DIR/trivy-report.xml
   parallel:
     matrix:
       - ARCH: [ "x86_64", "aarch64" ]
@@ -182,6 +186,10 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       - $REVERT_IS_ROLLING
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+  artifacts:
+    reports:
+      junit:
+        - $CI_PROJECT_DIR/trivy-report.xml
   when: on_success
   tags:
     - oci-fixed-amd
