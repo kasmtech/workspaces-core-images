@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -euo pipefail
+
+TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+echo "$TRIVY_VERSION"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+trivy_dir="${SCRIPT_DIR}/trivy"
+rm -rf $trivy_dir
+mkdir $trivy_dir
+cd $trivy_dir
+wget --no-verbose "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -O - | tar -zxvf -
+
+cp "${SCRIPT_DIR}/junit.tpl" "${SCRIPT_DIR}/trivy/contrib/"

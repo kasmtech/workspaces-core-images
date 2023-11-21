@@ -127,6 +127,66 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   retry: 1
 {% endfor %}
 
+######################################
+# Vulnerability Scans                #
+######################################
+{% for IMAGE in multiImages %}
+scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
+  stage: scan
+  when: always
+  script:
+    - apk add bash
+    - (cd ci-scripts && bash download-trivy)
+    - bash ci/scan image ${ORG_NAME}/image-cache-private:$(arch)-core-{{ IMAGE.name1 }}-{{ IMAGE.name2 }}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}
+  {% if FILE_LIMITS %}only:
+    changes:
+      {% for FILE in files %}- {{ FILE }}
+      {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
+      {% endfor %}{% endif %}
+  except:
+    variables:
+      - $README_USERNAME
+      - $README_PASSWORD
+      - $DOCKERHUB_REVERT
+      - $REVERT_IS_ROLLING
+  needs:
+    - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+  when: on_success
+  tags:
+    - oci-fixed-amd
+  retry: 1
+  parallel:
+    matrix:
+      - ARCH: [ "x86_64", "aarch64" ]
+{% endfor %}
+
+{% for IMAGE in singleImages %}
+scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
+  stage: scan
+  when: always
+  script:
+    - apk add bash
+    - (cd ci-scripts && bash download-trivy)
+    - bash ci/scan image ${ORG_NAME}/image-cache-private:x86_64-core-{{ IMAGE.name1 }}-{{ IMAGE.name2 }}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}
+  {% if FILE_LIMITS %}only:
+    changes:
+      {% for FILE in files %}- {{ FILE }}
+      {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
+      {% endfor %}{% endif %}
+  except:
+    variables:
+      - $README_USERNAME
+      - $README_PASSWORD
+      - $DOCKERHUB_REVERT
+      - $REVERT_IS_ROLLING
+  needs:
+    - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+  when: on_success
+  tags:
+    - oci-fixed-amd
+  retry: 1
+{% endfor %}
+
 ############################################
 # Manifest Containers if their test passed #
 ############################################
