@@ -349,10 +349,12 @@ if [[ -f $PASSWD_PATH ]]; then
     echo -e "\n---------  purging existing VNC password settings  ---------"
     rm -f $PASSWD_PATH
 fi
-VNC_PW_HASH=$(python3 -c "import crypt; print(crypt.crypt('${VNC_PW}', '\$5\$kasm\$'));")
-VNC_VIEW_PW_HASH=$(python3 -c "import crypt; print(crypt.crypt('${VNC_VIEW_ONLY_PW}', '\$5\$kasm\$'));")
-echo "kasm_user:${VNC_PW_HASH}:ow" > $PASSWD_PATH
-echo "kasm_viewer:${VNC_VIEW_PW_HASH}:" >> $PASSWD_PATH
+#VNC_PW_HASH=$(python3 -c "import crypt; print(crypt.crypt('${VNC_PW}', '\$5\$kasm\$'));")
+#VNC_VIEW_PW_HASH=$(python3 -c "import crypt; print(crypt.crypt('${VNC_VIEW_ONLY_PW}', '\$5\$kasm\$'));")
+#echo "kasm_user:${VNC_PW_HASH}:ow" > $PASSWD_PATH
+#echo "kasm_viewer:${VNC_VIEW_PW_HASH}:" >> $PASSWD_PATH
+echo -e "${VNC_PW}\n${VNC_PW}\n" | kasmvncpasswd -u kasm_user -wo
+echo -e "${VNC_PW}\n${VNC_PW}\n" | kasmvncpasswd -u kasm_viewer -r
 chmod 600 $PASSWD_PATH
 
 
