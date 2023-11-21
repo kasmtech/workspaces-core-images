@@ -172,8 +172,8 @@ COPY ./src/ubuntu/install/cleanup $INST_SCRIPTS/cleanup/
 RUN bash $INST_SCRIPTS/cleanup/cleanup.sh && rm -rf $INST_SCRIPTS/cleanup/
 
 #### Runtime Stage ####
-FROM scratch
-COPY --from=base_layer / /
+#FROM scratch
+#COPY --from=base_layer / /
 
 ### Labels
 LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
