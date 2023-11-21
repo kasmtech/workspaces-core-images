@@ -2,12 +2,17 @@
 set -ex
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
+if [[ "${ARCH}" == "arm64" ]]; then
+  LIBSSLURL="http://ports.ubuntu.com/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.20_arm64.deb"
+else
+  LIBSSLURL="http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.20_amd64.deb"
+fi
 
 # intall squid
 SQUID_COMMIT='1149fc830c7edcb383eec390cce2beba16befde5'
 if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) ; then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
-  wget https://kasm-ci.s3.amazonaws.com/libssl1.1.${ARCH}.deb
+  wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
   dpkg -i libssl1.1.${ARCH}.deb
   rm -f libssl1.1.${ARCH}.deb
 elif [[ "${DISTRO}" != @(centos|oracle7|oracle8|oracle9|opensuse|fedora37|fedora38|rockylinux9|rockylinux8|almalinux9|almalinux8|alpine) ]] ; then
@@ -39,7 +44,7 @@ elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
 elif [[ "${DISTRO}" == "alpine" ]]; then
   apk add --no-cache openssl1.1-compat
 elif grep -q bookworm /etc/os-release; then
-  wget https://kasm-ci.s3.amazonaws.com/libssl1.1.${ARCH}.deb
+  wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
   dpkg -i libssl1.1.${ARCH}.deb
   rm -f libssl1.1.${ARCH}.deb
 fi
