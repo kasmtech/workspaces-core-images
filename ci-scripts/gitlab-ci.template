@@ -144,17 +144,19 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^release\/.*$/
+      when: always
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+    - when: manual
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   when: on_success
-  rules:
-    - if: ($RUN_VULNERABILITY_SCANS == "true" || $CI_COMMIT_BRANCH == "develop")
   tags:
     - oci-fixed-amd
   retry: 1
@@ -180,12 +182,16 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
-  except:
-    variables:
-      - $README_USERNAME
-      - $README_PASSWORD
-      - $DOCKERHUB_REVERT
-      - $REVERT_IS_ROLLING
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_BRANCH =~ /^release\/.*$/
+      when: always
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+    - when: manual
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   rules:
