@@ -153,6 +153,8 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   when: on_success
+  rules:
+    - if: ($RUN_VULNERABILITY_SCANS == "true" || $CI_COMMIT_BRANCH == "develop")
   tags:
     - oci-fixed-amd
   retry: 1
@@ -186,6 +188,8 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       - $REVERT_IS_ROLLING
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+  rules:
+    - if: ($RUN_VULNERABILITY_SCANS == "true" || $CI_COMMIT_BRANCH == "develop")
   artifacts:
     reports:
       junit:
