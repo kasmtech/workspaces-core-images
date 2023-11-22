@@ -10,7 +10,7 @@
         {{- end -}}
         {{ range .Vulnerabilities }}
         <testcase classname="{{ .PkgName }}-{{ .InstalledVersion }}" file="{{ if .FixedVersion -}} Upgrade to {{ .FixedVersion }} {{- else -}} No solution provided  {{- end }}" name="[{{ .Vulnerability.Severity }}] {{ .VulnerabilityID }}" time="">
-            <{{ if .FixedVersion -}}error{{- else -}}skipped{{- end }}  message="{{ escapeXML .Title }}" type="description">Upgrade {{ .PkgName }} to {{ .FixedVersion }} - {{ escapeXML .Description }}</{{ if .FixedVersion -}}error{{- else -}}skipped{{- end }}>
+            <{{ if not .FixedVersion -}}passed{{- else if (eq .Vulnerability.Severity "CRITICAL") -}}failure{{- else if (eq .Vulnerability.Severity "HIGH") -}}error{{- else -}}skipped{{- end }}  message="{{ escapeXML .Title }}" type="description">Upgrade {{ .PkgName }} to {{ .FixedVersion }} - {{ escapeXML .Description }}</{{ if not .FixedVersion -}}passed{{- else if (eq .Vulnerability.Severity "CRITICAL") -}}failure{{- else if (eq .Vulnerability.Severity "HIGH") -}}error{{- else -}}skipped{{- end }}>
         </testcase>
     {{- end }}
     </testsuite>
