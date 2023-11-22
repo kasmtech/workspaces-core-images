@@ -141,7 +141,7 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule")
+    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule" || $SCAN_CONTAINERS == "true")
       {% if FILE_LIMITS %}changes:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
@@ -172,7 +172,7 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule")
+    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule" || $SCAN_CONTAINERS == "true")
       {% if FILE_LIMITS %}changes:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}

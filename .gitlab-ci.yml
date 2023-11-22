@@ -10,6 +10,7 @@ stages:
 variables:
   KASM_RELEASE: "1.14.0"
   TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.14.0.7f3582.tar.gz"
+  SCAN_CONTAINERS: "true"
 before_script:
   - export SANITIZED_BRANCH="$(echo $CI_COMMIT_REF_NAME | sed -r 's#^release/##' | sed 's/\//_/g')"
 
