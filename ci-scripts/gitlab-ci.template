@@ -138,19 +138,14 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - apk add bash
     - (cd ci-scripts && bash download-trivy)
     - bash ci-scripts/scan image ${ORG_NAME}/image-cache-private:$(arch)-core-{{ IMAGE.name1 }}-{{ IMAGE.name2 }}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}
-  {% if FILE_LIMITS %}only:
-    changes:
-      {% for FILE in files %}- {{ FILE }}
-      {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
-      {% endfor %}{% endif %}
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^release\/.*$/
-      when: always
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: always
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule")
+      {% if FILE_LIMITS %}changes:
+      {% for FILE in files %}- {{ FILE }}
+      {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
+      {% endfor %}{% endif %}
       when: always
     - when: manual
   needs:
@@ -174,19 +169,14 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - apk add bash
     - (cd ci-scripts && bash download-trivy)
     - bash ci-scripts/scan image ${ORG_NAME}/image-cache-private:x86_64-core-{{ IMAGE.name1 }}-{{ IMAGE.name2 }}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}
-  {% if FILE_LIMITS %}only:
-    changes:
-      {% for FILE in files %}- {{ FILE }}
-      {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
-      {% endfor %}{% endif %}
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: $CI_COMMIT_BRANCH =~ /^release\/.*$/
-      when: always
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: always
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule")
+      {% if FILE_LIMITS %}changes:
+      {% for FILE in files %}- {{ FILE }}
+      {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
+      {% endfor %}{% endif %}
       when: always
     - when: manual
   needs:
