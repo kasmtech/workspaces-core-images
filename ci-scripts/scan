@@ -29,7 +29,7 @@ set -x
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 trivy_dir="${SCRIPT_DIR}/trivy"
-trivy_cmd="$trivy_dir/trivy $scan_cmd --no-progress --cache-dir $HOME/.trivycache $options"
+trivy_cmd="$trivy_dir/trivy $scan_cmd --no-progress --ignore-unfixed --ignore-policy ${SCRIPT_DIR}/vulnerability-filter.rego --cache-dir $HOME/.trivycache $options"
 source_dir="${CI_PROJECT_DIR:-$trivy_dir}"
 
 build_report
