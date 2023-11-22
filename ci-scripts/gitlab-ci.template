@@ -134,7 +134,6 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in multiImages %}
 scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: scan
-  when: always
   script:
     - apk add bash
     - (cd ci-scripts && bash download-trivy)
@@ -156,7 +155,6 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - when: manual
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
-  when: on_success
   tags:
     - oci-fixed-amd
   retry: 1
@@ -172,7 +170,6 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in singleImages %}
 scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: scan
-  when: always
   script:
     - apk add bash
     - (cd ci-scripts && bash download-trivy)
@@ -194,13 +191,10 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - when: manual
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
-  rules:
-    - if: ($RUN_VULNERABILITY_SCANS == "true" || $CI_COMMIT_BRANCH == "develop")
   artifacts:
     reports:
       junit:
         - $CI_PROJECT_DIR/trivy-report.xml
-  when: on_success
   tags:
     - oci-fixed-amd
   retry: 1
