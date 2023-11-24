@@ -4,6 +4,10 @@
 image: docker:24.0.6
 services:
   - docker:24.0.6-dind
+
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
 stages:
   - template
   - run
