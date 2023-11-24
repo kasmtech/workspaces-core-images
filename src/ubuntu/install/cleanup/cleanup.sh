@@ -10,7 +10,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
   zypper clean --all
 elif [[ "${DISTRO}" == @(debian|kali|parrotos5|ubuntu) ]]; then
   # Uninstall unneccesary/vulnerable packages
-  apt remove -y ipp-usb #KASM-5266
+  dpkg --purge ipp-usb #KASM-5266
 
   apt-get autoremove -y
   apt-get autoclean -y
