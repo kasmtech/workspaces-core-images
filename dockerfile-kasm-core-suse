@@ -45,10 +45,6 @@ ENV HOME=/home/kasm-default-profile \
 WORKDIR $HOME
 RUN mkdir -p $HOME/Desktop
 
-### Setup package rules
-COPY ./src/ubuntu/install/package_rules $INST_SCRIPTS/package_rules/
-RUN bash $INST_SCRIPTS/package_rules/package_rules.sh && rm -rf $INST_SCRIPTS/package_rules/
-
 ### Install custom fonts
 COPY ./src/ubuntu/install/fonts $INST_SCRIPTS/fonts/
 RUN bash $INST_SCRIPTS/fonts/install_custom_fonts.sh && rm -rf $INST_SCRIPTS/fonts/
