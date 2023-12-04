@@ -322,18 +322,18 @@ if [[ $1 =~ -h|--help ]]; then
     exit 0
 fi
 
+if [[ ${KASM_DEBUG:-0} == 1 ]]; then
+    echo -e "\n\n------------------ DEBUG KASM STARTUP -----------------"
+    export DEBUG=true
+    set -x
+fi
+
 # Syncronize user-space loaded persistent profiles
 pull_profile
 
 # should also source $STARTUPDIR/generate_container_user
 if [ -f $HOME/.bashrc ]; then
     source $HOME/.bashrc
-fi
-
-if [[ ${KASM_DEBUG:-0} == 1 ]]; then
-    echo -e "\n\n------------------ DEBUG KASM STARTUP -----------------"
-    export DEBUG=true
-    set -x
 fi
 
 ## resolve_vnc_connection
