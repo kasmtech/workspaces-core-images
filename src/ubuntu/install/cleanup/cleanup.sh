@@ -9,6 +9,9 @@ elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora37|fedora38|oracle8|oracle9
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper clean --all
 elif [[ "${DISTRO}" == @(debian|kali|parrotos5|ubuntu) ]]; then
+  # Uninstall unneccesary/vulnerable packages
+  dpkg --purge ipp-usb #KASM-5266
+
   apt-get autoremove -y
   apt-get autoclean -y
 fi

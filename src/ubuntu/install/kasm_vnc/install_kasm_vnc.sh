@@ -157,7 +157,6 @@ elif [[ "${DISTRO}" == "alpine" ]] ; then
         perl-datetime-timezone \
         pixman \
         py3-xdg \
-        python3 \
         setxkbmap \
         xauth \
         xf86-video-amdgpu \

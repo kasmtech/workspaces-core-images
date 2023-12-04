@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -eo pipefail
+
+build_report() {
+  $trivy_cmd --exit-code 0 --format template --template "@/$trivy_dir/contrib/junit.tpl" -o "$source_dir/trivy-report.xml" "$target"
+  #$trivy_cmd --exit-code 0 --format json -o "$source_dir/report.json" "$target"
+}
+
+print_report_and_fail_on_vulnerabilities() {
+  $trivy_cmd --exit-code 1 "$target"
+}
+
+scan_cmd="$1"
+target="$2"
+if [[ -z "$scan_cmd" || -z "$target" ]]; then
+  echo >&2 "Usage: $(basename "$0") <repo|image> <target>"
+  exit 1
+fi
+
+case "$scan_cmd" in
+  repo) options="--scanners config,secret,vuln" ;;
+  image) options="--scanners vuln" ;;
+  *) options="--scanners vuln,config,secret" ;;
+esac
+
+set -u
+set -x
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+trivy_dir="${SCRIPT_DIR}/trivy"
+trivy_cmd="$trivy_dir/trivy $scan_cmd --no-progress --ignore-status will_not_fix,fix_deferred --ignore-policy ${SCRIPT_DIR}/vulnerability-filter.rego --cache-dir $HOME/.trivycache $options" #--ignore-unfixed --severity HIGH,CRITICAL,MEDIUM
+source_dir="${CI_PROJECT_DIR:-$trivy_dir}"
+
+build_report
+#print_report_and_fail_on_vulnerabilities
