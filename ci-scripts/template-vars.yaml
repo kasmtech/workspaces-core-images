@@ -1,5 +1,6 @@
 files: &UNIVERSAL_CHANGE_FILES
   - src/common/**
+  - src/common/startup_scripts/**
   - src/ubuntu/install/audio/**
   - src/ubuntu/install/audio_input/**
   - src/ubuntu/install/cleanup/**
