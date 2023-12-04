@@ -52,8 +52,6 @@ function help (){
 		-d, --debug     enables more detailed startup output
 		                e.g. 'docker run kasmweb/core --debug bash'
 		-h, --help      print out this help
-
-		Fore more information see: https://github.com/ConSol/docker-headless-vnc-container
 		"
 }
 
