@@ -52,8 +52,6 @@ function help (){
 		-d, --debug     enables more detailed startup output
 		                e.g. 'docker run kasmweb/core --debug bash'
 		-h, --help      print out this help
-
-		Fore more information see: https://github.com/ConSol/docker-headless-vnc-container
 		"
 }
 
@@ -70,7 +68,11 @@ function pull_profile (){
 
 		echo "Downloading and unpacking user profile from object storage."
 		set +e
-		http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
+		if [[ $DEBUG == true ]]; then
+			http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} --verbose
+		else
+			http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
+		fi
 		PROCESS_SYNC_EXIT_CODE=$?
 		set -e
 		if (( PROCESS_SYNC_EXIT_CODE > 1 )); then
@@ -318,18 +320,18 @@ if [[ $1 =~ -h|--help ]]; then
     exit 0
 fi
 
+if [[ ${KASM_DEBUG:-0} == 1 ]]; then
+    echo -e "\n\n------------------ DEBUG KASM STARTUP -----------------"
+    export DEBUG=true
+    set -x
+fi
+
 # Syncronize user-space loaded persistent profiles
 pull_profile
 
 # should also source $STARTUPDIR/generate_container_user
 if [ -f $HOME/.bashrc ]; then
     source $HOME/.bashrc
-fi
-
-if [[ ${KASM_DEBUG:-0} == 1 ]]; then
-    echo -e "\n\n------------------ DEBUG KASM STARTUP -----------------"
-    export DEBUG=true
-    set -x
 fi
 
 ## resolve_vnc_connection
