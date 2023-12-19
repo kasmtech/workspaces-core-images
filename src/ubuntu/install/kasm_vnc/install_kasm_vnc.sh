@@ -17,8 +17,8 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="1d8a2ed59a19642f900d9bf0836815b04f7d2ca2"
-BRANCH="feature_KASM-5078_multi_monitor" # just use 'release' for a release branch
+COMMIT_ID="4114d73ed67c483012129a800b116195c03e850f"
+BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.2.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
