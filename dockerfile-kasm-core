@@ -56,6 +56,7 @@ ADD /src/common/resources/images/$BG_IMG  /usr/share/extra/backgrounds/bg_defaul
 ADD /src/common/resources/images/icon_ubuntu.png /usr/share/extra/icons/icon_ubuntu.png
 ADD /src/common/resources/images/icon_ubuntu.png /usr/share/extra/icons/icon_default.png
 ADD /src/common/resources/images/icon_kasm.png /usr/share/extra/icons/icon_kasm.png
+RUN cp /usr/share/extra/backgrounds/bg_default.png /usr/share/backgrounds/xfce/xfce-stripes.png
 
 ### Install kasm_vnc dependencies and binaries
 COPY ./src/ubuntu/install/kasm_vnc $INST_SCRIPTS/kasm_vnc/
