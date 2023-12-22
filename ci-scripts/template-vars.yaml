@@ -1,6 +1,8 @@
 files: &UNIVERSAL_CHANGE_FILES
   - src/common/**
   - src/common/startup_scripts/**
+  - src/common/scripts/**
+  - src/common/scripts/kasm_hook_scripts/**
   - src/ubuntu/install/audio/**
   - src/ubuntu/install/audio_input/**
   - src/ubuntu/install/cleanup/**
@@ -18,6 +20,7 @@ files: &UNIVERSAL_CHANGE_FILES
   - src/ubuntu/install/squid/**
   - src/ubuntu/install/tools/**
   - src/ubuntu/install/webcam/**
+  - src/ubuntu/install/recorder/**
   - ci-scripts/**
   - .gitlab-ci.yml
 

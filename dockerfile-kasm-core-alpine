@@ -89,11 +89,15 @@ RUN bash $INST_SCRIPTS/gamepad/install_gamepad.sh && rm -rf $INST_SCRIPTS/gamepa
 COPY ./src/ubuntu/install/webcam $INST_SCRIPTS/webcam/
 RUN bash $INST_SCRIPTS/webcam/install_webcam.sh && rm -rf $INST_SCRIPTS/webcam/
 
-### Install Printer
+### Install Printer Service
 COPY ./src/ubuntu/install/printer $INST_SCRIPTS/printer/
 COPY ./src/ubuntu/install/printer/start_cups.sh /etc/cups/start_cups.sh
 RUN bash $INST_SCRIPTS/printer/install_printer.sh && rm -rf $INST_SCRIPTS/printer
 COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
+
+### Install Recorder Service
+COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
+RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
 
 ### Copy built Squid
 COPY --from=squid_builder /usr/local/squid /usr/local/squid
@@ -134,6 +138,11 @@ ENV HOME /home/kasm-user
 WORKDIR $HOME
 RUN mkdir -p $HOME && chown -R 1000:0 $HOME
 
+### Create user exclusively for session recording purposes
+RUN (groupadd -g 1001 kasm-recorder \
+    && useradd -M -u 1001 -g 1001 kasm-recorder \
+    && usermod -a -G kasm-recorder) ; exit 0
+
 ### FIX PERMISSIONS ## Objective is to change the owner of non-home paths to root, remove write permissions, and set execute where required
 # these files are created on container first exec, by the default user, so we have to create them since default will not have write perm
 RUN touch $STARTUPDIR/wm.log \
@@ -154,6 +163,7 @@ RUN touch $STARTUPDIR/wm.log \
     && chmod 755 $STARTUPDIR/webcam/kasm_webcam_server \
     && chmod 755 $STARTUPDIR/generate_container_user \
     && chmod 755 $STARTUPDIR/printer/kasm_printer_service \
+    && chmod 755 $STARTUPDIR/recorder/kasm_recorder_service \
     && chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux \
     && rm -rf $STARTUPDIR/install \
     && mkdir -p $STARTUPDIR/kasmrx/Downloads \
