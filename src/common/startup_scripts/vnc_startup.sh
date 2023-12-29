@@ -313,6 +313,37 @@ function custom_startup (){
 	fi
 }
 
+function ensure_recorder_running () {
+    kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
+
+    if [[ ${KASM_SVC_RECORDER:-1} != 1 ]]; then
+        return
+    fi
+
+    recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
+
+    if [[ -z $kasm_recorder_pid ]]; then
+        if [[ -z $recorder_pid ]] && (( $SECONDS > 15 )); then
+            echo "$kasm_recorder_process: not started, exiting"
+            exit 0
+        fi
+
+        kasm_recorder_pid=$recorder_pid
+    else
+        if [[ -z $recorder_pid ]]; then
+            echo "$kasm_recorder_process: not running, exiting"
+            exit 0
+        fi
+
+        recorder_user=$(ps -p $recorder_pid -o user=)
+        if [[ $recorder_user != "kasm-recorder" ]]; then
+            echo "$kasm_recorder_process: not running as kasm-recorder, exiting"
+            exit 0
+        fi
+    fi
+}
+
+
 ############ END FUNCTION DECLARATIONS ###########
 
 if [[ $1 =~ -h|--help ]]; then
@@ -457,6 +488,9 @@ do
 			esac
 		fi
 	done
+
+	ensure_recorder_running
+
 	sleep 3
 done
 
