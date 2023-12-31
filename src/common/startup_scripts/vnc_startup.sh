@@ -314,13 +314,22 @@ function custom_startup (){
 }
 
 function ensure_recorder_running () {
-    kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
-
     if [[ ${KASM_SVC_RECORDER:-1} != 1 ]]; then
         return
     fi
 
-    recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
+    local kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
+    local kasm_recorder_ack="/tmp/kasm_recorder.ack"
+
+		if [[ -f "$kasm_recorder_ack" ]]; then
+        local ack_user=$(stat -c '%U' $kasm_recorder_ack)
+        if [[ "$ack_user" == "kasm-recorder" ]]; then
+            SECONDS=0
+            kasm_recorder_pid=""
+        fi
+    fi
+
+    local recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
 
     if [[ -z $kasm_recorder_pid ]]; then
         if [[ -z $recorder_pid ]] && (( $SECONDS > 15 )); then
