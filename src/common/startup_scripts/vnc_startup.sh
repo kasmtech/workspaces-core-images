@@ -324,12 +324,18 @@ function ensure_recorder_running () {
 		if [[ -f "$kasm_recorder_ack" ]]; then
         local ack_user=$(stat -c '%U' $kasm_recorder_ack)
         if [[ "$ack_user" == "kasm-recorder" ]]; then
-            SECONDS=0
+            SECONDS=0  #SECONDS is a built in bash variable that is incremented approximately every second
             kasm_recorder_pid=""
         fi
     fi
 
     local recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
+
+    while [ $SECONDS -lt 16 ] && [[ -z $recorder_pid ]]
+    do
+        local recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
+        sleep 1
+    done
 
     if [[ -z $kasm_recorder_pid ]]; then
         if [[ -z $recorder_pid ]] && (( $SECONDS > 15 )); then
