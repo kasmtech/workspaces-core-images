@@ -184,7 +184,16 @@ multiImages:
     dockerfile: dockerfile-kasm-core-fedora
     changeFiles:
       - dockerfile-kasm-core-fedora
-      - src/fedora37/**
+      - src/fedora38/**
+  - name1: fedora
+    name2: 39
+    base: fedora:39
+    bg: bg_fedora.png
+    distro: fedora39
+    dockerfile: dockerfile-kasm-core-fedora
+    changeFiles:
+      - dockerfile-kasm-core-fedora
+      - src/fedora39/**
   - name1: parrotos
     name2: 5
     base: parrotsec/core:latest
@@ -209,6 +218,15 @@ multiImages:
   - name1: alpine
     name2: 318
     base: alpine:3.18
+    bg: bg_alpine.png
+    distro: alpine
+    dockerfile: dockerfile-kasm-core-alpine
+    changeFiles:
+      - dockerfile-kasm-core-alpine
+      - src/alpine/**
+  - name1: alpine
+    name2: 319
+    base: alpine:3.19
     bg: bg_alpine.png
     distro: alpine
     dockerfile: dockerfile-kasm-core-alpine

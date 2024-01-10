@@ -45,6 +45,9 @@ handle_other_distros_conversion() {
       if grep -q 'v3.18' /etc/os-release; then
         profile_distro="alpine_318"
       fi
+      if grep -q 'v3.19' /etc/os-release; then
+        profile_distro="alpine_319"
+      fi
       ;;
     rockylinux*)
       profile_distro=$(echo "$profile_distro" | sed -e 's/linux//')
@@ -76,8 +79,8 @@ download_and_symlink() {
 }
 
 ARCH=$(arch)
-BRANCH="release_1.0.1"
-COMMIT_ID="a2ed6b21848b835c5b33524b90894b8b4d6fed52"
+BRANCH="release_1.0.2"
+COMMIT_ID="8b90fa40285d80de72284d09bf6651642e5c07d2"
 
 convert_local_distro_to_profile_sync_distro
 check_distro_is_supported
