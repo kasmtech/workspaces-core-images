@@ -2,8 +2,8 @@
 set -e
 
 mkdir -p /opt/kasm/recordings
-sudo chown kasm-recorder:kasm-recorder /opt/kasm/recordings
-sudo chmod 700 /opt/kasm/recordings
+chown kasm-recorder:kasm-recorder /opt/kasm/recordings
+chmod 700 /opt/kasm/recordings
 
 # wait until X display is avaiable and allow the recorder to connect to it
 while ! xhost +SI:localuser:kasm-recorder 2>/dev/null; do
