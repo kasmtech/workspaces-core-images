@@ -6,7 +6,7 @@ echo $DISTRO
 
 if [ "${DISTRO}" == "oracle7" ] || [ "${DISTRO}" == "centos" ]; then
   yum install -y cups cups-client cups-pdf
-elif [[ "${DISTRO}" == @(almalinux8|almalinux9|oracle8|oracle9|rockylinux8|rockylinux9|fedora37|fedora38) ]]; then
+elif [[ "${DISTRO}" == @(almalinux8|almalinux9|oracle8|oracle9|rockylinux8|rockylinux9|fedora37|fedora38|fedora39) ]]; then
   dnf install -y cups cups-client cups-pdf
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -y cups cups-client cups-pdf

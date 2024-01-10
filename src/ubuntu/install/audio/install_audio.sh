@@ -34,15 +34,28 @@ elif [ "${DISTRO}" == "fedora38" ]; then
   dnf install -y curl git
   dnf localinstall -y --nogpgcheck https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm
   dnf install -y --allowerasing ffmpeg pulseaudio pulseaudio-utils
+elif [ "${DISTRO}" == "fedora39" ]; then
+  dnf install -y curl git
+  dnf localinstall -y --nogpgcheck https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-39.noarch.rpm
+  dnf install -y --allowerasing ffmpeg pulseaudio pulseaudio-utils
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -ny curl git
   zypper install -yn ffmpeg pulseaudio-utils
 elif [ "${DISTRO}" == "alpine" ]; then
-  apk add --no-cache \
-    ffmpeg \
-    git \
-    pulseaudio \
-    pulseaudio-utils 
+  if grep -q v3.19 /etc/os-release; then
+    apk add --no-cache \
+      ffmpeg \
+      ffplay \
+      git \
+      pulseaudio \
+      pulseaudio-utils
+  else
+    apk add --no-cache \
+      ffmpeg \
+      git \
+      pulseaudio \
+      pulseaudio-utils 
+  fi
 else
   apt-get update
   apt-get install -y curl git ffmpeg

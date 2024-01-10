@@ -69,6 +69,12 @@ elif [[ "${DISTRO}" == "fedora38" ]] ; then
     else
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtyeight_${KASM_VER_NAME_PART}_aarch64.rpm"
     fi
+elif [[ "${DISTRO}" == "fedora39" ]] ; then
+    if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtynine_${KASM_VER_NAME_PART}_x86_64.rpm"
+    else
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtynine_${KASM_VER_NAME_PART}_aarch64.rpm"
+    fi
 elif [[ "${DISTRO}" = @(debian|parrotos5) ]] ; then
     if grep -q bookworm /etc/os-release; then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
@@ -84,7 +90,13 @@ elif [[ "${DISTRO}" = @(debian|parrotos5) ]] ; then
         fi
     fi
 elif [[ "${DISTRO}" == "alpine" ]] ; then
-    if grep -q v3.18 /etc/os-release; then
+    if grep -q v3.19 /etc/os-release; then
+        if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_319/kasmvnc.alpine_319_x86_64.tgz"
+        else
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_319/kasmvnc.alpine_319_aarch64.tgz"
+        fi
+    elif grep -q v3.18 /etc/os-release; then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
             BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_318/kasmvnc.alpine_318_x86_64.tgz"
         else
@@ -117,7 +129,7 @@ elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|alma
     dnf localinstall -y kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-elif [[ "${DISTRO}" == @(fedora37|fedora38) ]] ; then
+elif [[ "${DISTRO}" == @(fedora37|fedora38|fedora39) ]] ; then
     dnf install -y xorg-x11-drv-amdgpu xorg-x11-drv-ati
     if [ "${BUILD_ARCH}" == "x86_64" ]; then
         dnf install -y xorg-x11-drv-intel
