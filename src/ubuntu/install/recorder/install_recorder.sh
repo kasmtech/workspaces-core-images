@@ -6,6 +6,10 @@ if [[ "${DISTRO}" == "alpine" ]]; then
     apk add --no-cache \
         runuser \
         xhost
+elif [ "${DISTRO}" == "opensuse" ]; then
+    zypper ar -cfp 90 'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_$releasever/' packman
+    zypper -n --gpg-auto-import-keys dup --from packman --allow-vendor-change
+    zypper install -ny xhost
 fi
 
 COMMIT_ID="75cf09992503e77a94b5f5c4deba7fc1daad4f5a"
