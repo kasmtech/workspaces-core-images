@@ -2,7 +2,7 @@
 ### every exit != 0 fails the script
 set -e
 
-COMMIT_ID="2ffd3da2a103e3838ab3e5573bd7610546691218"
+COMMIT_ID="e19fbc6d8c6bd0eea88dd20be20e016e1be7024d"
 BRANCH="feature_KASM-5378_recording_errata"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
