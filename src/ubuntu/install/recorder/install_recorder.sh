@@ -2,7 +2,17 @@
 ### every exit != 0 fails the script
 set -e
 
-COMMIT_ID="b9f195d8aac56b3127be9083470bddc360e30377"
+if [[ "${DISTRO}" == "alpine" ]]; then
+    apk add --no-cache \
+        runuser \
+        xhost
+elif [ "${DISTRO}" == "opensuse" ]; then
+    zypper ar -cfp 90 'https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_$releasever/' packman
+    zypper -n --gpg-auto-import-keys dup --from packman --allow-vendor-change
+    zypper install -ny xhost
+fi
+
+COMMIT_ID="9abeb2d5fba0bfe90d3fe60457a58ccc3ed1ad1d"
 BRANCH="main"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
