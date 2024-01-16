@@ -331,13 +331,8 @@ function ensure_recorder_running () {
 
     local recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
 
-    while [ $SECONDS -lt 16 ] && [[ -z $recorder_pid ]]
-    do
-        local recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
-        sleep 1
-    done
-
     if [[ -z $kasm_recorder_pid ]]; then
+        # This leverages the outside while loop that calls this function to provider checking ever x seconds.
         if [[ -z $recorder_pid ]] && (( $SECONDS > 15 )); then
             echo "$kasm_recorder_process: not started, exiting"
             exit 0
