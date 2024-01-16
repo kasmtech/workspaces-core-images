@@ -90,9 +90,12 @@ sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
 
-KASM_SQUID_ADAPTER=https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/6e3703800654b05f1ac00c76d02474a6c1a21d17/kasm_squid_adapter_${ARCH}_develop.6e3703.tar.gz
+COMMIT_ID="1879ba54bb5ce515d3ac9f55675ba5fc984798d0"
+BRANCH="develop"
+COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
-wget -qO- ${KASM_SQUID_ADAPTER} | tar xz -C /etc/squid/
+wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/${COMMIT_ID}/kasm_squid_adapter_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz | tar xz -C /etc/squid/
+echo "${BRANCH}:${COMMIT_ID}" > /etc/squid/kasm_squid_adapter.version
 ls -la /etc/squid
 chmod +x /etc/squid/kasm_squid_adapter
 

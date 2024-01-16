@@ -22,7 +22,7 @@ fi
 # to the one watched by the printer service
 sed -i -r -e "s:^(Out\s).*:\1/home/kasm-user/PDF:" /etc/cups/cups-pdf.conf
 
-COMMIT_ID="ea156adceb0161d6aeb7eeb5371dc09fc5807867"
+COMMIT_ID="30ca302fa364051fd4c68982da7c5474a7bda6b8"
 BRANCH="develop"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
@@ -30,5 +30,4 @@ ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 
 mkdir -p $STARTUPDIR/printer
 wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_printer_service/${COMMIT_ID}/kasm_printer_service_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz | tar -xvz -C $STARTUPDIR/printer/
-
 echo "${BRANCH}:${COMMIT_ID}" > $STARTUPDIR/printer/kasm_printer.version
