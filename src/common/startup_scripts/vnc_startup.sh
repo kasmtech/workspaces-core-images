@@ -353,6 +353,19 @@ function ensure_recorder_running () {
     fi
 }
 
+function ensure_recorder_terminates_gracefully () {
+  local kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
+
+  while true
+  do
+    recorder_pid=$(pgrep -f "$kasm_recorder_process") || true
+    if [[ -z $recorder_pid ]]; then
+      break
+    fi
+
+    sleep 1
+  done
+}
 
 ############ END FUNCTION DECLARATIONS ###########
 
@@ -452,6 +465,14 @@ do
 					;;
 				window_manager)
 					echo "Window manager crashed, restarting"
+
+					if [[ ${KASM_SVC_RECORDER:-1} == 1 ]]; then
+            echo "Waiting for recorder service to upload all pending recordings"
+            ensure_recorder_terminates_gracefully
+            echo "Recorder service has terminated, exiting container"
+            exit 1
+          fi
+
 					start_window_manager
 					;;
 				kasm_audio_out_websocket)
