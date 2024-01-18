@@ -93,6 +93,13 @@ RUN bash $INST_SCRIPTS/printer/install_printer.sh && rm -rf $INST_SCRIPTS/printe
 COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 
 ### Install Recorder Service
+
+RUN apt-get remove -y ffmpeg
+RUN wget -q "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+RUN tar -xf ffmpeg-release-amd64-static.tar.xz -C .
+RUN cp ./ffmpeg-6.1-amd64-static/ffmpeg /usr/local/bin
+RUN rm -rf ./ffmpeg-*
+
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
 

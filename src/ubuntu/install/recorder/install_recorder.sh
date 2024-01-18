@@ -12,7 +12,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
     zypper install -ny xhost
 fi
 
-COMMIT_ID="c1fb295699b044a731e4ef3369808cbd39da1567"
+COMMIT_ID="3bfd31d0a88c4d74ace9d7c7d12a95bc7f8ce7b7"
 BRANCH="feature_KASM-5446-refactor-kasm-recorder-service-to-attempt-to-eliminate-deadlocks-and-corrupt-videos"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
