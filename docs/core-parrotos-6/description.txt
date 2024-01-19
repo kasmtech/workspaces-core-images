@@ -1,0 +1,1 @@
+Parrot OS 6 base image for Kasm Workspaces

@@ -1,12 +1,12 @@
 [Desktop Entry]
 Name=Root Terminal
-Comment=Opens a terminal as the root user, using gksu to ask for the password
+Comment=Opens a terminal as the root user, using polkit to ask for the password
 Exec=menuexecg /usr/bin/x-terminal-emulator
-Icon=gksu-root-terminal
+Icon=utilities-root-terminal
 StartupNotify=true
 Terminal=false
 X-MultipleArgs=false
 Type=Application
 Categories=GTK;System;TerminalEmulator;
-X-Parrot-Package=gksu
+X-Parrot-Package=policykit-1
 X-XFCE-Source=file:///usr/share/applications/parrot-root-terminal.desktop

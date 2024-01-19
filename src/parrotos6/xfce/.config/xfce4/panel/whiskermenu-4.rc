@@ -1,25 +1,27 @@
-favorites=update-reminder.desktop,mousepad.desktop,encryptpad.desktop,anon-gui.desktop,codium.desktop,org.remmina.Remmina.desktop,htop.desktop
-button-title=Menu
-button-icon=view-list
+favorites=xfce4-web-browser.desktop,xfce4-mail-reader.desktop,xfce4-file-manager.desktop,xfce4-terminal-emulator.desktop
+recent=
+button-icon=app-launcher
 button-single-row=false
-show-button-title=true
+show-button-title=false
 show-button-icon=true
 launcher-show-name=true
 launcher-show-description=true
 launcher-show-tooltip=true
-item-icon-size=3
+launcher-icon-size=2
 hover-switch-category=false
 category-show-name=true
 category-icon-size=1
-load-hierarchy=true
-view-as-icons=false
+sort-categories=true
+view-mode=1
 default-category=0
 recent-items-max=10
 favorites-in-recent=true
-position-search-alternate=true
+position-search-alternate=false
 position-commands-alternate=false
-position-categories-alternate=true
+position-categories-alternate=false
+position-categories-horizontal=false
 stay-on-focus-out=false
+profile-shape=0
 confirm-session-command=true
 menu-width=450
 menu-height=500
@@ -27,7 +29,7 @@ menu-opacity=100
 command-settings=xfce4-settings-manager
 show-command-settings=true
 command-lockscreen=xflock4
-show-command-lockscreen=true
+show-command-lockscreen=false
 command-switchuser=dm-tool switch-to-greeter
 show-command-switchuser=false
 command-logoutuser=xfce4-session-logout --logout --fast
@@ -41,12 +43,12 @@ show-command-suspend=false
 command-hibernate=xfce4-session-logout --hibernate
 show-command-hibernate=false
 command-logout=xfce4-session-logout
-show-command-logout=true
+show-command-logout=false
 command-menueditor=menulibre
 show-command-menueditor=true
 command-profile=mugshot
 show-command-profile=true
-search-actions=3
+search-actions=6
 
 [action0]
 name=Man Pages
@@ -55,13 +57,32 @@ command=exo-open --launch TerminalEmulator man %s
 regex=false
 
 [action1]
-name=Web Search
+name=Search the Web
 pattern=?
 command=exo-open --launch WebBrowser https://duckduckgo.com/?q=%u
 regex=false
 
 [action2]
+name=Search for Files
+pattern=-
+command=catfish --path=~ --start %s
+regex=false
+
+[action3]
+name=Wikipedia
+pattern=!w
+command=exo-open --launch WebBrowser https://en.wikipedia.org/wiki/%u
+regex=false
+
+[action4]
 name=Run in Terminal
 pattern=!
 command=exo-open --launch TerminalEmulator %s
 regex=false
+
+[action5]
+name=Open URI
+pattern=^(file|http|https):\\/\\/(.*)$
+command=exo-open \\0
+regex=true
+
