@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+if [ "${DISTRO}" == "parrotos6" ]; then
+  PARROTEXTRA="-t lory-backports"
+fi
+
 echo "Install some common tools for further installation"
 if [[ "${DISTRO}" == @(centos|oracle7) ]] ; then
   yum install -y vim wget net-tools bzip2 ca-certificates bc
@@ -29,7 +33,7 @@ else
   apt-get update
   # Update tzdata noninteractive (otherwise our script is hung on user input later).
   DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
-  apt-get install -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils bc
+  apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils bc
 
   echo "generate locales for en_US.UTF-8"
   locale-gen en_US.UTF-8

@@ -2,7 +2,7 @@
 set -ex
 
 # Setup systemd based on distro type
-if [[ "${DISTRO}" == @(ubuntu|debian|parrotos5|kali) ]] ; then
+if [[ "${DISTRO}" == @(ubuntu|debian|parrotos6|kali) ]] ; then
   # Install deps
   apt-get update
   apt-get install -y --no-install-recommends \

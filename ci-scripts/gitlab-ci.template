@@ -138,16 +138,11 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - apk add bash
     - (cd ci-scripts && bash download-trivy)
     - bash ci-scripts/scan image ${ORG_NAME}/image-cache-private:$(arch)-core-{{ IMAGE.name1 }}-{{ IMAGE.name2 }}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: never
-    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule" || $SCAN_CONTAINERS == "true")
-      {% if FILE_LIMITS %}changes:
+  {% if FILE_LIMITS %}only:
+    changes:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
-      when: always
-    - when: manual
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   tags:
@@ -169,16 +164,11 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - apk add bash
     - (cd ci-scripts && bash download-trivy)
     - bash ci-scripts/scan image ${ORG_NAME}/image-cache-private:x86_64-core-{{ IMAGE.name1 }}-{{ IMAGE.name2 }}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: never
-    - if: ($CI_COMMIT_BRANCH =~ /^release\/.*$/ || $CI_COMMIT_BRANCH == "develop" || $CI_PIPELINE_SOURCE == "schedule" || $SCAN_CONTAINERS == "true")
-      {% if FILE_LIMITS %}changes:
+  {% if FILE_LIMITS %}only:
+    changes:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
-      when: always
-    - when: manual
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   artifacts:

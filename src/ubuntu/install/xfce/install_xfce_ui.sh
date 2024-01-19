@@ -73,7 +73,7 @@ elif [[ "$DISTRO" = @(ubuntu|debian) ]]; then
     xfce4-terminal \
     xterm \
     xclip
-elif [[ "$DISTRO" = "parrotos5" ]]; then
+elif [[ "$DISTRO" = "parrotos6" ]]; then
   apt-get install -y \
     dbus-x11 \
     desktop-base \
@@ -84,7 +84,8 @@ elif [[ "$DISTRO" = "parrotos5" ]]; then
     supervisor \
     xclip \
     xfce4 \
-    xfce4-terminal
+    xfce4-terminal \
+    xfce4-whiskermenu-plugin
   echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
   locale-gen
 elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
