@@ -313,6 +313,60 @@ function custom_startup (){
 	fi
 }
 
+function ensure_recorder_running () {
+    if [[ ${KASM_SVC_RECORDER:-1} != 1 ]]; then
+        return
+    fi
+
+    local kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
+    local kasm_recorder_ack="/tmp/kasm_recorder.ack"
+
+		if [[ -f "$kasm_recorder_ack" ]]; then
+        local ack_user=$(stat -c '%U' $kasm_recorder_ack)
+        if [[ "$ack_user" == "kasm-recorder" ]]; then
+            SECONDS=0  #SECONDS is a built in bash variable that is incremented approximately every second
+            kasm_recorder_pid=""
+        fi
+    fi
+
+    local recorder_pid=$(pgrep -f "^$kasm_recorder_process") || true
+
+    if [[ -z $kasm_recorder_pid ]]; then
+        # This leverages the outside while loop that calls this function to provider checking ever x seconds.
+        if [[ -z $recorder_pid ]] && (( $SECONDS > 15 )); then
+            echo "$kasm_recorder_process: not started, exiting"
+            exit 0
+        fi
+
+        kasm_recorder_pid=$recorder_pid
+    else
+        if [[ -z $recorder_pid ]]; then
+            echo "$kasm_recorder_process: not running, exiting"
+            exit 0
+        fi
+
+        recorder_user=$(ps -p $recorder_pid -o user=)
+        if [[ $recorder_user != "kasm-recorder" ]]; then
+            echo "$kasm_recorder_process: not running as kasm-recorder, exiting"
+            exit 0
+        fi
+    fi
+}
+
+function ensure_recorder_terminates_gracefully () {
+  local kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
+
+  while true
+  do
+    recorder_pid=$(pgrep -f "$kasm_recorder_process") || true
+    if [[ -z $recorder_pid ]]; then
+      break
+    fi
+
+    sleep 1
+  done
+}
+
 ############ END FUNCTION DECLARATIONS ###########
 
 if [[ $1 =~ -h|--help ]]; then
@@ -411,6 +465,14 @@ do
 					;;
 				window_manager)
 					echo "Window manager crashed, restarting"
+
+					if [[ ${KASM_SVC_RECORDER:-1} == 1 ]]; then
+            echo "Waiting for recorder service to upload all pending recordings"
+            ensure_recorder_terminates_gracefully
+            echo "Recorder service has terminated, exiting container"
+            exit 1
+          fi
+
 					start_window_manager
 					;;
 				kasm_audio_out_websocket)
@@ -457,6 +519,9 @@ do
 			esac
 		fi
 	done
+
+	ensure_recorder_running
+
 	sleep 3
 done
 
