@@ -34,6 +34,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/ubuntu/xfce/**
+      - src/ubuntu/xfce/.config/**
+      - src/ubuntu/xfce/.config/xfce4/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
@@ -46,6 +51,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/ubuntu/xfce/**
+      - src/ubuntu/xfce/.config/**
+      - src/ubuntu/xfce/.config/xfce4/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
@@ -58,6 +68,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/ubuntu/xfce/**
+      - src/ubuntu/xfce/.config/**
+      - src/ubuntu/xfce/.config/xfce4/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
@@ -70,6 +85,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/debian/**
+      - src/debian/xfce/**
+      - src/debian/xfce/.config/**
+      - src/debian/xfce/.config/xfce4/**
+      - src/debian/xfce/.config/xfce4/xfconf/**
+      - src/debian/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
   - name1: debian
@@ -81,6 +101,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/debian/**
+      - src/debian/xfce/**
+      - src/debian/xfce/.config/**
+      - src/debian/xfce/.config/xfce4/**
+      - src/debian/xfce/.config/xfce4/xfconf/**
+      - src/debian/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
@@ -93,6 +118,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/kali/**
+      - src/kali/xfce/**
+      - src/kali/xfce/.config/**
+      - src/kali/xfce/.config/xfce4/**
+      - src/kali/xfce/.config/xfce4/xfconf/**
+      - src/kali/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/install/extra/kali.sh
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
@@ -106,6 +136,12 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/oracle8/**
+      - src/oracle8/xfce/**
+      - src/oracle8/xfce/.config/**
+      - src/oracle8/xfce/.config/xfce4/**
+      - src/oracle8/xfce/.config/xfce4/xfconf/**
+      - src/oracle8/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/oracle8/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: oracle
     name2: 9
@@ -116,6 +152,12 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/oracle9/**
+      - src/oracle9/xfce/**
+      - src/oracle9/xfce/.config/**
+      - src/oracle9/xfce/.config/xfce4/**
+      - src/oracle9/xfce/.config/xfce4/xfconf/**
+      - src/oracle9/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/oracle9/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: rockylinux
     name2: 8
@@ -126,6 +168,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/rockylinux8/**
+      - src/rockylinux8/xfce/**
+      - src/rockylinux8/xfce/.config/**
+      - src/rockylinux8/xfce/.config/xfce4/**
+      - src/rockylinux8/xfce/.config/xfce4/xfconf/**
+      - src/rockylinux8/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: rockylinux
     name2: 9
@@ -136,6 +183,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/rockylinux9/**
+      - src/rockylinux9/xfce/**
+      - src/rockylinux9/xfce/.config/**
+      - src/rockylinux9/xfce/.config/xfce4/**
+      - src/rockylinux9/xfce/.config/xfce4/xfconf/**
+      - src/rockylinux9/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: almalinux
     name2: 8
@@ -146,6 +198,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/almalinux8/**
+      - src/almalinux8/xfce/**
+      - src/almalinux8/xfce/.config/**
+      - src/almalinux8/xfce/.config/xfce4/**
+      - src/almalinux8/xfce/.config/xfce4/xfconf/**
+      - src/almalinux8/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: almalinux
     name2: 9
@@ -156,6 +213,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/almalinux9/**
+      - src/almalinux9/xfce/**
+      - src/almalinux9/xfce/.config/**
+      - src/almalinux9/xfce/.config/xfce4/**
+      - src/almalinux9/xfce/.config/xfce4/xfconf/**
+      - src/almalinux9/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: opensuse
     name2: 15
@@ -166,6 +228,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-suse
       - src/opensuse/**
+      - src/opensuse/xfce/**
+      - src/opensuse/xfce/.config/**
+      - src/opensuse/xfce/.config/xfce4/**
+      - src/opensuse/xfce/.config/xfce4/xfconf/**
+      - src/opensuse/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
       - src/ubuntu/sysbox/**
   - name1: fedora
     name2: 37
@@ -176,6 +243,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-fedora
       - src/fedora37/**
+      - src/fedora37/xfce/**
+      - src/fedora37/xfce/.config/**
+      - src/fedora37/xfce/.config/xfce4/**
+      - src/fedora37/xfce/.config/xfce4/xfconf/**
+      - src/fedora37/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: fedora
     name2: 38
     base: fedora:38
@@ -185,6 +257,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-fedora
       - src/fedora38/**
+      - src/fedora38/xfce/**
+      - src/fedora38/xfce/.config/**
+      - src/fedora38/xfce/.config/xfce4/**
+      - src/fedora38/xfce/.config/xfce4/xfconf/**
+      - src/fedora38/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: fedora
     name2: 39
     base: fedora:39
@@ -194,18 +271,24 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-fedora
       - src/fedora39/**
+      - src/fedora39/xfce/**
+      - src/fedora39/xfce/.config/**
+      - src/fedora39/xfce/.config/xfce4/**
+      - src/fedora39/xfce/.config/xfce4/xfconf/**
+      - src/fedora39/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: parrotos
-    name2: 5
-    base: parrotsec/core:latest
-    bg: bg_parrotos5.jpg
-    distro: parrotos5
+    name2: 6
+    base: parrotsec/core:6
+    bg: bg_parrotos6.jpg
+    distro: parrotos6
     dockerfile: dockerfile-kasm-core
     changeFiles:
       - dockerfile-kasm-core
-      - src/parrotos5/**
+      - src/parrotos6/**
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
+      - src/parrotos6/**
   - name1: alpine
     name2: 317
     base: alpine:3.17
@@ -215,6 +298,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-alpine
       - src/alpine/**
+      - src/alpine/xfce/**
+      - src/alpine/xfce/.config/**
+      - src/alpine/xfce/.config/xfce4/**
+      - src/alpine/xfce/.config/xfce4/xfconf/**
+      - src/alpine/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: alpine
     name2: 318
     base: alpine:3.18
@@ -224,6 +312,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-alpine
       - src/alpine/**
+      - src/alpine/xfce/**
+      - src/alpine/xfce/.config/**
+      - src/alpine/xfce/.config/xfce4/**
+      - src/alpine/xfce/.config/xfce4/xfconf/**
+      - src/alpine/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: alpine
     name2: 319
     base: alpine:3.19
@@ -233,6 +326,11 @@ multiImages:
     changeFiles:
       - dockerfile-kasm-core-alpine
       - src/alpine/**
+      - src/alpine/xfce/**
+      - src/alpine/xfce/.config/**
+      - src/alpine/xfce/.config/xfce4/**
+      - src/alpine/xfce/.config/xfce4/xfconf/**
+      - src/alpine/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
 singleImages:
   - name1: cuda
     name2: focal
@@ -243,6 +341,11 @@ singleImages:
     changeFiles:
       - dockerfile-kasm-core
       - src/ubuntu/xfce/**
+      - src/ubuntu/xfce/.config/**
+      - src/ubuntu/xfce/.config/xfce4/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
@@ -255,6 +358,11 @@ singleImages:
     changeFiles:
       - dockerfile-kasm-core-centos
       - src/centos/**
+      - src/centos/xfce/**
+      - src/centos/xfce/.config/**
+      - src/centos/xfce/.config/xfce4/**
+      - src/centos/xfce/.config/xfce4/xfconf/**
+      - src/centos/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: oracle
     name2: 7
     base: oraclelinux:7
@@ -264,3 +372,8 @@ singleImages:
     changeFiles:
       - dockerfile-kasm-core-oracle
       - src/oracle7/**
+      - src/oracle7/xfce/**
+      - src/oracle7/xfce/.config/**
+      - src/oracle7/xfce/.config/xfce4/**
+      - src/oracle7/xfce/.config/xfce4/xfconf/**
+      - src/oracle7/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**

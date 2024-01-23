@@ -314,7 +314,7 @@ function custom_startup (){
 }
 
 function ensure_recorder_running () {
-    if [[ ${KASM_SVC_RECORDER:-1} != 1 ]]; then
+    if [[ ${KASM_SVC_RECORDER:-0} != 1 ]]; then
         return
     fi
 
@@ -466,12 +466,12 @@ do
 				window_manager)
 					echo "Window manager crashed, restarting"
 
-					if [[ ${KASM_SVC_RECORDER:-1} == 1 ]]; then
-            echo "Waiting for recorder service to upload all pending recordings"
-            ensure_recorder_terminates_gracefully
-            echo "Recorder service has terminated, exiting container"
-            exit 1
-          fi
+					if [[ ${KASM_SVC_RECORDER:-0} == 1 ]]; then
+						echo "Waiting for recorder service to upload all pending recordings"
+						ensure_recorder_terminates_gracefully
+						echo "Recorder service has terminated, exiting container"
+						exit 1
+					fi
 
 					start_window_manager
 					;;

@@ -16,7 +16,7 @@ set -ex
     elif [ -f /etc/fedora-release ]; then
         DISTRO=fedora
     elif [ -f /etc/dpkg/origins/parrot ]; then
-        DISTRO=parrotos5
+        DISTRO=parrotos6
     elif [ -f /etc/alpine-release ]; then
         DISTRO=alpine
     fi
@@ -68,7 +68,7 @@ set -ex
     chown $MEMCACHE_USER:$MEMCACHE_USER /etc/sasl2/memcached-sasldb2
 
 
-    if [[ "${DISTRO}" == @(centos|oracle7|fedora|parrotos5|alpine) ]]; then
+    if [[ "${DISTRO}" == @(centos|oracle7|fedora|parrotos6|alpine) ]]; then
         /usr/bin/memcached -u $MEMCACHE_USER &
     elif [ "${DISTRO}" == "opensuse" ]; then
         /usr/sbin/memcached -u $MEMCACHE_USER &

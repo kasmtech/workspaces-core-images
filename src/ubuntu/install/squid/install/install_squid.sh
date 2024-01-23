@@ -10,7 +10,7 @@ fi
 
 # intall squid
 SQUID_COMMIT='1149fc830c7edcb383eec390cce2beba16befde5'
-if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) ; then
+if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) || $(grep -q lory /etc/os-release); then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
   wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
   dpkg -i libssl1.1.${ARCH}.deb
