@@ -12,8 +12,8 @@ elif [ "${DISTRO}" == "opensuse" ]; then
     zypper install -ny xhost
 fi
 
-COMMIT_ID="85891331d5c6942b1471055803f3af25d722c699"
-BRANCH="feature_KASM-5458-fix-ffmpeg-video-corruption-when-container-is-killed"
+COMMIT_ID="bf2696c063b307591483a21693542dd360a3baa6"
+BRANCH="main"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
