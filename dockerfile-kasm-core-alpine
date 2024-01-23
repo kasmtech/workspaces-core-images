@@ -98,6 +98,7 @@ COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 ### Install Recorder Service
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
+RUN apk add --no-cache coreutils  # the timeout function used by the backend needs to be the one from core utils.
 
 ### Copy built Squid
 COPY --from=squid_builder /usr/local/squid /usr/local/squid
