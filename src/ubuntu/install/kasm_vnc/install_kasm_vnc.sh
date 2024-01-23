@@ -12,12 +12,12 @@ prepare_rpm_repo_dependencies() {
     dnf install -y oracle-epel-release-el9
   fi
 }
-#https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/7b442658e13a291b9e5d97b068e98a1d6abff942/kasmvncserver_buster_1.2.1_master_7b4426_amd64.deb
+
 echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="7b442658e13a291b9e5d97b068e98a1d6abff942"
+COMMIT_ID="fddaab51240e386543e04a23d8cc8993ba55c2a2"
 BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.2.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
