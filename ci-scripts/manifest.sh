@@ -21,7 +21,11 @@ fi
 
 # Determine if this is a rolling build
 if [ "${CI_PIPELINE_SOURCE}" == "schedule" ]; then
-  SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling
+   if [ -z ${SCHEDULE_NAME+x} ]; then
+    SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling
+  else
+    SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling-${SCHEDULE_NAME}
+  fi
 fi
 
 # Determine if we are doing a reversion
@@ -29,7 +33,11 @@ if [ ! -z "${REVERT_PIPELINE_ID}" ]; then
   # If we are reverting modify the pipeline ID to the one passed
   CI_PIPELINE_ID=${REVERT_PIPELINE_ID}
   if [ "${IS_ROLLING}" == "true" ]; then
-    SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling
+    if [ -z ${SCHEDULE_NAME+x} ]; then
+      SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling
+    else
+      SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling-${SCHEDULE_NAME}
+    fi
   fi
 fi
 
