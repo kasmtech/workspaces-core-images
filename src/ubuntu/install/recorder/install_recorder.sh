@@ -12,7 +12,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
     zypper install -ny xhost
 fi
 
-COMMIT_ID="b906f7dd511b43ff97bfb290a9dc35761453453f"
+COMMIT_ID="bf2696c063b307591483a21693542dd360a3baa6"
 BRANCH="main"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
