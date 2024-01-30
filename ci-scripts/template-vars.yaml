@@ -18,6 +18,8 @@ files: &UNIVERSAL_CHANGE_FILES
   - src/ubuntu/install/printer/**
   - src/ubuntu/install/profile_sync/**
   - src/ubuntu/install/squid/**
+  - src/ubuntu/install/squid/install/**
+  - src/ubuntu/install/squid/resources/**
   - src/ubuntu/install/tools/**
   - src/ubuntu/install/webcam/**
   - src/ubuntu/install/recorder/**

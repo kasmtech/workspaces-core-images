@@ -90,11 +90,16 @@ sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
 
-COMMIT_ID="1879ba54bb5ce515d3ac9f55675ba5fc984798d0"
+COMMIT_ID="f8a1049969e7bde2fa0814eb3e5e09f4359efca1"
 BRANCH="develop"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
-wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/${COMMIT_ID}/kasm_squid_adapter_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz | tar xz -C /etc/squid/
+
+if [[ "${DISTRO}" == "alpine" ]]; then
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/${COMMIT_ID}/kasm_squid_adapter_alpine_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz | tar xz -C /etc/squid/
+else
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_squid_adapter/${COMMIT_ID}/kasm_squid_adapter_glibc_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz | tar xz -C /etc/squid/
+fi
 echo "${BRANCH}:${COMMIT_ID}" > /etc/squid/kasm_squid_adapter.version
 ls -la /etc/squid
 chmod +x /etc/squid/kasm_squid_adapter
