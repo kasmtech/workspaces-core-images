@@ -84,6 +84,8 @@ function pull_profile (){
 		sleep 3
 		http_proxy="" https_proxy="" curl -k "https://${KASM_API_HOST}:${KASM_API_PORT}/api/set_kasm_session_status?token=${KASM_API_JWT}" -H 'Content-Type: application/json' -d '{"status": "running"}'
 
+		# Reset the timer to prevent session recording monitor from exiting
+		SECONDS=0
 	fi
 }
 
