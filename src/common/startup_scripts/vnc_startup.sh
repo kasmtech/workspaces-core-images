@@ -2,6 +2,17 @@
 ### every exit != 0 fails the script
 set -e
 
+APP_NAME=$(basename "$0")
+
+log () {
+    if [ ! -z "${1}" ]; then
+        LOG_LEVEL="${2:-DEBUG}"
+        INGEST_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        echo "${INGEST_DATE} ${LOG_LEVEL} (${APP_NAME}): $1"
+        http_proxy="" https_proxy="" curl https://${KASM_API_HOST}:${KASM_API_PORT}/api/kasm_session_log?token=${KASM_API_JWT} --max-time 1 -X POST -H 'Content-Type: application/json' -d '[{ "host": "'"${KASM_ID}"'", "application": "Session", "ingest_date": "'"${INGEST_DATE}"'", "message": "'"$1"'", "levelname": "'"${LOG_LEVEL}"'", "process": "'"${APP_NAME}"'", "kasm_user_name": "'"${KASM_USER_NAME}"'", "kasm_id": "'"${KASM_ID}"'" }]' -k
+	fi
+}
+
 no_proxy="localhost,127.0.0.1"
 
 if [ -f /usr/bin/kasm-profile-sync ]; then
@@ -66,20 +77,27 @@ function pull_profile (){
 			return
 		fi
 
-		echo "Downloading and unpacking user profile from object storage."
+		log "Downloading and unpacking user profile from object storage."
 		set +e
 		if [[ $DEBUG == true ]]; then
-			http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} --verbose
+			OUTPUT=$(http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} --verbose 2>&1 )
 		else
-			http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT}
+			OUTPUT=$(http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} 2>&1 )
 		fi
+
+		# log output of profile sync
+		while IFS= read -r line; do
+            log "$line"
+        done <<< "$OUTPUT"
+
+		# exit and log a non-zero exit code
 		PROCESS_SYNC_EXIT_CODE=$?
 		set -e
 		if (( PROCESS_SYNC_EXIT_CODE > 1 )); then
-			echo "Profile-sync failed with a non-recoverable error. See server side logs for more details."
+			log "Profile-sync failed with a non-recoverable error. See server side logs for more details." "ERROR"
 			exit 1
 		fi
-		echo "Profile load complete."
+		log "Profile load complete."
 		# Update the status of the container to running
 		sleep 3
 		http_proxy="" https_proxy="" curl -k "https://${KASM_API_HOST}:${KASM_API_PORT}/api/set_kasm_session_status?token=${KASM_API_JWT}" -H 'Content-Type: application/json' -d '{"status": "running"}'
@@ -106,6 +124,10 @@ function profile_size_check(){
 					notify-send "Profile Size" "Your home profile size is now under the limit and will be saved when your session is terminated." -i /usr/share/icons/ubuntu-mono-dark/apps/22/dropboxstatus-logo.svg -t 57000
 				fi
 			fi
+
+			if [ -f  /tmp/.kasm_container_shutdown_failure ]; then
+				notify-send "Profile Size" "Your profile failed to save. Contact your administrator for assistance." -i /usr/share/icons/ubuntu-mono-dark/apps/22/dropboxstatus-logo.svg -t 57000
+			fi
 		done
 	fi
 }
@@ -117,9 +139,7 @@ function cleanup () {
 }
 
 function start_kasmvnc (){
-	if [[ $DEBUG == true ]]; then
-	  echo -e "\n------------------ Start KasmVNC Server ------------------------"
-	fi
+	log "Starting KasmVNC"
 
 	DISPLAY_NUM=$(echo $DISPLAY | grep -Po ':\d+')
 
@@ -164,7 +184,7 @@ function start_kasmvnc (){
 }
 
 function start_window_manager (){
-	echo -e "\n------------------ Xfce4 window manager startup------------------"
+	log "Starting Window Manager"
 
 	if [ "${START_XFCE4}" == "1" ] ; then
 		if [ -f /opt/VirtualGL/bin/vglrun ] && [ ! -z "${KASM_EGL_CARD}" ] && [ ! -z "${KASM_RENDERD}" ] && [ -O "${KASM_RENDERD}" ] && [ -O "${KASM_EGL_CARD}" ] ; then
@@ -186,7 +206,7 @@ function start_window_manager (){
 
 function start_audio_out_websocket (){
 	if [[ ${KASM_SVC_AUDIO:-1} == 1 ]]; then
-		echo 'Starting audio websocket server'
+		log 'Starting audio websocket server'
 		$STARTUPDIR/jsmpeg/kasm_audio_out-linux kasmaudio 8081 4901 ${HOME}/.vnc/self.pem ${HOME}/.vnc/self.pem "kasm_user:$VNC_PW"  &
 
 		KASM_PROCS['kasm_audio_out_websocket']=$!
@@ -200,7 +220,7 @@ function start_audio_out_websocket (){
 
 function start_audio_out (){
 	if [[ ${KASM_SVC_AUDIO:-1} == 1 ]]; then
-		echo 'Starting audio server'
+		log 'Starting audio server'
 
         if [ "${START_PULSEAUDIO:-0}" == "1" ] ;
         then
@@ -224,7 +244,7 @@ function start_audio_out (){
 
 function start_audio_in (){
 	if [[ ${KASM_SVC_AUDIO_INPUT:-1} == 1 ]]; then
-		echo 'Starting audio input server'
+		log 'Starting audio input server'
 		$STARTUPDIR/audio_input/kasm_audio_input_server --ssl --auth-token "kasm_user:$VNC_PW" --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
 
 		KASM_PROCS['kasm_audio_in']=$!
@@ -238,7 +258,7 @@ function start_audio_in (){
 
 function start_upload (){
 	if [[ ${KASM_SVC_UPLOADS:-1} == 1 ]]; then
-		echo 'Starting upload server'
+		log 'Starting upload server'
 		$STARTUPDIR/upload_server/kasm_upload_server --ssl --auth-token "kasm_user:$VNC_PW" --port 4902 --upload_dir ${HOME}/Uploads &
 
 		KASM_PROCS['upload_server']=$!
@@ -252,7 +272,7 @@ function start_upload (){
 
 function start_gamepad (){
 	if [[ ${KASM_SVC_GAMEPAD:-1} == 1 ]]; then
-		echo 'Starting gamepad server'
+		log 'Starting gamepad server'
 		$STARTUPDIR/gamepad/kasm_gamepad_server --ssl --auth-token "kasm_user:$VNC_PW" --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
 
 		KASM_PROCS['kasm_gamepad']=$!
@@ -266,7 +286,7 @@ function start_gamepad (){
 
 function start_webcam (){
 	if [[ ${KASM_SVC_WEBCAM:-1} == 1 ]] && [[ -e /dev/video0 ]]; then
-		echo 'Starting webcam server'
+		log 'Starting webcam server'
                 if [[ $DEBUG == true ]]; then
 			$STARTUPDIR/webcam/kasm_webcam_server --debug --port 4905 --ssl --cert ${HOME}/.vnc/self.pem --certkey ${HOME}/.vnc/self.pem &
 		else
@@ -284,7 +304,7 @@ function start_webcam (){
 
 function start_printer (){
 		if [[ ${KASM_SVC_PRINTER:-1} == 1 ]]; then
-			echo 'Starting printer service'
+			log 'Starting printer service'
             if [[ $DEBUG == true ]]; then
 			    $STARTUPDIR/printer/kasm_printer_service --debug --directory $HOME/PDF --relay /tmp/printer &
 		    else
@@ -310,6 +330,7 @@ function custom_startup (){
 
 		"$custom_startup_script" &
 		KASM_PROCS['custom_startup']=$!
+		log "Executed custom startup script."
 	fi
 }
 
@@ -321,7 +342,7 @@ function ensure_recorder_running () {
     local kasm_recorder_process="/dockerstartup/recorder/kasm_recorder_service"
     local kasm_recorder_ack="/tmp/kasm_recorder.ack"
 
-		if [[ -f "$kasm_recorder_ack" ]]; then
+	if [[ -f "$kasm_recorder_ack" ]]; then
         local ack_user=$(stat -c '%U' $kasm_recorder_ack)
         if [[ "$ack_user" == "kasm-recorder" ]]; then
             SECONDS=0  #SECONDS is a built in bash variable that is incremented approximately every second
@@ -334,20 +355,20 @@ function ensure_recorder_running () {
     if [[ -z $kasm_recorder_pid ]]; then
         # This leverages the outside while loop that calls this function to provider checking ever x seconds.
         if [[ -z $recorder_pid ]] && (( $SECONDS > 15 )); then
-            echo "$kasm_recorder_process: not started, exiting"
+            log "$kasm_recorder_process: not started, exiting" "ERROR"
             exit 0
         fi
 
         kasm_recorder_pid=$recorder_pid
     else
         if [[ -z $recorder_pid ]]; then
-            echo "$kasm_recorder_process: not running, exiting"
+            log "$kasm_recorder_process: not running, exiting" "ERROR"
             exit 0
         fi
 
         recorder_user=$(ps -p $recorder_pid -o user=)
         if [[ $recorder_user != "kasm-recorder" ]]; then
-            echo "$kasm_recorder_process: not running as kasm-recorder, exiting"
+            log "$kasm_recorder_process: not running as kasm-recorder, exiting" "ERROR"
             exit 0
         fi
     fi
@@ -405,10 +426,7 @@ if [[ -f $PASSWD_PATH ]]; then
     echo -e "\n---------  purging existing VNC password settings  ---------"
     rm -f $PASSWD_PATH
 fi
-#VNC_PW_HASH=$(python3 -c "import crypt; print(crypt.crypt('${VNC_PW}', '\$5\$kasm\$'));")
-#VNC_VIEW_PW_HASH=$(python3 -c "import crypt; print(crypt.crypt('${VNC_VIEW_ONLY_PW}', '\$5\$kasm\$'));")
-#echo "kasm_user:${VNC_PW_HASH}:ow" > $PASSWD_PATH
-#echo "kasm_viewer:${VNC_VIEW_PW_HASH}:" >> $PASSWD_PATH
+
 echo -e "${VNC_PW}\n${VNC_PW}\n" | kasmvncpasswd -u kasm_user -wo
 echo -e "${VNC_PW}\n${VNC_PW}\n" | kasmvncpasswd -u kasm_viewer -r
 chmod 600 $PASSWD_PATH
@@ -436,7 +454,7 @@ echo -e "\n\n------------------ KasmVNC environment started ------------------"
 tail -f $HOME/.vnc/*$DISPLAY.log &
 
 KASMIP=$(hostname -i)
-echo "Kasm User ${KASM_USER}(${KASM_USER_ID}) started container id ${HOSTNAME} with local IP address ${KASMIP}"
+log "Kasm User ${KASM_USER}(${KASM_USER_ID}) started container id ${HOSTNAME} with local IP address ${KASMIP}" "INFO"
 
 # start custom startup script
 custom_startup
@@ -456,20 +474,20 @@ do
 			case $process in
 				kasmvnc)
 					if [ "$KASMVNC_AUTO_RECOVER" = true ] ; then
-						echo "KasmVNC crashed, restarting"
+						log "KasmVNC crashed, restarting" "WARNING"
 						start_kasmvnc
 					else
-						echo "KasmVNC crashed, exiting container"
+						log "KasmVNC crashed, exiting container" "ERROR"
 						exit 1
 					fi
 					;;
 				window_manager)
-					echo "Window manager crashed, restarting"
+					log "Window manager crashed, restarting" "WARNING"
 
 					if [[ ${KASM_SVC_RECORDER:-0} == 1 ]]; then
-						echo "Waiting for recorder service to upload all pending recordings"
+						log "Waiting for recorder service to upload all pending recordings"
 						ensure_recorder_terminates_gracefully
-						echo "Recorder service has terminated, exiting container"
+						log "Recorder service has terminated, exiting container" "ERROR"
 						exit 1
 					fi
 
@@ -526,4 +544,4 @@ do
 done
 
 
-echo "Exiting Kasm container"
+log "Exiting Kasm container"
