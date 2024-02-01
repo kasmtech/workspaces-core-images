@@ -2,6 +2,8 @@
 set -ex
 
 {
+    /usr/bin/desktop_ready
+
     IP=$(ip route get 1.1.1.1 | grep -oP "src \\K\\S+")
 
     mkdir -p /tmp/working_certs
