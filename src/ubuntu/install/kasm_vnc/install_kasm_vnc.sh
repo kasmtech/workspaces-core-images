@@ -13,13 +13,14 @@ prepare_rpm_repo_dependencies() {
   fi
 }
 
+
 echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="a10358b5ca10ef12c377ddac8bacb8c8a6ca31ae"
-BRANCH="master" # just use 'release' for a release branch
-KASMVNC_VER="1.2.1"
+COMMIT_ID="12066abc660de932924b5635913170b3c4ac5f87"
+BRANCH="release" # just use 'release' for a release branch
+KASMVNC_VER="1.3.0"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
