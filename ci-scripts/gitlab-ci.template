@@ -187,6 +187,9 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
   when: always
+  variables:
+    SCHEDULED: "{{ SCHEDULED }}"
+    SCHEDULE_NAME: "{{ SCHEDULED_NAME }}"
   script:
     - apk add bash
     - bash ci-scripts/manifest.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "multi"
@@ -212,6 +215,9 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
   when: always
+  variables:
+    SCHEDULED: "{{ SCHEDULED }}"
+    SCHEDULE_NAME: "{{ SCHEDULED_NAME }}"
   script:
     - apk add bash
     - bash ci-scripts/manifest.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "single"
