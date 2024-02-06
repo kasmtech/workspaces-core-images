@@ -189,7 +189,7 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   when: always
   variables:
     SCHEDULED: "{{ SCHEDULED }}"
-    SCHEDULE_NAME: "{{ SCHEDULED_NAME }}"
+    SCHEDULE_NAME: "{{ SCHEDULE_NAME }}"
   script:
     - apk add bash
     - bash ci-scripts/manifest.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "multi"
@@ -217,7 +217,7 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   when: always
   variables:
     SCHEDULED: "{{ SCHEDULED }}"
-    SCHEDULE_NAME: "{{ SCHEDULED_NAME }}"
+    SCHEDULE_NAME: "{{ SCHEDULE_NAME }}"
   script:
     - apk add bash
     - bash ci-scripts/manifest.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "single"
