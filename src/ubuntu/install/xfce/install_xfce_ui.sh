@@ -153,6 +153,8 @@ elif [ "$DISTRO" = "opensuse" ]; then
     xfce4-notifyd \
     xfce4-terminal \
     xset
+  # Pidof is no longer shipped in OpenSuse
+  ln -s /usr/bin/pgrep /usr/bin/pidof
 elif [[ "$DISTRO" = @(fedora37|fedora38|fedora39) ]]; then
   dnf group install xfce -y
   dnf install -y \

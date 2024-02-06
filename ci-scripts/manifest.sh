@@ -21,7 +21,7 @@ fi
 
 # Determine if this is a rolling build
 if [[ "${SCHEDULED}" != "NO" ]]; then
-   if [[ "${SCHEDULE_NAME}" == "NO" ]]; then
+  if [[ "${SCHEDULE_NAME}" == "NO" ]]; then
     SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling
   else
     SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling-${SCHEDULE_NAME}
