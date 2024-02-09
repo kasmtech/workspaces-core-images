@@ -13,12 +13,11 @@ prepare_rpm_repo_dependencies() {
   fi
 }
 
-
 echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="12066abc660de932924b5635913170b3c4ac5f87"
+COMMIT_ID="001ff1aa47cd6a2803c47c1b9ca572352681504a"
 BRANCH="release" # just use 'release' for a release branch
 KASMVNC_VER="1.3.0"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
