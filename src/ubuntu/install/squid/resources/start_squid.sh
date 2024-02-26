@@ -42,6 +42,7 @@ set -ex
     else
         cp /usr/local/squid/etc/ssl_cert/squid.pem ${CERT_FILE}
     fi
+    chmod 644 ${CERT_FILE}
 
     if [[ "${DISTRO}" == @(centos|oracle7|fedora) ]]; then
         update-ca-trust
