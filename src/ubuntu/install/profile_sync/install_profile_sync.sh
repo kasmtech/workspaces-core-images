@@ -79,8 +79,8 @@ download_and_symlink() {
 }
 
 ARCH=$(arch)
-BRANCH="release_1.0.3"
-COMMIT_ID="635ff757b74f53b88d6ceb58d6041676fd59f5bd"
+BRANCH="release_1.0.4"
+COMMIT_ID="ce08b72955459c61f27ce5015547fab9b25842d4"
 
 convert_local_distro_to_profile_sync_distro
 check_distro_is_supported
