@@ -191,9 +191,8 @@ else
     apt-get install -y /tmp/kasmvncserver.deb
     rm -f /tmp/kasmvncserver.deb
 fi
-#mkdir $KASM_VNC_PATH/certs
 mkdir -p $KASM_VNC_PATH/www/Downloads
 chown -R 0:0 $KASM_VNC_PATH
 chmod -R og-w $KASM_VNC_PATH
-#chown -R 1000:0 $KASM_VNC_PATH/certs
+ln -sf /home/kasm-user/Downloads $KASM_VNC_PATH/www/Downloads/Downloads
 chown -R 1000:0 $KASM_VNC_PATH/www/Downloads
