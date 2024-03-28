@@ -33,12 +33,14 @@ function verify_profile_config {
     fi
 
 
-    if [ -d "$KASM_VNC_PATH/Downloads/Downloads" ]; then
-        echo "Downloads RX Symlink Exists"
-    else
-        echo "Creating Downloads RX Symlink"
+    if [[ "$(readlink -f $KASM_VNC_PATH/www/Downloads/Downloads)" != "$HOME/Downloads" ]]; then
+        echo "Fixing Downloads RX Symlink"
+        rm -f $KASM_VNC_PATH/www/Downloads/Downloads
         ln -sf $HOME/Downloads $KASM_VNC_PATH/www/Downloads/Downloads
+    else
+        echo "Downloads RX Symlink Exists"
     fi
+
 
     ls -la $HOME/Desktop
 
