@@ -412,6 +412,48 @@ function ensure_recorder_terminates_gracefully () {
   done
 }
 
+function wait_for_egress_signal() {
+	egress_file="/dockerstartup/.egress_status"
+
+	while [ ! -f "$egress_file" ]; do
+		sleep 1
+	done
+
+	egress_status=$(cat $egress_file)
+
+	if [ "$egress_status" == "ready" ]; then
+		return
+	fi
+
+	if [ "$egress_status" == "error" ]; then
+		echo "Failed to establish egress gateway. Exiting..."
+		exit 1
+	fi
+}
+
+function wait_for_network_devices() {
+	while true; do
+		interfaces=$(ip link show type veth | awk -F: '/^[0-9]+: / {print $2}' | awk '{print $1}' | sed 's/@.*//')
+		if [ -z "$interfaces" ]; then
+			sleep 1
+			continue
+		fi
+
+		for interface in $interfaces; do
+			if [[ $interface == eth* ]]; then
+				return
+			fi
+
+			if [[ $interface == k-p-* ]]; then
+				wait_for_egress_signal
+				return
+			fi
+		done
+
+		sleep 1
+	done
+}
+
 ############ END FUNCTION DECLARATIONS ###########
 
 if [[ $1 =~ -h|--help ]]; then
@@ -424,6 +466,11 @@ if [[ ${KASM_DEBUG:-0} == 1 ]]; then
     export DEBUG=true
     set -x
 fi
+
+# wait for any network interface other than loopback to be up
+# this is necessary because containers with egress gateways
+# have a custom network interface setup that might not be ready
+wait_for_network_devices
 
 # Syncronize user-space loaded persistent profiles
 pull_profile
