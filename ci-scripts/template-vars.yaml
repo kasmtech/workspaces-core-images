@@ -78,6 +78,23 @@ multiImages:
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
+  - name1: ubuntu
+    name2: noble
+    base: ubuntu:24.04
+    bg: bg_noble.png
+    distro: ubuntu
+    dockerfile: dockerfile-kasm-core
+    changeFiles:
+      - dockerfile-kasm-core
+      - src/ubuntu/xfce/**
+      - src/ubuntu/xfce/.config/**
+      - src/ubuntu/xfce/.config/xfce4/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+      - src/ubuntu/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
   - name1: debian
     name2: bullseye
     base: debian:bullseye-slim
