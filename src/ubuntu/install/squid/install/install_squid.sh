@@ -47,7 +47,7 @@ elif [[ "${DISTRO}" == "alpine" ]]; then
   else
     apk add --no-cache openssl1.1-compat
   fi
-elif grep -q bookworm /etc/os-release; then
+elif grep -q bookworm /etc/os-release || grep -q noble /etc/os-release; then
   wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
   dpkg -i libssl1.1.${ARCH}.deb
   rm -f libssl1.1.${ARCH}.deb

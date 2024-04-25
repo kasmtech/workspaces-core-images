@@ -1,0 +1,1 @@
+Ubuntu Noble base image for Kasm Workspaces

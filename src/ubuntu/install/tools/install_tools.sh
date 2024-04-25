@@ -39,7 +39,7 @@ else
   locale-gen en_US.UTF-8
 fi
 
-if [ "$DISTRO" = "ubuntu" ]; then
+if [ "$DISTRO" = "ubuntu" ] && ! grep -q "24.04" /etc/os-release; then
   #update mesa to latest
   add-apt-repository ppa:kisak/turtle
   apt-get update
