@@ -1,0 +1,33 @@
+#!/bin/bash
+
+TIMEOUT=
+ICON="/usr/share/icons/Papirus-Dark/24x24/actions/dialog-information.svg"
+TITLE=
+MESSAGE=
+LASTARG=
+
+for var in "$@"
+do
+  if [[ "$var" == -* ]] ; then
+    LASTARG="$var"
+  else
+    if [ -z "$LASTARG"  ] ; then
+      if [ -z "$TITLE" ] ; then
+        TITLE="$var"
+      else
+        MESSAGE="$var                                "
+      fi
+    else
+      case $LASTARG in
+        -t)
+          TIMEOUT=$var
+          ;;
+        -i)
+          ICON=$var
+          ;;
+      esac
+    fi
+  fi
+done
+
+kdialog --passivepopup "$MESSAGE" --icon "$ICON" --title "$TITLE"  $TIMEOUT &

@@ -58,7 +58,12 @@ elif [ "${DISTRO}" == "alpine" ]; then
   fi
 else
   apt-get update
-  apt-get install -y curl git ffmpeg
+  apt-get install -y \
+    curl \
+    ffmpeg \
+    git \
+    pulseaudio \
+    pulseaudio-utils
 fi
 
 mkdir -p /var/run/pulse

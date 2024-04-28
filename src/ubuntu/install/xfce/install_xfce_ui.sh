@@ -204,7 +204,10 @@ chmod +x /usr/bin/execThunar.sh
 
 cat >/usr/bin/desktop_ready <<EOL
 #!/usr/bin/env bash
-until pids=\$(pidof xfce4-session); do sleep .5; done
+if [ -z \${START_DE+x} ]; then \
+  START_DE="xfce4-session"
+fi
+until pids=\$(pidof \${START_DE}); do sleep .5; done
 EOL
 chmod +x /usr/bin/desktop_ready
 

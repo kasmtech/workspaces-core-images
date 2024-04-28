@@ -14,9 +14,17 @@ PULL_BRANCH=${SANITIZED_BRANCH}
 
 # Determine if this is a private or public build
 if [[ "${CI_COMMIT_REF_NAME}" == release/* ]] || [[ "${CI_COMMIT_REF_NAME}" == "develop" ]]; then
-  ENDPOINT="core-${NAME1}-${NAME2}"
+  if [[ "${NAME1}" == "${NAME2}" ]]; then
+    ENDPOINT="core-${NAME1}"
+  else
+    ENDPOINT="core-${NAME1}-${NAME2}"
+  fi
 else
-  ENDPOINT="core-${NAME1}-${NAME2}-private"
+  if [[ "${NAME1}" == "${NAME2}" ]]; then
+    ENDPOINT="core-${NAME1}-private"
+  else
+    ENDPOINT="core-${NAME1}-${NAME2}-private"
+  fi
 fi
 
 # Determine if this is a rolling build

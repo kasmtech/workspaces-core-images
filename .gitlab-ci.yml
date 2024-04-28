@@ -13,6 +13,8 @@ stages:
   - run
   - test
 variables:
+  DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
+  GIT_SUBMODULE_STRATEGY: normal
   KASM_RELEASE: "1.14.0"
   TEST_INSTALLER: "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_backend/1e99090dadb026f1e37e34e53334da20061bc21c/kasm_workspaces_feature_tester-1.15-pre-release_1.15.0.1e9909.tar.gz"
   SCAN_CONTAINERS: "true"

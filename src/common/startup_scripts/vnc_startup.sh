@@ -29,6 +29,9 @@ if [ "${LC_ALL}" != "en_US.UTF-8" ]; then
   export LANGUAGE=${LC_ALL}
 fi
 
+# Dbus
+export $(dbus-launch)
+
 # dict to store processes
 declare -A KASM_PROCS
 
@@ -190,24 +193,39 @@ function start_kasmvnc (){
 }
 
 function start_window_manager (){
-	log "Starting Window Manager"
-
-	if [ "${START_XFCE4}" == "1" ] ; then
+	echo -e "\n------------------ Xfce4 window manager startup------------------"
+	if [ "${START_XFCE4}" == "1" ] || [ "${START_DE}" == "xfce4-session" ]; then
 		if [ -f /opt/VirtualGL/bin/vglrun ] && [ ! -z "${KASM_EGL_CARD}" ] && [ ! -z "${KASM_RENDERD}" ] && [ -O "${KASM_RENDERD}" ] && [ -O "${KASM_EGL_CARD}" ] ; then
 		echo "Starting XFCE with VirtualGL using EGL device ${KASM_EGL_CARD}"
 			DISPLAY=:1 /opt/VirtualGL/bin/vglrun -d "${KASM_EGL_CARD}" /usr/bin/startxfce4 --replace &
 		else
 			echo "Starting XFCE"
-			if [ -f '/usr/bin/zypper' ]; then
-				DISPLAY=:1 /usr/bin/dbus-launch /usr/bin/startxfce4 --replace &
-			else
-				/usr/bin/startxfce4 --replace &
-			fi
+			DISPLAY=:1 /usr/bin/startxfce4 --replace &
 		fi
 		KASM_PROCS['window_manager']=$!
 	else
 		echo "Skipping XFCE Startup"
 	fi
+        echo -e "\n------------------ Openbox window manager startup------------------"
+        if [ "${START_DE}" == "openbox" ] ; then
+		/usr/bin/openbox-session &
+                KASM_PROCS['window_manager']=$!
+        else
+                echo "Skipping OpenBox Startup"
+        fi
+        echo -e "\n------------------ KDE window manager startup------------------"
+        if [ "${START_DE}" == "kde5" ] ; then
+                if [ -f /opt/VirtualGL/bin/vglrun ] && [ ! -z "${KASM_EGL_CARD}" ] && [ ! -z "${KASM_RENDERD}" ] && [ -O "${KASM_RENDERD}" ] && [ -O "${KASM_EGL_CARD}" ] ; then
+                echo "Starting KDE with VirtualGL using EGL device ${KASM_EGL_CARD}"
+                        DISPLAY=:1 /opt/VirtualGL/bin/vglrun -d "${KASM_EGL_CARD}" /usr/bin/startplasma-x11 &
+                else
+                        echo "Starting KDE"
+                        DISPLAY=:1 /usr/bin/startplasma-x11 &
+                fi
+                KASM_PROCS['window_manager']=$!
+        else
+                echo "Skipping KDE Startup"
+        fi
 }
 
 function start_audio_out_websocket (){
@@ -517,7 +535,7 @@ do
 					# TODO: This will only work if both processes are killed, requires more work
 					start_upload
 					;;
-                                kasm_gamepad)
+                kasm_gamepad)
 					echo "Gamepad Service Failed"
 					# TODO: Needs work in python project to support auto restart
 					# start_gamepad
