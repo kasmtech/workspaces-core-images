@@ -62,3 +62,19 @@ rm -f \
   /etc/xdg/autostart/xfce4-screensaver.desktop \
   /etc/xdg/autostart/xfce-polkit.desktop \
   /etc/xdg/autostart/xscreensaver.desktop
+
+# Cleanup specific to KasmOS
+if [ "$1" = "kasmos" ] ; then
+  echo "Removing packages from base"
+  packages=("konsole" "geeqie" "gwenview" "imagemagick-6.q16" "kate" "dolphin")
+  for package in ${packages[@]}; do
+    if [[ $(apt -qq list "$package") ]] ; then
+      echo "Removing package $package."
+      apt remove -y ${package}
+    else
+      echo "Package ${package} not found."
+    fi
+  done
+ apt autoremove -y
+
+fi

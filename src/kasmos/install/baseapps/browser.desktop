@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=Chromium Web Browser
+Exec=kdialog --msgbox "A default internet browser is not installed."
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=chromium
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;application/x-mimearchive;x-scheme-handler/http;x-scheme-handler/https;
+StartupWMClass=chromium
+StartupNotify=true
+Keywords=browser

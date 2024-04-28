@@ -27,6 +27,20 @@ files: &UNIVERSAL_CHANGE_FILES
   - .gitlab-ci.yml
 
 multiImages:
+  - name1: kasmos
+    name2: kasmos
+    base: debian:bookworm-slim
+    bg: kasmos.png
+    distro: debian
+    dockerfile: dockerfile-kasm-core-kasmos
+    changeFiles:
+      - dockerfile-kasm-core-kasmos
+      - src/ubuntu/install/package_rules/**
+      - src/ubuntu/nvidia/**
+      - src/ubuntu/sysbox/**
+      - src/ubuntu/virtualgl/**
+      - src/ubuntu/install/kde/**
+      - kasm-desktop-kde/**
   - name1: ubuntu
     name2: bionic
     base: ubuntu:18.04
