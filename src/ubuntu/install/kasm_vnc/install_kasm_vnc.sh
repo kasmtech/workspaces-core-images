@@ -17,7 +17,7 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="574954611c0e8e77d1365f5f739e641eddb2bcbd"
+COMMIT_ID="511e2ae542e95f5447a0a145bb54ced968e6cfec"
 BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.3.2"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
@@ -75,6 +75,12 @@ elif [[ "${DISTRO}" == "fedora39" ]] ; then
     else
         BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_thirtynine_${KASM_VER_NAME_PART}_aarch64.rpm"
     fi
+elif [[ "${DISTRO}" == "fedora40" ]] ; then
+    if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_forty_${KASM_VER_NAME_PART}_x86_64.rpm"
+    else
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_fedora_forty_${KASM_VER_NAME_PART}_aarch64.rpm"
+    fi
 elif [[ "${DISTRO}" = @(debian|parrotos6) ]] ; then
     if $(grep -q bookworm /etc/os-release) || $(grep -q lory /etc/os-release); then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
@@ -129,7 +135,7 @@ elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|alma
     dnf localinstall -y kasmvncserver.rpm
     dnf install -y mesa-dri-drivers
     rm kasmvncserver.rpm
-elif [[ "${DISTRO}" == @(fedora37|fedora38|fedora39) ]] ; then
+elif [[ "${DISTRO}" == @(fedora37|fedora38|fedora39|fedora40) ]] ; then
     dnf install -y xorg-x11-drv-amdgpu xorg-x11-drv-ati
     if [ "${BUILD_ARCH}" == "x86_64" ]; then
         dnf install -y xorg-x11-drv-intel

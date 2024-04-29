@@ -30,7 +30,7 @@ EOL
 }
 
 echo "Install Xfce4 UI components"
-if [[ "${DISTRO}" != @(centos|oracle7|oracle8|opensuse|fedora37|fedora38|fedora39|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
+if [[ "${DISTRO}" != @(centos|oracle7|oracle8|opensuse|fedora37|fedora38|fedora39|fedora40|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
   apt-get update
 fi
 
@@ -155,7 +155,7 @@ elif [ "$DISTRO" = "opensuse" ]; then
     xset
   # Pidof is no longer shipped in OpenSuse
   ln -s /usr/bin/pgrep /usr/bin/pidof
-elif [[ "$DISTRO" = @(fedora37|fedora38|fedora39) ]]; then
+elif [[ "$DISTRO" = @(fedora37|fedora38|fedora39|fedora40) ]]; then
   dnf group install xfce -y
   dnf install -y \
     gvfs \
@@ -180,7 +180,7 @@ elif [ "$DISTRO" = "alpine" ]; then
   rm -f /usr/share/xfce4/panel/plugins/power-manager-plugin.desktop
 fi
 
-if [[ "${DISTRO}" != @(centos|oracle7|oracle8|fedora37|fedora38|fedora39|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
+if [[ "${DISTRO}" != @(centos|oracle7|oracle8|fedora37|fedora38|fedora39|fedora40|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
   replace_default_xinit
   if [ "${START_XFCE4}" == "1" ] ; then
     replace_default_99x11_common_start

@@ -80,7 +80,7 @@ download_and_symlink() {
 
 ARCH=$(arch)
 BRANCH="develop"
-COMMIT_ID="a72c9f215b328348e9703ad4336eefbba9806113"
+COMMIT_ID="a1ffc539ae2c42eda1bcbc5a16e352f241e94a7c"
 
 convert_local_distro_to_profile_sync_distro
 check_distro_is_supported

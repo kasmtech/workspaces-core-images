@@ -4,8 +4,10 @@ set -ex
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 if [[ "${ARCH}" == "arm64" ]]; then
   LIBSSLURL="http://ports.ubuntu.com/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_arm64.deb"
+  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/aarch64/os/Packages/o/openssl1.1-1.1.1q-5.fc39.aarch64.rpm"
 else
   LIBSSLURL="http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb"
+  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/x86_64/os/Packages/o/openssl1.1-1.1.1q-5.fc39.x86_64.rpm"
 fi
 
 # intall squid
@@ -15,12 +17,12 @@ if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) || $(gre
   wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
   dpkg -i libssl1.1.${ARCH}.deb
   rm -f libssl1.1.${ARCH}.deb
-elif [[ "${DISTRO}" != @(centos|oracle7|oracle8|oracle9|opensuse|fedora37|fedora38|fedora39|rockylinux9|rockylinux8|almalinux9|almalinux8|alpine) ]] ; then
+elif [[ "${DISTRO}" != @(centos|oracle7|oracle8|oracle9|opensuse|fedora37|fedora38|fedora39|fedora40|rockylinux9|rockylinux8|almalinux9|almalinux8|alpine) ]] ; then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
 fi
 
 # update squid conf with user info
-if [[ "${DISTRO}" == @(centos|oracle7|oracle8|oracle9|fedora37|fedora38|fedora39|almalinux8|almalinux9|rockylinux8|rockylinux9|alpine) ]]; then
+if [[ "${DISTRO}" == @(centos|oracle7|oracle8|oracle9|fedora37|fedora38|fedora39|fedora40|almalinux8|almalinux9|rockylinux8|rockylinux9|alpine) ]]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
 elif [ "${DISTRO}" == "opensuse" ]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
@@ -35,6 +37,13 @@ cd /usr/local/squid/etc/ssl_cert
 
 if [[ "${DISTRO}" == @(fedora37|fedora38|fedora39) ]]; then
   dnf install -y openssl1.1 xkbcomp
+  rm -f /etc/X11/xinit/xinitrc
+elif [[ "${DISTRO}" == "fedora40" ]]; then
+  curl -o \
+    /tmp/libssl.rpm -L \
+    "${RPMLIBSSL}"
+  rpm -i \
+    /tmp/libssl.rpm
   rm -f /etc/X11/xinit/xinitrc
 elif [[ "${DISTRO}" == @(rockylinux9|oracle9|almalinux9) ]]; then
   dnf install -y compat-openssl11 xkbcomp
@@ -69,7 +78,7 @@ chown -R proxy:proxy /etc/squid/blocked.acl
 
 if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   yum install -y memcached cyrus-sasl iproute
-elif [[ "${DISTRO}" == @(oracle8|fedora37|fedora38|fedora39|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
+elif [[ "${DISTRO}" == @(oracle8|fedora37|fedora38|fedora39|fedora40|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
   dnf install -y memcached cyrus-sasl iproute
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -yn memcached cyrus-sasl iproute2 libatomic1
@@ -108,7 +117,7 @@ chmod +x /etc/squid/kasm_squid_adapter
 # Install Cert utilities
 if [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   yum install -y nss-tools
-elif [[ "${DISTRO}" == @(oracle8|fedora37|fedora38|fedora39|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
+elif [[ "${DISTRO}" == @(oracle8|fedora37|fedora38|fedora39|fedora40|oracle9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
   dnf install -y nss-tools
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -yn mozilla-nss-tools
