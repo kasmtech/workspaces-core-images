@@ -517,7 +517,7 @@ do
 					# TODO: This will only work if both processes are killed, requires more work
 					start_upload
 					;;
-                                kasm_gamepad)
+				kasm_gamepad)
 					echo "Gamepad Service Failed"
 					# TODO: Needs work in python project to support auto restart
 					# start_gamepad
