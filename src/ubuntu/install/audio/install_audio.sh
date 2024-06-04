@@ -46,7 +46,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -ny curl git
   zypper install -yn ffmpeg pulseaudio-utils
 elif [ "${DISTRO}" == "alpine" ]; then
-  if grep -q v3.19 /etc/os-release; then
+  if grep -q v3.19 /etc/os-release || grep -q v3.20 /etc/os-release; then
     apk add --no-cache \
       ffmpeg \
       ffplay \
