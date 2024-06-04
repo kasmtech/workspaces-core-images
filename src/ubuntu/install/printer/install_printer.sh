@@ -13,6 +13,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
 elif [ "${DISTRO}" == "alpine" ]; then
   echo '@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
   apk add --no-cache cups cups-client cups-pdf@testing
+  usermod -a -G lpadmin root
 else
   apt-get update
   apt-get install -y cups cups-client cups-pdf

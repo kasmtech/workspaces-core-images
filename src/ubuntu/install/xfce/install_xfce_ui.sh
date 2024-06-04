@@ -39,7 +39,6 @@ if [ "${DISTRO}" == "kali" ]; then
     atril \
     dbus-x11 \
     engrampa \
-    kali-debtags \
     kali-defaults-desktop \
     kali-menu \
     kali-themes \

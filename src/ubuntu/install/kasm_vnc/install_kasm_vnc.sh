@@ -17,7 +17,7 @@ echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
 UBUNTU_CODENAME=""
-COMMIT_ID="511e2ae542e95f5447a0a145bb54ced968e6cfec"
+COMMIT_ID="9f7a6b58cedaa8637e9274e428a498e023b0fc2f"
 BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.3.2"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
@@ -96,7 +96,13 @@ elif [[ "${DISTRO}" = @(debian|parrotos6) ]] ; then
         fi
     fi
 elif [[ "${DISTRO}" == "alpine" ]] ; then
-    if grep -q v3.19 /etc/os-release; then
+    if grep -q v3.20 /etc/os-release; then
+        if [[ "$(arch)" =~ ^x86_64$ ]] ; then
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_320/kasmvnc.alpine_320_x86_64.tgz"
+        else
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_320/kasmvnc.alpine_320_aarch64.tgz"
+        fi
+    elif grep -q v3.19 /etc/os-release; then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
             BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/output/alpine_319/kasmvnc.alpine_319_x86_64.tgz"
         else

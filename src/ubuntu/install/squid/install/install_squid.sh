@@ -51,7 +51,7 @@ elif [[ "${DISTRO}" == @(rockylinux9|oracle9|almalinux9) ]]; then
 elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
   yum install -y openssl11-libs
 elif [[ "${DISTRO}" == "alpine" ]]; then
-  if grep -q v3.19 /etc/os-release; then
+  if grep -q v3.19 /etc/os-release || grep -q v3.20 /etc/os-release; then
     apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing openssl1.1-compat
   else
     apk add --no-cache openssl1.1-compat

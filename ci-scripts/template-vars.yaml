@@ -378,6 +378,20 @@ multiImages:
       - src/alpine/xfce/.config/xfce4/**
       - src/alpine/xfce/.config/xfce4/xfconf/**
       - src/alpine/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
+  - name1: alpine
+    name2: 320
+    base: alpine:3.20
+    bg: bg_alpine.png
+    distro: alpine
+    dockerfile: dockerfile-kasm-core-alpine
+    changeFiles:
+      - dockerfile-kasm-core-alpine
+      - src/alpine/**
+      - src/alpine/xfce/**
+      - src/alpine/xfce/.config/**
+      - src/alpine/xfce/.config/xfce4/**
+      - src/alpine/xfce/.config/xfce4/xfconf/**
+      - src/alpine/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
 singleImages:
   - name1: cuda
     name2: focal
