@@ -44,4 +44,7 @@ if [ "$DISTRO" = "ubuntu" ] && ! grep -q "24.04" /etc/os-release; then
   add-apt-repository ppa:kisak/turtle
   apt-get update
   apt full-upgrade -y
+elif [ "$DISTRO" = "ubuntu" ] && grep -q "24.04" /etc/os-release; then
+  userdel ubuntu
+  rm -Rf /home/ubuntu
 fi
