@@ -343,7 +343,7 @@ build_fedora_37:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 manifest_fedora_37:
   stage: manifest
@@ -424,7 +424,7 @@ build_ubuntu_bionic_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_ubuntu_focal_dev:
   stage: build
@@ -445,7 +445,7 @@ build_ubuntu_focal_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_ubuntu_jammy_dev:
   stage: build
@@ -466,7 +466,7 @@ build_ubuntu_jammy_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_debian_bullseye_dev:
   stage: build
@@ -488,7 +488,7 @@ build_debian_bullseye_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_cuda_focal_dev:
   stage: build
@@ -549,7 +549,7 @@ build_kali_rolling_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_centos_dev:
   stage: build
@@ -612,7 +612,7 @@ build_oracle_8_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_oracle_9_dev:
   stage: build
@@ -633,7 +633,7 @@ build_oracle_9_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_rockylinux_9_dev:
   stage: build
@@ -655,7 +655,7 @@ build_rockylinux_9_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_rockylinux_8_dev:
   stage: build
@@ -677,7 +677,7 @@ build_rockylinux_8_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_almalinux_9_dev:
   stage: build
@@ -699,7 +699,7 @@ build_almalinux_9_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_almalinux_8_dev:
   stage: build
@@ -721,7 +721,7 @@ build_almalinux_8_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_opensuse_15_dev:
   stage: build
@@ -742,7 +742,7 @@ build_opensuse_15_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_fedora_37_dev:
   stage: build
@@ -763,7 +763,7 @@ build_fedora_37_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_parrotos_5_dev:
   stage: build
@@ -785,7 +785,7 @@ build_parrotos_5_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_alpine_317_dev:
   stage: build
@@ -807,7 +807,7 @@ build_alpine_317_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 test_multi_arch_dev:
   stage: test
@@ -838,7 +838,7 @@ test_multi_arch_dev:
     - manifest_dev
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
         KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
@@ -1256,7 +1256,7 @@ build_fedora_37_scheduled:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ oci-fixed-amd, oci-fixed-amd ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 manifest_fedora_37_scheduled:
   stage: manifest
