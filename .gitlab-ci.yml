@@ -1,6 +1,6 @@
-image: docker
+image: docker:24.0.6
 services:
-  - docker:dind
+  - docker:24.0.6-dind
 
 stages:
   - readme
@@ -10,6 +10,8 @@ stages:
   - linktests
 
 variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   KASM_RELEASE: "1.13.0"
 
@@ -37,7 +39,7 @@ build_ubuntu_bionic:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_ubuntu_focal:
   stage: build
@@ -57,7 +59,7 @@ build_ubuntu_focal:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_ubuntu_jammy:
   stage: build
@@ -77,7 +79,7 @@ build_ubuntu_jammy:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_debian_bullseye:
   stage: build
@@ -97,7 +99,7 @@ build_debian_bullseye:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_cuda_focal:
   stage: build
@@ -112,6 +114,8 @@ build_cuda_focal:
     - /^release\/.*$/
   except:
     - schedules
+  tags:
+    - oci-fixed-amd
 
 build_remnux_focal:
   stage: build
@@ -127,7 +131,7 @@ build_remnux_focal:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 
 build_kali_rolling:
@@ -148,7 +152,7 @@ build_kali_rolling:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_centos:
   stage: build
@@ -163,6 +167,8 @@ build_centos:
     - /^release\/.*$/
   except:
     - schedules
+  tags:
+    - oci-fixed-amd
 
 build_oracle_7:
   stage: build
@@ -178,7 +184,7 @@ build_oracle_7:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_oracle_8:
   stage: build
@@ -198,7 +204,7 @@ build_oracle_8:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_oracle_9:
   stage: build
@@ -218,7 +224,7 @@ build_oracle_9:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_rocky_9:
   stage: build
@@ -238,7 +244,7 @@ build_rocky_9:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_rocky_8:
   stage: build
@@ -258,7 +264,7 @@ build_rocky_8:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_alma_8:
   stage: build
@@ -278,7 +284,7 @@ build_alma_8:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_alma_9:
   stage: build
@@ -298,7 +304,7 @@ build_alma_9:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_opensuse_15:
   stage: build
@@ -318,7 +324,7 @@ build_opensuse_15:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_fedora_37:
   stage: build
@@ -341,7 +347,7 @@ build_fedora_37:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 manifest_fedora_37:
   stage: manifest
@@ -360,7 +366,7 @@ manifest_fedora_37:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_parrotos_5:
   stage: build
@@ -380,7 +386,7 @@ build_parrotos_5:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_alpine_317:
   stage: build
@@ -400,7 +406,7 @@ build_alpine_317:
   except:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 # These jobs should run on the feature/bugfix branches - anything that is not the develop or release branches. It should only push images to the private repos
 build_ubuntu_bionic_dev:
@@ -422,7 +428,7 @@ build_ubuntu_bionic_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_ubuntu_focal_dev:
   stage: build
@@ -443,7 +449,7 @@ build_ubuntu_focal_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_ubuntu_jammy_dev:
   stage: build
@@ -464,7 +470,7 @@ build_ubuntu_jammy_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_debian_bullseye_dev:
   stage: build
@@ -486,7 +492,7 @@ build_debian_bullseye_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_cuda_focal_dev:
   stage: build
@@ -504,7 +510,7 @@ build_cuda_focal_dev:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_remnux_focal_dev:
   stage: build
@@ -523,7 +529,7 @@ build_remnux_focal_dev:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_kali_rolling_dev:
   stage: build
@@ -547,7 +553,7 @@ build_kali_rolling_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_centos_dev:
   stage: build
@@ -568,7 +574,7 @@ build_centos_dev:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_oracle_7_dev:
   stage: build
@@ -589,7 +595,7 @@ build_oracle_7_dev:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_oracle_8_dev:
   stage: build
@@ -610,7 +616,7 @@ build_oracle_8_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_oracle_9_dev:
   stage: build
@@ -631,7 +637,7 @@ build_oracle_9_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_rockylinux_9_dev:
   stage: build
@@ -653,7 +659,7 @@ build_rockylinux_9_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_rockylinux_8_dev:
   stage: build
@@ -675,7 +681,7 @@ build_rockylinux_8_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_almalinux_9_dev:
   stage: build
@@ -697,7 +703,7 @@ build_almalinux_9_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_almalinux_8_dev:
   stage: build
@@ -719,7 +725,7 @@ build_almalinux_8_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_opensuse_15_dev:
   stage: build
@@ -740,7 +746,7 @@ build_opensuse_15_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_fedora_37_dev:
   stage: build
@@ -761,7 +767,7 @@ build_fedora_37_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_parrotos_5_dev:
   stage: build
@@ -783,7 +789,7 @@ build_parrotos_5_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 build_alpine_317_dev:
   stage: build
@@ -805,7 +811,7 @@ build_alpine_317_dev:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 test_multi_arch_dev:
   stage: test
@@ -836,7 +842,7 @@ test_multi_arch_dev:
     - manifest_dev
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
         KASM_IMAGE:
           - core-ubuntu-bionic-private
           - core-ubuntu-focal-private
@@ -878,7 +884,7 @@ test_single_arch_dev:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
   needs:
     - build_cuda_focal_dev
     - build_centos_dev
@@ -905,7 +911,7 @@ manifest_dev:
     - develop
     - /^release\/.*$/
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
   needs:
     - build_ubuntu_bionic_dev
     - build_ubuntu_focal_dev
@@ -1007,7 +1013,7 @@ build_ubuntu_bionic_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_ubuntu_focal_scheduled:
   stage: build
@@ -1024,7 +1030,7 @@ build_ubuntu_focal_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_ubuntu_jammy_scheduled:
   stage: build
@@ -1041,7 +1047,7 @@ build_ubuntu_jammy_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_debian_bullseye_scheduled:
   stage: build
@@ -1058,7 +1064,7 @@ build_debian_bullseye_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_cuda_focal_schedules:
   stage: build
@@ -1076,7 +1082,7 @@ build_remnux_focal_schedules:
     - docker push ${ORG_NAME}/core-remnux-focal-private:$SANITIZED_ROLLING_BRANCH
     - docker push ${ORG_NAME}/core-remnux-focal:$SANITIZED_ROLLING_BRANCH
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
   only:
     - schedules
 
@@ -1095,7 +1101,7 @@ build_kali_rolling_schedules:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_centos_schedules:
   stage: build
@@ -1115,7 +1121,7 @@ build_oracle_7_schedules:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_oracle_8_scheduled:
   stage: build
@@ -1132,7 +1138,7 @@ build_oracle_8_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_oracle_9_scheduled:
   stage: build
@@ -1149,7 +1155,7 @@ build_oracle_9_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_rockylinux_9_scheduled:
   stage: build
@@ -1166,7 +1172,7 @@ build_rockylinux_9_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_rockylinux_8_scheduled:
   stage: build
@@ -1183,7 +1189,7 @@ build_rockylinux_8_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_almalinux_9_scheduled:
   stage: build
@@ -1200,7 +1206,7 @@ build_almalinux_9_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_almalinux_8_scheduled:
   stage: build
@@ -1217,7 +1223,7 @@ build_almalinux_8_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_opensuse_15_scheduled:
   stage: build
@@ -1234,7 +1240,7 @@ build_opensuse_15_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_fedora_37_scheduled:
   stage: build
@@ -1254,7 +1260,7 @@ build_fedora_37_scheduled:
     - ${TAG}
   parallel:
     matrix:
-      - TAG: [ aws-autoscale, aws-autoscale-arm64 ]
+      - TAG: [ oci-fixed-amd, oci-fixed-arm ]
 
 manifest_fedora_37_scheduled:
   stage: manifest
@@ -1270,7 +1276,7 @@ manifest_fedora_37_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_parrotos_5_scheduled:
   stage: build
@@ -1287,7 +1293,7 @@ build_parrotos_5_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 build_parrotos_5_scheduled:
   stage: build
@@ -1304,7 +1310,7 @@ build_parrotos_5_scheduled:
   only:
     - schedules
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
 
 update_readmes:
   stage: readme
@@ -1321,7 +1327,7 @@ update_readmes:
       - $README_USERNAME
       - $README_PASSWORD
   tags:
-    - aws-autoscale
+    - oci-fixed-amd
   parallel:
     matrix:
       - KASM_IMAGE:
