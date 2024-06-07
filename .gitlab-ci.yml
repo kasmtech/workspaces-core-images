@@ -1,6 +1,6 @@
 image: docker:24.0.6
 services:
-  - docker:dind:24.0.6-dind
+  - docker:24.0.6-dind
 
 stages:
   - readme
