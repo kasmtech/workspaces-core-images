@@ -19,6 +19,7 @@ elif [ "${DISTRO}" == "alpine" ]; then
     curl \
     gcompat \
     grep \
+    iproute2-minimal \
     libgcc \
     mcookie \
     net-tools \
