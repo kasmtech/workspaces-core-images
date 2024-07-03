@@ -122,6 +122,12 @@ RUN /tmp/theme-src/install-theme
 COPY ./kasm-desktop-kde/kde-config/.config $HOME/.config
 COPY ./kasm-desktop-kde/kde-config/.local/share/plasma $HOME/.local/share/plasma
 
+### Egress Icons
+RUN mkdir -p /usr/share/extra/icons/
+ADD /src/common/resources/images/egress_info.svg /usr/share/extra/icons/egress_info.svg
+ADD /src/common/resources/images/egress_error.svg /usr/share/extra/icons/egress_error.svg
+ADD /src/common/resources/images/egress_offline.svg /usr/share/extra/icons/egress_offline.svg
+
 ## Base Apps
 COPY ./src/kasmos/install/baseapps/ $INST_SCRIPTS/baseapps/
 RUN bash $INST_SCRIPTS/baseapps/install_baseapps.sh \

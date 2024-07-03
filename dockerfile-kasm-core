@@ -56,6 +56,9 @@ ADD /src/common/resources/images/$BG_IMG  /usr/share/backgrounds/bg_default.png
 ADD /src/common/resources/images/icon_ubuntu.png /usr/share/extra/icons/icon_ubuntu.png
 ADD /src/common/resources/images/icon_ubuntu.png /usr/share/extra/icons/icon_default.png
 ADD /src/common/resources/images/icon_kasm.png /usr/share/extra/icons/icon_kasm.png
+ADD /src/common/resources/images/egress_info.svg /usr/share/extra/icons/egress_info.svg
+ADD /src/common/resources/images/egress_error.svg /usr/share/extra/icons/egress_error.svg
+ADD /src/common/resources/images/egress_offline.svg /usr/share/extra/icons/egress_offline.svg
 
 ### Install kasm_vnc dependencies and binaries
 COPY ./src/ubuntu/install/kasm_vnc $INST_SCRIPTS/kasm_vnc/
