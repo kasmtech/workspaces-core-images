@@ -37,15 +37,15 @@ echo "${BRANCH}:${COMMIT_ID}" > $STARTUPDIR/printer/kasm_printer.version
 cat >/usr/bin/printer_ready <<EOL
 #!/usr/bin/env bash
 set -x
-if [[ ${KASM_SVC_PRINTER:-1} == 1 ]]; then
-  PRINTER_NAME=${KASM_PRINTER_NAME:-Kasm-Printer}
-  until [[ "$(lpstat -r)" == "scheduler is running" ]]; do sleep 1; done
+if [[ \${KASM_SVC_PRINTER:-1} == 1 ]]; then
+  PRINTER_NAME=\${KASM_PRINTER_NAME:-Kasm-Printer}
+  until [[ "\$(lpstat -r)" == "scheduler is running" ]]; do sleep 1; done
   echo "Scheduler is running"
 
-  until lpstat -p "$PRINTER_NAME" | grep -q "is idle"; do
+  until lpstat -p "\$PRINTER_NAME" | grep -q "is idle"; do
       sleep 1
   done
-  echo "Printer $PRINTER_NAME is idle."
+  echo "Printer \$PRINTER_NAME is idle."
 else
   echo "Printing service is not enabled"
 fi
