@@ -133,6 +133,14 @@ elif [[ "$DISTRO" == @(rockylinux9|almalinux9) ]]; then
     xclip \
     xfce4-notifyd \
     xset
+
+    # fix for xfce4-notifyd not being rachable
+    dbus-uuidgen --ensure
+    cat > /usr/share/dbus-1/services/org.freedesktop.Notifications.service <<EOL
+[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=/usr/lib64/xfce4/notifyd/xfce4-notifyd
+EOL
 elif [[ "$DISTRO" == @(rockylinux8|almalinux8) ]]; then
   dnf config-manager --set-enabled powertools
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -144,13 +152,22 @@ elif [[ "$DISTRO" == @(rockylinux8|almalinux8) ]]; then
     xclip \
     xfce4-notifyd \
     xset
+
+    # fix for xfce4-notifyd not being rachable
+    dbus-uuidgen --ensure
+  cat > /usr/share/dbus-1/services/org.freedesktop.Notifications.service <<EOL
+[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=/usr/lib64/xfce4/notifyd/xfce4-notifyd
+EOL
 elif [ "$DISTRO" = "opensuse" ]; then
   zypper install -yn -t pattern xfce
   zypper install -yn \
     gvfs \
     xclip \
-    xfce4-notifyd \
     xfce4-terminal \
+    xfce4-notifyd \
+	  kdialog \
     xset
   # Pidof is no longer shipped in OpenSuse
   ln -s /usr/bin/pgrep /usr/bin/pidof
@@ -162,6 +179,14 @@ elif [[ "$DISTRO" = @(fedora37|fedora38|fedora39|fedora40) ]]; then
     xclip \
     xfce4-notifyd \
     xset
+
+  # fix for xfce4-notifyd not being rachable
+  dbus-uuidgen --ensure
+  cat > /usr/share/dbus-1/services/org.freedesktop.Notifications.service <<EOL
+[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=/usr/lib64/xfce4/notifyd/xfce4-notifyd
+EOL
 elif [ "$DISTRO" = "alpine" ]; then
   apk add --no-cache \
     dbus-x11 \
@@ -175,8 +200,17 @@ elif [ "$DISTRO" = "alpine" ]; then
     mousepad \
     thunar \
     xfce4 \
-    xfce4-terminal
+    xfce4-terminal \
+    xfce4-notifyd
   rm -f /usr/share/xfce4/panel/plugins/power-manager-plugin.desktop
+
+  # fix for xfce4-notifyd not being rachable
+  dbus-uuidgen --ensure
+  cat > /usr/share/dbus-1/services/org.freedesktop.Notifications.service <<EOL
+[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=/usr/lib/xfce4/notifyd/xfce4-notifyd
+EOL
 fi
 
 if [[ "${DISTRO}" != @(centos|oracle7|oracle8|fedora37|fedora38|fedora39|fedora40|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9|alpine) ]]; then
