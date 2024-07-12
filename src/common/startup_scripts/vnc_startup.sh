@@ -427,7 +427,7 @@ function wait_for_egress_signal() {
 
 	if [ "$egress_status" == "error" ]; then
 		echo "Failed to establish egress gateway. Exiting..."
-		exit 1
+		exit 0
 	fi
 }
 
@@ -446,6 +446,11 @@ function wait_for_network_devices() {
 
 			if [[ $interface == k-p-* ]]; then
 				wait_for_egress_signal
+
+				if [ -z "$KASM_PROFILE_LDR" ]; then
+					http_proxy="" https_proxy="" curl -k "https://${KASM_API_HOST}:${KASM_API_PORT}/api/set_kasm_session_status?token=${KASM_API_JWT}" -H 'Content-Type: application/json' -d '{"status": "running"}'
+				fi
+
 				return
 			fi
 		done
