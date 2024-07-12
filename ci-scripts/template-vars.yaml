@@ -23,6 +23,7 @@ files: &UNIVERSAL_CHANGE_FILES
   - src/ubuntu/install/tools/**
   - src/ubuntu/install/webcam/**
   - src/ubuntu/install/recorder/**
+  - src/ubuntu/install/xfce
   - ci-scripts/**
   - .gitlab-ci.yml
 
