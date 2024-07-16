@@ -344,6 +344,16 @@ function start_printer (){
 	fi
 }
 
+function wait_on_printer (){
+    # Wait for cups and the printer device to be created
+    if [[ ${KASM_SVC_PRINTER:-1} == 1 && ${KASM_PRINTER_WAIT:-0} == 1 ]]; then
+        log 'Waiting on printer service to be ready'
+        /usr/bin/printer_ready
+        log 'Printer is ready'
+    fi
+}
+
+
 function custom_startup (){
 	custom_startup_script=/dockerstartup/custom_startup.sh
 	if [ -f "$custom_startup_script" ]; then
@@ -509,6 +519,7 @@ chmod 600 $PASSWD_PATH
 
 
 # start processes
+wait_on_printer
 start_kasmvnc
 start_window_manager
 start_audio_out_websocket

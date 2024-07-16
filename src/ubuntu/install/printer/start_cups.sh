@@ -7,7 +7,7 @@ set -ex
     # HACK: Some versions of cupsd cannot handle unlimited file descriptor limit
     # that docker sets..
     ulimit -n 1024 &&/usr/sbin/cupsd -f &
-    until [[ "$(lpstat -r)" == "scheduler is running" ]]; do sleep 15; done
+    until [[ "$(lpstat -r)" == "scheduler is running" ]]; do sleep ${KASM_CUPS_SLEEP:-15}; done
 
     echo "Creating a virtual printer: $PRINTER_NAME"
     lpadmin -p $PRINTER_NAME -E -v cups-pdf:/ -P /etc/cups/ppd/kasm.ppd
