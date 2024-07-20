@@ -450,8 +450,9 @@ function wait_for_network_devices() {
 		fi
 
 		for interface in $interfaces; do
-			if [[ $interface == eth* ]]; then
-				return
+			# ignore eth* interfaces if egress gateway is enabled
+			if [[ $interface == eth* && -z $KASM_SVC_EGRESS ]]; then
+					return
 			fi
 
 			if [[ $interface == k-p-* ]]; then
