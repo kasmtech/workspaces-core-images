@@ -38,6 +38,7 @@ if [ "${DISTRO}" == "kali" ]; then
   apt-get install --no-install-recommends -y \
     atril \
     dbus-x11 \
+    libnotify-bin \
     engrampa \
     kali-defaults-desktop \
     kali-menu \
