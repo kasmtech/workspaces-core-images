@@ -556,6 +556,7 @@ do
 
 			# If DLP Policy is set to fail secure, default is to be resilient
 			if [[ ${DLP_PROCESS_FAIL_SECURE:-0} == 1 ]]; then
+				log "DLP Policy violation, exiting container" "ERROR"
 				exit 1
 			fi
 
