@@ -3,11 +3,15 @@ set -ex
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 if [[ "${ARCH}" == "arm64" ]]; then
-  LIBSSLURL="http://ports.ubuntu.com/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_arm64.deb"
-  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/aarch64/os/Packages/o/openssl1.1-1.1.1q-5.fc39.aarch64.rpm"
+  LIBSSLDEB=$(curl -sL http://ports.ubuntu.com/pool/main/o/openssl/ | awk -F'(href="|">)' '/libssl1.1.*ubuntu2.[0-9][0-9]_arm64.deb/ {print $4}')
+  LIBSSLRPM=$(curl -sL https://ap.edge.kernel.org/fedora/releases/39/Everything/aarch64/os/Packages/o/ | awk -F'(href="|">)' '/openssl1.1-1/ {print $2}')
+  LIBSSLURL="http://ports.ubuntu.com/pool/main/o/openssl/${LIBSSLDEB}"
+  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/aarch64/os/Packages/o/${LIBSSLRPM}"
 else
-  LIBSSLURL="http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.22_amd64.deb"
-  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/x86_64/os/Packages/o/openssl1.1-1.1.1q-5.fc39.x86_64.rpm"
+  LIBSSLDEB=$(curl -sL http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/ | awk -F'(href="|">)' '/libssl1.1.*ubuntu2.[0-9][0-9]_amd64.deb/ {print $4}')
+  LIBSSLRPM=$(curl -sL https://ap.edge.kernel.org/fedora/releases/39/Everything/x86_64/os/Packages/o/ | awk -F'(href="|">)' '/openssl1.1-1.*x86_64/ {print $2}')
+  LIBSSLURL="http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/${LIBSSLDEB}"
+  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/x86_64/os/Packages/o/${LIBSSLRPM}"
 fi
 
 # intall squid
