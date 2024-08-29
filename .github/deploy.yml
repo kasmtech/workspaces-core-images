@@ -1,11 +1,8 @@
 name: Deploy to EKS
 
 on:
-  workflow_call:
-    inputs:
-      service_name:
-        required: true
-        type: string
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build-and-push:
