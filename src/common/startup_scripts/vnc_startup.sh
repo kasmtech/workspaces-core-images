@@ -142,8 +142,19 @@ function profile_size_check(){
 }
 
 ## correct forwarding of shutdown signal
-function cleanup () {
-    kill -s SIGTERM $!
+function cleanup() {
+    port=3000
+    pid=$(netstat -tulnp 2>/dev/null | grep ":$port" | awk '{print $7}' | cut -d'/' -f1)
+    echo "Attempting to terminate process with PID: $pid"
+    echo "Received shutdown signal, terminating process..."
+    kill -s SIGTERM "$pid"  # Send the SIGTERM signal to the background process
+
+    # Wait for the process to exit
+    while kill -0 "$pid" 2>/dev/null; do
+        sleep 1
+    done
+
+    echo "Process has exited, exiting script..."
     exit 0
 }
 
