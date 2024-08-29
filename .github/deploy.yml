@@ -2,7 +2,7 @@ name: Deploy to EKS
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [kasmtech:develop]
 jobs:
   build-and-push:
     name: Build, Push to ECR and Deploy to EKS
