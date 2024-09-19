@@ -1,13 +1,16 @@
 #! /bin/bash
 
 ## Parse input ##
-NAME1=$1
-NAME2=$2
+FULLNAME="core-$1-$2"
+
+if [[ "$1" == "$2" ]] ; then
+  FULLNAME="core-$1"
+fi
 
 ## Run readme updater ##
 docker run -v $PWD/docs:/docs \
   -e RELEASE="$KASM_RELEASE" \
   -e DOCKER_USERNAME="$README_USERNAME" \
   -e DOCKER_PASSWORD="$README_PASSWORD" \
-  -e DOCKERHUB_REPOSITORY="${ORG_NAME}/core-${NAME1}-${NAME2}" \
+  -e DOCKERHUB_REPOSITORY="${ORG_NAME}/${FULLNAME}" \
   kasmweb/dockerhub-updater:develop
