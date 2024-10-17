@@ -143,6 +143,10 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
+  except:
+    variables:
+      - $README_USERNAME
+      - $README_PASSWORD
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   tags:
@@ -169,6 +173,10 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
+  except:
+    variables:
+      - $README_USERNAME
+      - $README_PASSWORD
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   artifacts:
