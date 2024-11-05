@@ -34,7 +34,13 @@ else
   apt-get update
   # Update tzdata noninteractive (otherwise our script is hung on user input later).
   DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
-  apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils bc
+  
+  # software-properties is removed from kali-rolling
+  if grep -q "kali-rolling" /etc/os-release; then
+    apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl mesa-utils bc
+  else
+    apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils bc
+  fi
 
   echo "generate locales for en_US.UTF-8"
   locale-gen en_US.UTF-8
