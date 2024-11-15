@@ -89,7 +89,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
 elif [[ "${DISTRO}" == "alpine" ]]; then
   apk add --no-cache memcached cyrus-sasl iproute2 libatomic
 else
-  apt-get install -y memcached sasl2-bin iproute2
+  apt-get install -y memcached sasl2-bin libsasl2-modules iproute2
 fi
 
 # Enable SASL in the memchache config
