@@ -12,6 +12,7 @@ COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
 RUN bash "$INST_SCRIPTS/tools/install_tools.sh" && rm -rf "$INST_SCRIPTS/tools/"
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
+<<<<<<< HEAD
 FROM install_tools AS squid_builder
 
 ARG DISTRO=oracle8
@@ -26,6 +27,9 @@ fi
 RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
 
 FROM install_tools as base_layer
+=======
+FROM install_tools AS base_layer
+>>>>>>> 1e17125 (KASM-6341 remove openssl 1.1 requirement on images that do not need it)
 
 MAINTAINER Kasm Tech "info@kasmweb.com"
 LABEL "com.kasmweb.image"="true"
@@ -123,9 +127,6 @@ COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 ### Install Recorder Service
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
-
-### Copy built Squid
-COPY --from=squid_builder /usr/local/squid /usr/local/squid
 
 ### Install Squid
 COPY ./src/ubuntu/install/squid/install/ $INST_SCRIPTS/squid_install/
