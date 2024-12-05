@@ -16,6 +16,7 @@ elif [ "${DISTRO}" == "alpine" ]; then
   usermod -a -G lpadmin root
 else
   apt-get update
+  apt-get install -y cups-filters 
   apt-get install -y cups cups-client cups-pdf
 fi
 

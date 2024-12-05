@@ -1,32 +1,32 @@
 #!/bin/bash
 set -ex
 
+# Install openssl
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
-if [[ "${ARCH}" == "arm64" ]]; then
-  LIBSSLDEB=$(curl -sL http://ports.ubuntu.com/pool/main/o/openssl/ | awk -F'(href="|">)' '/libssl1.1.*ubuntu2.[0-9][0-9]_arm64.deb/ {print $4}')
-  LIBSSLRPM=$(curl -sL https://ap.edge.kernel.org/fedora/releases/39/Everything/aarch64/os/Packages/o/ | awk -F'(href="|">)' '/openssl1.1-1/ {print $2}')
-  LIBSSLURL="http://ports.ubuntu.com/pool/main/o/openssl/${LIBSSLDEB}"
-  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/aarch64/os/Packages/o/${LIBSSLRPM}"
+if [[ "${DISTRO}" == @(centos|oracle7|oracle8|oracle9|fedora37|fedora38|fedora39|fedora40|almalinux8|almalinux9|rockylinux8|rockylinux9) ]]; then
+  dnf install -y openssl xkbcomp
+  rm -f /etc/X11/xinit/xinitrc
+elif [[ "${DISTRO}" == "alpine" ]]; then
+  apk add --no-cache openssl
+elif [ "${DISTRO}" == "opensuse" ]; then
+  zypper install -yn openssl
 else
-  LIBSSLDEB=$(curl -sL http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/ | awk -F'(href="|">)' '/libssl1.1.*ubuntu2.[0-9][0-9]_amd64.deb/ {print $4}')
-  LIBSSLRPM=$(curl -sL https://ap.edge.kernel.org/fedora/releases/39/Everything/x86_64/os/Packages/o/ | awk -F'(href="|">)' '/openssl1.1-1.*x86_64/ {print $2}')
-  LIBSSLURL="http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/${LIBSSLDEB}"
-  RPMLIBSSL="https://ap.edge.kernel.org/fedora/releases/39/Everything/x86_64/os/Packages/o/${LIBSSLRPM}"
+  apt-get update
+  apt-get install -y openssl
 fi
 
-# intall squid
-SQUID_COMMIT='1149fc830c7edcb383eec390cce2beba16befde5'
-if  $(grep -q Jammy /etc/os-release) || $(grep -q Kali /etc/os-release) || $(grep -q lory /etc/os-release); then
-  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
-  wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
-  dpkg -i libssl1.1.${ARCH}.deb
-  rm -f libssl1.1.${ARCH}.deb
-elif [[ "${DISTRO}" != @(centos|oracle7|oracle8|oracle9|rhel9|opensuse|fedora37|fedora38|fedora39|fedora40|rockylinux9|rockylinux8|almalinux9|almalinux8|alpine) ]] ; then
-  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_${ARCH}.tar.gz | tar -xzf - -C /
+# Intall squid
+SQUID_COMMIT='c45537169794a16029e06d7d456edb21b9ce7d12'
+if $(grep -q Focal /etc/os-release) || $(grep -q bullseye /etc/os-release) || [ -f /usr/bin/zypper ] || [[ "${DISTRO}" == @(oracle8|almalinux8|rockylinux8) ]]; then
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_ubuntu11_${ARCH}.tar.gz | tar -xzf - -C /
+elif [[ "${DISTRO}" == "alpine" ]]; then
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_alpine_${ARCH}.tar.gz | tar -xzf - -C /
+else
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_ubuntu_${ARCH}.tar.gz | tar -xzf - -C /
 fi
 
-# update squid conf with user info
-if [[ "${DISTRO}" == @(centos|oracle7|oracle8|oracle9|rhel9|fedora37|fedora38|fedora39|fedora40|almalinux8|almalinux9|rockylinux8|rockylinux9|alpine) ]]; then
+# Update squid conf with user info
+if [[ "${DISTRO}" == @(centos|oracle7|oracle8|oracle9|fedora37|fedora38|fedora39|fedora40|almalinux8|almalinux9|rockylinux8|rockylinux9|alpine) ]]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
 elif [ "${DISTRO}" == "opensuse" ]; then
   useradd --system --shell /usr/sbin/nologin --home-dir /bin proxy
@@ -34,43 +34,14 @@ elif [ "${DISTRO}" == "opensuse" ]; then
   usermod -a -G proxy proxy
 fi
 
+# File and perms
 mkdir /usr/local/squid/etc/ssl_cert -p
 chown proxy:proxy /usr/local/squid/etc/ssl_cert -R
 chmod 700 /usr/local/squid/etc/ssl_cert -R
 cd /usr/local/squid/etc/ssl_cert
-
-if [[ "${DISTRO}" == @(fedora37|fedora38|fedora39) ]]; then
-  dnf install -y openssl1.1 xkbcomp
-  rm -f /etc/X11/xinit/xinitrc
-elif [[ "${DISTRO}" == "fedora40" ]]; then
-  curl -o \
-    /tmp/libssl.rpm -L \
-    "${RPMLIBSSL}"
-  rpm -i \
-    /tmp/libssl.rpm
-  rm -f /etc/X11/xinit/xinitrc
-elif [[ "${DISTRO}" == @(rockylinux9|oracle9|rhel9|almalinux9) ]]; then
-  dnf install -y compat-openssl11 xkbcomp
-  rm -f /etc/X11/xinit/xinitrc
-elif [[ "${DISTRO}" == @(centos|oracle7) ]]; then
-  yum install -y openssl11-libs
-elif [[ "${DISTRO}" == "alpine" ]]; then
-  if grep -q v3.19 /etc/os-release || grep -q v3.20 /etc/os-release; then
-    apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing openssl1.1-compat
-  else
-    apk add --no-cache openssl1.1-compat
-  fi
-elif grep -q bookworm /etc/os-release || grep -q noble /etc/os-release; then
-  wget ${LIBSSLURL} -O libssl1.1.${ARCH}.deb
-  dpkg -i libssl1.1.${ARCH}.deb
-  rm -f libssl1.1.${ARCH}.deb
-fi
-
 /usr/local/squid/libexec/security_file_certgen -c -s /usr/local/squid/var/logs/ssl_db -M 4MB
 chown proxy:proxy /usr/local/squid/var/logs/ssl_db -R
-
 chown -R proxy:proxy /usr/local/squid -R
-
 mkdir -p /etc/squid/
 
 # Trick so we can auto re-direct blocked urls to a special page
