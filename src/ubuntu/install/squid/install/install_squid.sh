@@ -6,7 +6,7 @@ ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
 if [[ "${DISTRO}" == @(centos|oracle7|oracle8|oracle9|fedora37|fedora38|fedora39|fedora40|almalinux8|almalinux9|rockylinux8|rockylinux9) ]]; then
   dnf install -y openssl xkbcomp
   rm -f /etc/X11/xinit/xinitrc
-if [[ "${DISTRO}" == "rhel9" ]]; then
+elif [[ "${DISTRO}" == "rhel9" ]]; then
   dnf install -y openssl
 elif [[ "${DISTRO}" == "alpine" ]]; then
   apk add --no-cache openssl
