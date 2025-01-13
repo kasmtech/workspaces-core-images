@@ -12,24 +12,7 @@ COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
 RUN bash "$INST_SCRIPTS/tools/install_tools.sh" && rm -rf "$INST_SCRIPTS/tools/"
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
-<<<<<<< HEAD
-FROM install_tools AS squid_builder
-
-ARG DISTRO=oracle8
-
-RUN if [ "${DISTRO}" == "oracle8" ] || [ "${DISTRO}" == "oracle9" ] || [ "${DISTRO}" == "rockylinux9" ] || [ "${DISTRO}" == "rockylinux8" ] || [ "${DISTRO}" == "almalinux8" ] || [ "${DISTRO}" == "almalinux9" ]; then \
-  ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
-  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/1149fc830c7edcb383eec390cce2beba16befde5/output/kasm-squid-builder_${ARCH}.tar.gz"; \
-else \
-  ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g') && \
-  wget --progress=dot:giga "https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/de1dffbc94d4132d6c696de8c6dfcd6f08900f61/output/kasm-squid-builder_centos_${ARCH}.tar.gz"; \
-fi
-RUN tar -xzf kasm-squid-builder_*.tar.gz -C /
-
-FROM install_tools as base_layer
-=======
 FROM install_tools AS base_layer
->>>>>>> 1e17125 (KASM-6341 remove openssl 1.1 requirement on images that do not need it)
 
 MAINTAINER Kasm Tech "info@kasmweb.com"
 LABEL "com.kasmweb.image"="true"
