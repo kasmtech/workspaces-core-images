@@ -44,7 +44,7 @@ elif [[ "${DISTRO}" == @(oracle8|oracle9|rockylinux9|rockylinux8|almalinux9|alma
   done
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper addrepo -G \
-    https://download.opensuse.org/repositories/M17N:/fonts/15.5/ fonts-x86_64
+    https://download.opensuse.org/repositories/M17N:/fonts/15.6/ fonts-x86_64
   zypper install -ny \
     glibc-i18ndata \
     glibc-locale \
