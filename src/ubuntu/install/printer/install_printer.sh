@@ -15,6 +15,7 @@ elif [ "${DISTRO}" == "alpine" ]; then
   apk add --no-cache cups cups-client cups-pdf@testing
 else
   apt-get update
+  apt-get install -y cups-filters 
   apt-get install -y cups cups-client cups-pdf
 fi
 
