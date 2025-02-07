@@ -44,18 +44,18 @@
     </property>
     <property name="plugin-5" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="17371268451.desktop"/>
+        <value type="string" value="17389582521.desktop"/>
       </property>
     </property>
     <property name="plugin-6" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="17371268452.desktop"/>
+        <value type="string" value="17389582522.desktop"/>
       </property>
     </property>
     <property name="plugin-7" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="17371268453.desktop"/>
-        <value type="string" value="17371268454.desktop"/>
+        <value type="string" value="17389582523.desktop"/>
+        <value type="string" value="17389582524.desktop"/>
       </property>
       <property name="move-first" type="bool" value="true"/>
     </property>
@@ -110,9 +110,6 @@
       <property name="size-max" type="uint" value="22"/>
       <property name="square-icons" type="bool" value="true"/>
       <property name="symbolic-icons" type="bool" value="false"/>
-      <property name="known-legacy-items" type="array">
-        <value type="string" value="networkmanager applet"/>
-      </property>
     </property>
     <property name="plugin-15" type="string" value="genmon"/>
     <property name="plugin-16" type="string" value="pulseaudio">

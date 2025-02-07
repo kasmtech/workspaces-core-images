@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Exec=pkexec x-terminal-emulator
+StartupNotify=false
+Terminal=false
+Type=Application
+X-Kali-Package=kali-menu
+Name=Root Terminal Emulator
+Comment=Opens a terminal as the root user, using sudo to ask for the password
+Icon=utilities-root-terminal
+Categories=System;Utility;TerminalEmulator;
+X-XFCE-Source=file:///usr/share/applications/root-terminal.desktop
