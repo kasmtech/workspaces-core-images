@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Text Editor
+Comment=Simple Text Editor
+TryExec=mousepad
+Exec=mousepad
+Icon=accessories-text-editor
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Utility;TextEditor;
+OnlyShowIn=XFCE;
+X-XFCE-Source=file:///usr/share/applications/xfce-text-editor.desktop

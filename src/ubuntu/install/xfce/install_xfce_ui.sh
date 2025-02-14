@@ -48,7 +48,6 @@ if [ "${DISTRO}" == "kali" ]; then
     mousepad \
     parole \
     pavucontrol \
-    policykit-1-gnome \
     pulseaudio \
     pulseaudio-utils \
     qt5ct \
