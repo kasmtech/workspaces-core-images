@@ -1,0 +1,4 @@
+Command=/usr/share/kali-themes/xfce4-panel-genmon-vpnip.sh
+UseLabel=0
+UpdatePeriod=1000
+Font=FiraCode Nerd Font 8
