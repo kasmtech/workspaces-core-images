@@ -1,7 +1,10 @@
 #! /bin/bash
+set -e 
 
 # Globals
 FAILED="false"
+PUBLIC_BUILD="false"
+REGISTRY_MIRRORS=("quay.io" "ghcr.io")
 
 # Ingest cli variables
 ## Parse input ##
@@ -90,11 +93,48 @@ if [[ "${TYPE}" == "multi" ]]; then
   docker push ${ORG_NAME}/${ENDPOINT}:x86_64-${SANITIZED_BRANCH}
   docker push ${ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH}
 
-  # Manifest to meta tag
-  docker manifest push --purge ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} || :
-  docker manifest create ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}:x86_64-${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH}
-  docker manifest annotate ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH} --os linux --arch arm64 --variant v8
-  docker manifest push --purge ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+    # Manifest to meta tag on live repo
+    docker manifest push --purge ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} || :
+    docker manifest create ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}:x86_64-${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH}
+    docker manifest annotate ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH} --os linux --arch arm64 --variant v8
+    docker manifest push --purge ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+    for MIRROR in "${REGISTRY_MIRRORS[@]}"; do
+      docker tag \
+        ${ORG_NAME}/image-cache-private:x86_64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}  \
+        ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:x86_64-${SANITIZED_BRANCH}
+      docker tag \
+        ${ORG_NAME}/image-cache-private:aarch64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID} \
+        ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH}
+
+      # Push arches to live repo
+      docker push ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:x86_64-${SANITIZED_BRANCH}
+      docker push ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH}
+
+      # Manifest to meta tag
+      docker manifest push --purge ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} || :
+      docker manifest create ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:x86_64-${SANITIZED_BRANCH} ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH}
+      docker manifest annotate ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH} ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:aarch64-${SANITIZED_BRANCH} --os linux --arch arm64 --variant v8
+      docker manifest push --purge ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+    done
+  fi
+
+  # Tag images to private repo
+  docker tag \
+    ${ORG_NAME}/image-cache-private:x86_64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID} \
+    ${ORG_NAME}/${ENDPOINT}-private:x86_64-${SANITIZED_BRANCH}
+  docker tag \
+    ${ORG_NAME}/image-cache-private:aarch64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID} \
+    ${ORG_NAME}/${ENDPOINT}-private:aarch64-${SANITIZED_BRANCH}
+
+  # Push arches to private repo
+  docker push ${ORG_NAME}/${ENDPOINT}-private:x86_64-${SANITIZED_BRANCH}
+  docker push ${ORG_NAME}/${ENDPOINT}-private:aarch64-${SANITIZED_BRANCH}
+
+  # Manifest to meta tag on private repo
+  docker manifest push --purge ${ORG_NAME}/${ENDPOINT}-private:${SANITIZED_BRANCH} || :
+  docker manifest create ${ORG_NAME}/${ENDPOINT}-private:${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}-private:x86_64-${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}-private:aarch64-${SANITIZED_BRANCH}
+  docker manifest annotate ${ORG_NAME}/${ENDPOINT}-private:${SANITIZED_BRANCH} ${ORG_NAME}/${ENDPOINT}-private:aarch64-${SANITIZED_BRANCH} --os linux --arch arm64 --variant v8
+  docker manifest push --purge ${ORG_NAME}/${ENDPOINT}-private:${SANITIZED_BRANCH}
 
 # Single arch image just pull and push
 else
@@ -102,7 +142,25 @@ else
   # Pull image
   docker pull ${ORG_NAME}/image-cache-private:x86_64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}
 
-  # Tage image
+  # Conditionally Process Public Build
+  if [[ "${PUBLIC_BUILD}" == "true" ]]; then
+    # Tage image to live repo
+    docker tag \
+      ${ORG_NAME}/image-cache-private:x86_64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID} \
+      ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+
+    # Push image to live repo
+    docker push ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+    for MIRROR in "${REGISTRY_MIRRORS[@]}"; do
+      docker tag \
+        ${ORG_NAME}/image-cache-private:x86_64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID} \
+        ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+
+      docker push ${MIRROR}/${MIRROR_ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
+    done
+  fi
+
+  # Tage image to private repo
   docker tag \
     ${ORG_NAME}/image-cache-private:x86_64-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID} \
     ${ORG_NAME}/${ENDPOINT}:${SANITIZED_BRANCH}
