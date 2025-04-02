@@ -17,7 +17,7 @@ elif [ "${DISTRO}" == "alpine" ]; then
 else
   apt-get update
   apt-get install -y cups-filters 
-  apt-get install -y cups cups-client cups-pdf
+  apt-get install -y cups cups-client printer-driver-cups-pdf
 fi
 
 # change the default path where pdfs are saved
