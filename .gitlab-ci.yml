@@ -15,8 +15,8 @@ stages:
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   GIT_SUBMODULE_STRATEGY: normal
-  KASM_RELEASE: "1.16.0"
-  TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.16.0.a1d5b7.tar.gz"
+  KASM_RELEASE: "1.17.0"
+  TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.17.0.bbc15c.tar.gz"
   SCAN_CONTAINERS: "true"
   MIRROR_ORG_NAME: "kasmtech"
 before_script:
