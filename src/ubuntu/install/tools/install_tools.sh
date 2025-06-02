@@ -47,7 +47,7 @@ else
 
   # Install openssh-client on Ubuntu
   if grep -q "ubuntu" /etc/os-release; then
-    apt-get install -y openssh-client
+    apt-get install -y openssh-client --no-install-recommends
   fi
 
   echo "generate locales for en_US.UTF-8"
