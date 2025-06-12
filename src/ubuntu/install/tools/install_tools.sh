@@ -45,6 +45,11 @@ else
     apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl software-properties-common mesa-utils bc
   fi
 
+  # Install openssh-client on Ubuntu
+  if grep -q "ubuntu" /etc/os-release; then
+    apt-get install -y openssh-client --no-install-recommends
+  fi
+
   echo "generate locales for en_US.UTF-8"
   locale-gen en_US.UTF-8
 fi
