@@ -465,7 +465,7 @@ function wait_for_egress_signal() {
 
 function wait_for_network_devices() {
 	while true; do
-		interfaces=$(ip link show type veth | awk -F: '/^[0-9]+: / {print $2}' | awk '{print $1}' | sed 's/@.*//')
+		interfaces=$(ip -o link show | awk '!/lo:/ && !/tun/' | awk -F: '/^[0-9]+: / {print $2}' | awk '{print $1}' | sed 's/@.*//')
 		if [ -z "$interfaces" ]; then
 			sleep 1
 			continue
