@@ -49,8 +49,6 @@ pipeline:
         $DOCKERHUB_REVERT_RUN ||
         $REVERT_IS_ROLLING_RUN
       when: never    
-  tags:
-    - oci-amd-scheduled
   trigger:
     include:
       - artifact: gitlab-ci.yml
