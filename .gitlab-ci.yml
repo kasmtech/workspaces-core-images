@@ -48,7 +48,11 @@ pipeline:
         $QUAY_API_KEY_RUN ||
         $DOCKERHUB_REVERT_RUN ||
         $REVERT_IS_ROLLING_RUN
-      when: never    
+      when: never
+    - when: on_success
+  variables:
+    PARENT_PIPELINE_SOURCE: "$CI_PIPELINE_SOURCE"
+    RUN_SET: "$RUN_SET"    
   trigger:
     include:
       - artifact: gitlab-ci.yml
