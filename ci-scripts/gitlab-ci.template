@@ -37,7 +37,7 @@ build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $DOCKERHUB_REVERT ||
         $REVERT_IS_ROLLING
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -66,7 +66,7 @@ build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $DOCKERHUB_REVERT ||
         $REVERT_IS_ROLLING
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -95,7 +95,7 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $DOCKERHUB_REVERT ||
         $REVERT_IS_ROLLING
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -126,7 +126,7 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $DOCKERHUB_REVERT ||
         $REVERT_IS_ROLLING
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -155,7 +155,7 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $README_PASSWORD ||
         $QUAY_API_KEY
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -189,7 +189,7 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $README_PASSWORD ||
         $QUAY_API_KEY
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -225,7 +225,7 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $DOCKERHUB_REVERT ||
         $REVERT_IS_ROLLING
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -255,7 +255,7 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
         $DOCKERHUB_REVERT ||
         $REVERT_IS_ROLLING
       when: never
-    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET != "schedule"
+    - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
@@ -279,7 +279,7 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 #############################
 
 {% for IMAGE in multiImages %}
-manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
+manifest_weekly_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
   rules:
     - if: >
@@ -301,7 +301,7 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% endfor %}
 
 {% for IMAGE in singleImages %}
-manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
+manifest_weekly_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
   rules:
     - if: >
