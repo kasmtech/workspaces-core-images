@@ -28,23 +28,6 @@ files: &UNIVERSAL_CHANGE_FILES
 
 multiImages:
   - name1: ubuntu
-    name2: bionic
-    base: ubuntu:18.04
-    bg: bg_bionic.png
-    distro: ubuntu
-    dockerfile: dockerfile-kasm-core
-    changeFiles:
-      - dockerfile-kasm-core
-      - src/ubuntu/xfce/**
-      - src/ubuntu/xfce/.config/**
-      - src/ubuntu/xfce/.config/xfce4/**
-      - src/ubuntu/xfce/.config/xfce4/xfconf/**
-      - src/ubuntu/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
-      - src/ubuntu/xfce/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/**
-      - src/ubuntu/nvidia/**
-      - src/ubuntu/sysbox/**
-      - src/ubuntu/virtualgl/**
-  - name1: ubuntu
     name2: focal
     base: ubuntu:20.04
     bg: bg_focal.png
