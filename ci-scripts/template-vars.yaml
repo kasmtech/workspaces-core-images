@@ -351,20 +351,6 @@ singleImages:
       - src/ubuntu/nvidia/**
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
-  - name1: centos
-    name2: 7
-    base: centos:centos7
-    bg: bg_centos.png
-    distro: centos
-    dockerfile: dockerfile-kasm-core-centos
-    changeFiles:
-      - dockerfile-kasm-core-centos
-      - src/centos/**
-      - src/centos/xfce/**
-      - src/centos/xfce/.config/**
-      - src/centos/xfce/.config/xfce4/**
-      - src/centos/xfce/.config/xfce4/xfconf/**
-      - src/centos/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
   - name1: oracle
     name2: 7
     base: oraclelinux:7
