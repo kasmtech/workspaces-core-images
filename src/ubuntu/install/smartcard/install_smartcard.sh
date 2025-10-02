@@ -34,6 +34,7 @@ fi
 mkdir -p /tmp/smartcard
 wget -q  https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_smartcard_bridge/${COMMIT_ID}/kasm_smartcard_bridge_deps_${DEPS_VERSION}_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz
 tar -xvzf kasm_smartcard_bridge_deps_${DEPS_VERSION}_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz -C /tmp/smartcard/
+rm  kasm_smartcard_bridge_deps_${DEPS_VERSION}_${ARCH}_${BRANCH}.${COMMIT_ID_SHORT}.tar.gz
 
 # install pcsc-lite
 cd /tmp/smartcard/pcsc
