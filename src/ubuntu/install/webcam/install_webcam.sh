@@ -8,8 +8,8 @@ elif [ "${DISTRO}" == "oracle8" ]; then
   DISTRO=oracle
 fi
 
-COMMIT_ID="ae6a047c53dd4e76c0c355542b33c53efc5c2c7d"
-BRANCH="bugfix_KASM-7838_crash_on_device_open"
+COMMIT_ID="2656b2ae0efe9fd81dd5778a1b393c4cb263ea5b"
+BRANCH="develop"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
