@@ -32,7 +32,7 @@ elif [[ "${DISTRO}" == @(fedora37|fedora38|fedora39|fedora40|fedora41) ]]; then
     localedef -i ${LOCALE} -f UTF-8 ${LOCALE}.UTF-8
   done
 elif [[ "${DISTRO}" == @(oracle8|oracle9|rhel9|rockylinux9|rockylinux8|almalinux9|almalinux8) ]]; then
-  dnf install -y \
+  dnf install -y --nobest \
     glibc-locale-source \
     google-noto-emoji-fonts \
     google-noto-sans-cjk-ttc-fonts \
