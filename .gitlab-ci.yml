@@ -1,9 +1,9 @@
 ############
 # Settings #
 ############
-image: docker:24.0.6
+image: docker:28.0.0
 services:
-  - docker:24.0.6-dind
+  - docker:28.0.0-dind
 
 include:
   - template: Code-Quality.gitlab-ci.yml
@@ -12,6 +12,8 @@ stages:
   - template
   - run
   - test
+default:
+  retry: 2
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   GIT_SUBMODULE_STRATEGY: normal

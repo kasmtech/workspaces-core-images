@@ -1,9 +1,9 @@
 ############
 # Settings #
 ############
-image: docker:24.0.6
+image: docker:28.0.0
 services:
-  - docker:24.0.6-dind
+  - docker:28.0.0-dind
 stages:
   - readme
   - revert
@@ -11,6 +11,8 @@ stages:
   - scan
   - test
   - manifest
+default:
+  retry: 2
 variables:
   KASM_RELEASE: "{{ KASM_RELEASE }}"
   TEST_INSTALLER: "{{ TEST_INSTALLER }}"
