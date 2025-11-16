@@ -1,9 +1,9 @@
 ############
 # Settings #
 ############
-image: docker:24.0.6
+image: docker:28.0.0
 services:
-  - docker:24.0.6-dind
+  - docker:28.0.0-dind
 
 include:
   - template: Code-Quality.gitlab-ci.yml
@@ -15,8 +15,8 @@ stages:
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   GIT_SUBMODULE_STRATEGY: normal
-  KASM_RELEASE: "1.17.0"
-  TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.17.0.bbc15c.tar.gz"
+  KASM_RELEASE: "1.18.0"
+  TEST_INSTALLER: "https://kasm-static-content.s3.amazonaws.com/kasm_release_1.18.0.09f70a.tar.gz"
   SCAN_CONTAINERS: "true"
   MIRROR_ORG_NAME: "kasmtech"
 before_script:
