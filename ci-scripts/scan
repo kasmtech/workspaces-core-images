@@ -27,7 +27,7 @@ fi
 
 case "$scan_cmd" in
   repo) options="--scanners config,secret,vuln" ;;
-  image) options="--scanners vuln" ;;
+  image) options="--scanners vuln --timeout 10m" ;;
   *) options="--scanners vuln,config,secret" ;;
 esac
 

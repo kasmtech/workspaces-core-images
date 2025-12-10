@@ -12,6 +12,8 @@ stages:
   - template
   - run
   - test
+default:
+  retry: 2
 variables:
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
   GIT_SUBMODULE_STRATEGY: normal

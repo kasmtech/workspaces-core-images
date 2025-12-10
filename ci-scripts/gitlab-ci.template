@@ -11,6 +11,8 @@ stages:
   - scan
   - test
   - manifest
+default:
+  retry: 2
 variables:
   KASM_RELEASE: "{{ KASM_RELEASE }}"
   TEST_INSTALLER: "{{ TEST_INSTALLER }}"
