@@ -98,6 +98,20 @@ download_and_symlink_v2() {
   ln -s "$BINARY_NAME" kasm-profile-sync-2
 }
 
+install_v2_dependencies() {
+  # Install libarchive 13 on distros that need it
+  if [[ "$DISTRO" = @(debian|ubuntu|kali) ]]; then
+    apt-get update
+    apt-get install -y libarchive13
+  elif [[ "$DISTRO" = @(opensuse) ]]; then
+     zypper install -yn libarchive13
+  elif [ "${DISTRO}" == "alpine" ]; then
+      apk add --no-cache  libarchive
+  elif [[ "${DISTRO}" == @(fedora*|oracle*|rockylinux*|almalinux*|rhel*) ]]; then
+      dnf install -y libarchive
+  fi
+}
+
 ARCH=$(arch)
 convert_local_distro_to_profile_sync_distro
 check_distro_is_supported
@@ -110,4 +124,5 @@ download_and_symlink
 # profile-sync-v2
 BRANCH="release_2.0.0"
 COMMIT_ID="299a7ead1350e4ddd8e3b59a1186a8dc11673a05"
+install_v2_dependencies
 download_and_symlink_v2
