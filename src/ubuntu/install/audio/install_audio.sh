@@ -82,13 +82,7 @@ WS_COMMIT_ID="f7efb82dc59a02d1b99e2e2b3c6d127dc548ba72"
 WS_BRANCH="develop"
 WS_COMMIT_ID_SHORT=$(echo "${WS_COMMIT_ID}" | cut -c1-6)
 
-AS_COMMIT_ID="40caefd2f6732fe5ab90091e89a1e364210afff0"
-AS_BRANCH="develop"
-AS_COMMIT_ID_SHORT=$(echo "${AS_COMMIT_ID}" | cut -c1-6)
-
 cd $STARTUPDIR
 mkdir jsmpeg
 wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_websocket_relay/${WS_COMMIT_ID}/kasm_websocket_relay_${ARCH}_${WS_BRANCH}.${WS_COMMIT_ID_SHORT}.tar.gz | tar xz --strip 1 -C $STARTUPDIR/jsmpeg
 chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux
-mkdir /opt/audio
-wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_audio_server/${AS_COMMIT_ID}/kasm_audio_server_${ARCH}_${AS_BRANCH}.${AS_COMMIT_ID_SHORT}.tar.gz | tar xz -C /opt/audio
