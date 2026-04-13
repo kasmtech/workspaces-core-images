@@ -41,7 +41,11 @@ before_script:
 {% for IMAGE in multiImages %}
 build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: build
-  extends: .run_rules
+  image: docker:28.2.2
+  services:
+    - docker:28.2.2-dind
+  extends:
+    - .run_rules
   rules:
     - !reference [.run_rules, rules]
     - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
@@ -69,7 +73,11 @@ build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in singleImages %}
 build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: build
-  extends: .run_rules
+  image: docker:28.2.2
+  services:
+    - docker:28.2.2-dind
+  extends:
+    - .run_rules
   rules:
     - !reference [.run_rules, rules]
     - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
@@ -229,7 +237,11 @@ scan_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in multiImages %}
 manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
-  extends: .run_rules
+  image: docker:28.2.2
+  services:
+    - docker:28.2.2-dind
+  extends:
+    - .run_rules
   rules:
     - !reference [.run_rules, rules]
     - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
@@ -257,7 +269,11 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in singleImages %}
 manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
-  extends: .run_rules
+  image: docker:28.2.2
+  services:
+    - docker:28.2.2-dind
+  extends:
+    - .run_rules
   rules:
     - !reference [.run_rules, rules]
     - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
@@ -289,6 +305,9 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in multiImages %}
 manifest_weekly_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
+  image: docker:28.2.2
+  services:
+    - docker:28.2.2-dind
   rules:
     - if: >
         $README_USERNAME || 
@@ -311,6 +330,9 @@ manifest_weekly_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in singleImages %}
 manifest_weekly_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: manifest
+  image: docker:28.2.2
+  services:
+    - docker:28.2.2-dind
   rules:
     - if: >
         $README_USERNAME || 
