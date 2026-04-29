@@ -64,6 +64,8 @@ if [ "${DISTRO}" == "kali" ]; then
     xfce4-taskmanager \
     xfce4-whiskermenu-plugin \
     xfce4-notifyd
+  cp "$(dirname $0)/bwrap_wrapper.sh" /usr/bin/bwrap.wrapper
+  chmod 755 /usr/bin/bwrap.wrapper
 elif [[ "$DISTRO" = @(ubuntu|debian) ]]; then
   apt-get install -y \
     dbus-x11 \

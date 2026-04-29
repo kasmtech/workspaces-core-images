@@ -1,9 +1,9 @@
 ############
 # Settings #
 ############
-image: docker:28.0.0
+image: docker:29.4.0
 services:
-  - docker:28.0.0-dind
+  - docker:29.4.0-dind
 
 include:
   - template: Code-Quality.gitlab-ci.yml
