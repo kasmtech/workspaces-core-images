@@ -19,8 +19,8 @@ elif [ "${DISTRO}" == "opensuse" ]; then
     zypper install --allow-vendor-change -y cups-pdf
   fi
 elif [ "${DISTRO}" == "alpine" ]; then
-  echo '@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
-  apk add --no-cache cups cups-client cups-pdf@testing
+  echo '@edge-community http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
+  apk add --no-cache cups cups-client cups-pdf@edge-community
   usermod -a -G lpadmin root
 else
   apt-get update
