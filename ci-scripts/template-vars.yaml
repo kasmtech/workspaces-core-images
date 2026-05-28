@@ -293,19 +293,6 @@ multiImages:
       - src/fedora41/xfce/.config/xfce4/**
       - src/fedora41/xfce/.config/xfce4/xfconf/**
       - src/fedora41/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
-  - name1: parrotos
-    name2: 6
-    base: parrotsec/core:6
-    bg: bg_parrotos6.jpg
-    distro: parrotos6
-    dockerfile: dockerfile-kasm-core
-    changeFiles:
-      - dockerfile-kasm-core
-      - src/parrotos6/**
-      - src/ubuntu/nvidia/**
-      - src/ubuntu/sysbox/**
-      - src/ubuntu/virtualgl/**
-      - src/parrotos6/**
   - name1: alpine
     name2: 319
     base: alpine:3.19

@@ -11,8 +11,8 @@ elif [[ "${DISTRO}" == @(almalinux8|almalinux9|oracle8|oracle9|rhel9|rockylinux8
 elif [ "${DISTRO}" == "opensuse" ]; then
   zypper install -y cups cups-client cups-pdf
 elif [ "${DISTRO}" == "alpine" ]; then
-  echo '@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
-  apk add --no-cache cups cups-client cups-pdf@testing
+  echo '@edge-community http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
+  apk add --no-cache cups cups-client cups-pdf@edge-community
   usermod -a -G lpadmin root
 else
   apt-get update
