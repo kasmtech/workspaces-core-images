@@ -120,6 +120,6 @@ download_and_symlink
 
 # profile-sync-v2
 BRANCH="release_2.1.0"
-COMMIT_ID="cb3d9c65ab9e0b3160cafa65375bfebbec7f199a"
+COMMIT_ID="c10d82f8492d711c01b67a97cb20bec0c357cf06"
 install_v2_dependencies
 download_and_symlink_v2
