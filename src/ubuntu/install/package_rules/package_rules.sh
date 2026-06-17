@@ -25,16 +25,10 @@ elif [ "${DISTRO}" == "alpine" ]; then
 elif [[ "${DISTRO}" == "parrotos7" ]]; then
   sed -i 's|https://deb.parrot.sh/parrot|https://mirrors.mit.edu/parrot|g' /etc/apt/sources.list.d/parrot.list
   apt-get update
-  DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+  DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold"
 else
-  if [ "${DISTRO}" == "parrotos6" ]; then
-    if ! getent group kasm-default-profile >/dev/null; then
-      groupadd --system kasm-default-profile
-    fi
-    if ! id kasm-default-profile >/dev/null 2>&1; then
-      useradd --system --gid kasm-default-profile --home-dir /home/kasm-default-profile --shell /usr/sbin/nologin kasm-default-profile
-    fi
-  fi
   apt-get update
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
     -o Dpkg::Options::="--force-confdef" \
