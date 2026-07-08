@@ -43,12 +43,18 @@ if command -v apt-get &>/dev/null; then
         libxcb1 libxcb1:i386 \
         libxext6 libxext6:i386 \
         libx11-6 libx11-6:i386
-    apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update
+    if ! apt-get install -y --no-install-recommends \
         libglvnd0 libglvnd0:i386 \
         libgl1 libgl1:i386 \
         libglx0 libglx0:i386 \
         libegl1 libegl1:i386 \
-        libgles2 libgles2:i386
+        libgles2 libgles2:i386; then
+      echo "WARNING: 32-bit (i386) GL libraries are not currently installable; \
+continuing with amd64-only GL (no 32-bit OpenGL support under VirtualGL)." >&2
+      apt-get install -y --no-install-recommends \
+          libglvnd0 libgl1 libglx0 libegl1 libgles2
+    fi
 
     if [[ "$DISTRO" = "ubuntu" ]] && ! grep -q "24.04" /etc/os-release; then
       add-apt-repository ppa:kisak/turtle
