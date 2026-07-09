@@ -14,7 +14,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 FROM install_tools AS base_layer
 
-MAINTAINER Kasm Tech "info@kasmweb.com"
+MAINTAINER Kasm Tech "info@kasm.com"
 LABEL "com.kasmweb.image"="true"
 
 ### Environment config
@@ -203,7 +203,7 @@ FROM scratch
 COPY --from=base_layer / /
 
 ### Labels
-LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasmweb.com"'
+LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasm.com"'
 LABEL "com.kasmweb.image"="true"
 ### Adding label to let Kasm Backend know the port upload request should be sent to
 ### See Kasm-7989 for details
