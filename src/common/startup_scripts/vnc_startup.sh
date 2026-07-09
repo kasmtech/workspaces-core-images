@@ -293,6 +293,17 @@ function start_window_manager (){
         fi
 }
 
+function start_xfce_touch_fix (){
+	if [ "${START_XFCE4}" == "1" ] || [ "${START_DE}" == "xfce4-session" ]; then
+		if [ -d "$STARTUPDIR/xfce_touch_fix" ]; then
+			log 'Starting xfce touch fix'
+			find "$STARTUPDIR/xfce_touch_fix" -maxdepth 1 -type f -executable | while read -r bin; do
+				DISPLAY=:1 "$bin" &
+			done
+		fi
+	fi
+}
+
 function start_audio_out_websocket (){
 	if [[ ${KASM_SVC_AUDIO:-1} == 1 ]]; then
 		log 'Starting audio websocket server'
@@ -709,6 +720,7 @@ wait_on_smartcard
 start_kasmvnc
 start_ssh_agent
 start_window_manager
+start_xfce_touch_fix
 start_audio_out_websocket
 start_audio_out
 start_audio_in
@@ -769,6 +781,7 @@ do
 					fi
 
 					start_window_manager
+					start_xfce_touch_fix
 					;;
 				kasm_audio_out_websocket)
 					echo "Restarting Audio Out Websocket Service"
