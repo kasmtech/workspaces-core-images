@@ -24,7 +24,7 @@ elif [[ "${DISTRO}" == "alpine" ]]; then
 fi
 
 echo "Clone and build xfce_touch_fix"
-git clone --depth=1 "${REPO_URL}" "${BUILD_DIR}"
+GIT_TERMINAL_PROMPT=0 git clone --depth=1 "${REPO_URL}" "${BUILD_DIR}"
 
 mkdir -p "${INSTALL_DIR}"
 make -C "${BUILD_DIR}" -j"$(nproc)"
