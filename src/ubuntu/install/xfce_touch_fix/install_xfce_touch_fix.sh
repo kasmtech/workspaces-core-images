@@ -12,15 +12,15 @@ fi
 echo "Install build dependencies for xfce_touch_fix"
 if [[ "${DISTRO}" == @(ubuntu|debian|kali|parrotos7) ]]; then
   apt-get update
-  apt-get install -y --no-install-recommends gcc git make
+  apt-get install -y --no-install-recommends gcc git make libx11-dev libxi-dev libxtst-dev
 elif [[ "${DISTRO}" == @(fedora42|fedora43) ]]; then
-  dnf install -y gcc git make
+  dnf install -y gcc git make libX11-devel libXi-devel libXtst-devel
 elif [[ "${DISTRO}" == @(oracle8|oracle9|rhel9|rockylinux8|rockylinux9|almalinux8|almalinux9|centos) ]]; then
-  yum install -y gcc git make
+  yum install -y gcc git make libX11-devel libXi-devel libXtst-devel
 elif [[ "${DISTRO}" == "opensuse" ]]; then
-  zypper install -yn gcc git make
+  zypper install -yn gcc git make libX11-devel libXi-devel libXtst-devel
 elif [[ "${DISTRO}" == "alpine" ]]; then
-  apk add --no-cache gcc git make musl-dev
+  apk add --no-cache gcc git make musl-dev libx11-dev libxi-dev libxtst-dev
 fi
 
 echo "Clone and build xfce_touch_fix"
