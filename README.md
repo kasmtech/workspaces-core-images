@@ -15,9 +15,9 @@ The container is now accessible via a browser : `https://<IP>:6901`
  - **Password**: `password`
 
 
-For more information about building custom images please review the  [**How To Guide**](https://kasm.com/docs/latest/how_to/building_images.html?utm_campaign=Github&utm_source=github)
+For more information about building custom images please review the  [**How To Guide**](https://docs.kasm.com/docs/how-to/workspaces-sessions/container-workspace/customization/building-images)
 
-The Kasm team publishes applications and desktop images for use inside the platform. More information, including source can be found in the [Default Images List](https://kasm.com/docs/latest/guide/custom_images.html?utm_campaign=Github&utm_source=github)
+The Kasm team publishes applications and desktop images for use inside the platform. More information, including source can be found in the [Default Images List](https://docs.kasm.com/docs/how-to/workspaces-sessions/container-workspace/custom-images)
 
 # About Workspaces
 Kasm Workspaces is a docker container streaming platform that enables you to deliver browser-based access to desktops, applications, and web services. Kasm uses a modern DevOps approach for programmatic delivery of services via Containerized Desktop Infrastructure (CDI) technology to create on-demand, disposable, docker containers that are accessible via web browser. The rendering of the graphical-based containers is powered by the open-source project   [**KasmVNC**](https://github.com/kasmtech/KasmVNC?utm_campaign=Github&utm_source=github)
