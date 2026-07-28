@@ -15,9 +15,9 @@ The container is now accessible via a browser : `https://<IP>:6901`
  - **Password**: `password`
 
 
-For more information about building custom images please review the  [**How To Guide**](https://kasmweb.com/docs/latest/how_to/building_images.html?utm_campaign=Github&utm_source=github)
+For more information about building custom images please review the  [**How To Guide**](https://docs.kasm.com/docs/latest/how-to/workspaces-sessions/container-workspace/customization/building-images?utm_campaign=Github&utm_source=github)
 
-The Kasm team publishes applications and desktop images for use inside the platform. More information, including source can be found in the [Default Images List](https://kasmweb.com/docs/latest/guide/custom_images.html?utm_campaign=Github&utm_source=github)
+The Kasm team publishes applications and desktop images for use inside the platform. More information, including source can be found in the [Default Images List](https://docs.kasm.com/docs/latest/how-to/workspaces-sessions/container-workspace/custom-images?utm_campaign=Github&utm_source=github)
 
 # About Workspaces
 Kasm Workspaces is a docker container streaming platform that enables you to deliver browser-based access to desktops, applications, and web services. Kasm uses a modern DevOps approach for programmatic delivery of services via Containerized Desktop Infrastructure (CDI) technology to create on-demand, disposable, docker containers that are accessible via web browser. The rendering of the graphical-based containers is powered by the open-source project   [**KasmVNC**](https://github.com/kasmtech/KasmVNC?utm_campaign=Github&utm_source=github)
@@ -27,11 +27,54 @@ Kasm Workspaces is a docker container streaming platform that enables you to del
 Kasm Workspaces was developed to meet the most demanding secure collaboration requirements that is highly scalable, customizable, and easy to maintain.  Most importantly, Kasm provides a solution, rather than a service, so it is infinitely customizable to your unique requirements and includes a developer API so that it can be integrated with, rather than replace, your existing applications and workflows. Kasm can be deployed in the cloud (Public or Private), on-premise (Including Air-Gapped Networks), or in a hybrid configuration.
 
 # Live Demo
-A self-guided on-demand demo is available at [**kasmweb.com**](https://www.kasmweb.com/demo.html?utm_campaign=Github&utm_source=github)
+A self-guided on-demand demo is available at [**kasmweb.com**](https://kasm.com?utm_campaign=Github&utm_source=github)
 
+# Building Images
+Build scripts for creating core images locally are in `scripts/` and require
+[`yq`](https://github.com/mikefarah/yq) v4.53.3 (downloaded and sha256-verified automatically on first run; cached at `~/.cache/kasm/yq/`).
 
-[logo]: https://cdn2.hubspot.net/hubfs/5856039/dockerhub/kasm_logo.png "Kasm Logo"
-[Kasm_Workflow]: https://cdn2.hubspot.net/hubfs/5856039/dockerhub/kasm_workflow_960.gif "Kasm Workflow"
+All commands must be run from the repository root.
+
+Initialize git submodules first — these are required to build the KasmOS image:
+
+```
+git submodule update --init --recursive
+```
+
+## List available images
+
+```
+./scripts/build-image.sh --list-images
+```
+
+## Build an image
+
+To build an image directly (tagged `local_build` by default):
+
+```
+./scripts/build-image.sh --build kasmweb/core-ubuntu-jammy
+```
+
+To inspect the `docker build` command before running it:
+
+```
+./scripts/build-image.sh --list-image-build-command kasmweb/core-ubuntu-jammy
+```
+
+To list build commands for all images:
+
+```
+./scripts/build-image.sh --list-images-build-commands
+```
+
+Override the image tag with `-t`:
+
+```
+./scripts/build-image.sh --build kasmweb/core-ubuntu-jammy -t my-tag
+```
+
+[logo]: https://5856039.fs1.hubspotusercontent-na1.net/hubfs/5856039/Kasm_Workspaces_Logo.png "Kasm Logo"
+[Kasm_Workflow]: https://5856039.fs1.hubspotusercontent-na1.net/hubfs/5856039/dockerhub/launching_ubuntu_jammy.gif "Kasm Workflow"
 
 # Reporting Issues
 
