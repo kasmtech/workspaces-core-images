@@ -50,9 +50,9 @@ elif [[ "${DISTRO}" == @(rockylinux9|oracle9|rhel9|almalinux9) ]] ; then
 elif [[ "${DISTRO}" == "opensuse" ]] ; then
     if grep -q "16" /etc/os-release;then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_opensuse_16_${KASM_VER_NAME_PART}_x86_64.rpm"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/17265facc40ab50db5740cdf0d12c61173edafc9/kasmvncserver_opensuse_16_1.5.0_x86_64.rpm"
         else
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_opensuse_16_${KASM_VER_NAME_PART}_aarch64.rpm"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/17265facc40ab50db5740cdf0d12c61173edafc9/kasmvncserver_opensuse_16_1.5.0_aarch64.rpm"
         fi
     fi
 elif [[ "${DISTRO}" == "fedora42" ]] ; then
