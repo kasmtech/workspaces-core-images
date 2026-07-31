@@ -23,7 +23,7 @@ apk add \
   jq \
   openssh-client
 
-AWS_CLI_IMAGE=public.ecr.aws/aws-cli/aws-cli:2.34.33
+AWS_CLI_IMAGE=amazon/aws-cli:2.34.33
 
 aws() {
   docker run --rm \
