@@ -31,9 +31,9 @@ then
     apt-get update
     apt-get install -y sgml-base
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali_kali-rolling_${KASM_VER_NAME_PART}_amd64.deb"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_arm64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali_kali-rolling_${KASM_VER_NAME_PART}_arm64.deb"
     fi
 elif [[ "${DISTRO}" == @(rockylinux8|oracle8|almalinux8) ]] ; then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
