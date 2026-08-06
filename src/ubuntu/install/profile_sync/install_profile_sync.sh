@@ -119,7 +119,7 @@ COMMIT_ID="bdda739846603351abce617cd3c3ebaacdd44ff8"
 download_and_symlink
 
 # profile-sync-v2
-BRANCH="release_2.1.0"
-COMMIT_ID="c10d82f8492d711c01b67a97cb20bec0c357cf06"
+BRANCH="release_2.1.1"
+COMMIT_ID="506ba7a13d810b214fe76cb91e94abc7c559d8d7"
 install_v2_dependencies
 download_and_symlink_v2
