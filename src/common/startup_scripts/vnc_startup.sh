@@ -34,6 +34,9 @@ if [ "${LC_ALL}" != "en_US.UTF-8" ]; then
   export LANGUAGE=${LC_ALL}
 fi
 
+# Enable XInput2 in Firefox for touch device support
+export MOZ_USE_XINPUT2=1
+
 # Dbus
 export $(dbus-launch)
 
