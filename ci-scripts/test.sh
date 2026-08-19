@@ -11,6 +11,7 @@ DOCKERFILE=$6
 ARCH=$7
 AWS_ID=$8
 AWS_KEY=$9
+TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}"
 
 # Setup aws cli
 export AWS_ACCESS_KEY_ID="${AWS_ID}"
@@ -135,7 +136,24 @@ function turnoff() {
   done
   aws ec2 delete-key-pair --key-name ${RAND}
 }
-trap turnoff ERR
+
+# The integration report can only show that a workspace is restarting. Capture
+# the actual container exit state and startup log before the ephemeral test host
+# is destroyed so image startup regressions can be diagnosed from the job log.
+function collect_workspace_logs() {
+  for IP in "${IPS[@]}"; do
+    ssh \
+      -oConnectTimeout=4 \
+      -oStrictHostKeyChecking=no \
+      ${USER}@${IP} \
+      "for container in \$(sudo docker ps -aq --filter ancestor='${TEST_IMAGE}'); do
+         sudo docker inspect --format 'Workspace container {{.Name}}: status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}} restart_count={{.RestartCount}}' \"\${container}\"
+         sudo docker logs --timestamps --tail 500 \"\${container}\" 2>&1
+       done" || :
+  done
+}
+
+trap 'collect_workspace_logs; turnoff' ERR
 
 # Make sure the instance is up
 for IP in "${IPS[@]}"; do
@@ -219,7 +237,7 @@ docker run --rm \
   -e SSH_USER=$USER \
   -e DOCKERUSER=$DOCKER_HUB_USERNAME \
   -e DOCKERPASS=$DOCKER_HUB_PASSWORD \
-  -e TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}" \
+  -e TEST_IMAGE="${TEST_IMAGE}" \
   -e AWS_KEY=${KASM_TEST_AWS_KEY} \
   -e AWS_SECRET="${KASM_TEST_AWS_SECRET}" \
   -e SLACK_TOKEN=${SLACK_TOKEN} \
