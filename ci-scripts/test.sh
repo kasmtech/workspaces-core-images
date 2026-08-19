@@ -248,11 +248,13 @@ docker run --rm \
   -v $(dirname ${CI_PROJECT_DIR})/sshkey:/sshkey:ro  ${SLIM_FLAG} \
   kasmweb/kasm-tester:1.18.0
 
-# Shutdown Instances
-turnoff
-
 # Exit 1 if test failed or file does not exist
 STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
 if [ ! "${STATUS}" == "PASS" ]; then
+  collect_workspace_logs
+  turnoff
   exit 1
 fi
+
+# Shutdown Instances
+turnoff
