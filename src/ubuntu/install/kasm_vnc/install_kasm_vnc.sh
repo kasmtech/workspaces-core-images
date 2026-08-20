@@ -33,8 +33,8 @@ cd /tmp
 BUILD_ARCH=$(uname -m)
 UBUNTU_CODENAME=""
 LEGACY_BUILD_URL=""
-COMMIT_ID="e05d0bf9f0c04a66da74ee8876ff928ee43f2308"
-BRANCH="bugfix_VNC-546_fix_ffmpeg_library_loading"
+COMMIT_ID="473d66e10ffefd57b13f1bdfe46194ba51ec1ea7"
+BRANCH="bugfix_VNC-546_fix_ffmpeg_library_loading_2"
 KASMVNC_VER="1.5.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
