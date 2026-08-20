@@ -33,9 +33,9 @@ cd /tmp
 BUILD_ARCH=$(uname -m)
 UBUNTU_CODENAME=""
 LEGACY_BUILD_URL=""
-COMMIT_ID="17265facc40ab50db5740cdf0d12c61173edafc9"
-BRANCH="release" # just use 'release' for a release branch
-KASMVNC_VER="1.5.0"
+COMMIT_ID="e05d0bf9f0c04a66da74ee8876ff928ee43f2308"
+BRANCH="bugfix_VNC-546_fix_ffmpeg_library_loading"
+KASMVNC_VER="1.5.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
