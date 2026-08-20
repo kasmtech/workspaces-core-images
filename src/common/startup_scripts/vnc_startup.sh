@@ -37,6 +37,10 @@ fi
 # Enable XInput2 in Firefox for touch device support
 export MOZ_USE_XINPUT2=1
 
+# Enable AT-SPI accessibility bridge for GTK apps (e.g. Firefox) so touch input focus fixes work
+export GNOME_ACCESSIBILITY=1
+export GTK_MODULES=gail:atk-bridge
+
 # Dbus
 export $(dbus-launch)
 
