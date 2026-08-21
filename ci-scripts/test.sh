@@ -193,12 +193,13 @@ deb ${APT_MIRROR} jammy-updates main restricted universe multiverse
 deb ${APT_MIRROR} jammy-backports main restricted universe multiverse
 deb ${APT_SECURITY_MIRROR} jammy-security main restricted universe multiverse
 EOL
+APT_UPDATE_TIMEOUT=120
 for IP in "${IPS[@]}"; do
-  if ssh \
+  if timeout ${APT_UPDATE_TIMEOUT} ssh \
     -oConnectTimeout=10 \
     -oStrictHostKeyChecking=no \
     ${USER}@${IP} \
-    "sudo apt-get update"; then
+    "sudo apt-get update -o APT::Update::Error-Mode=any"; then
     echo "${IP}: default apt mirror is working, leaving it as-is"
   else
     echo "${IP}: default apt mirror failed, switching to official Ubuntu mirrors"
@@ -206,7 +207,7 @@ for IP in "${IPS[@]}"; do
       -oStrictHostKeyChecking=no \
       /root/sources.list \
       ${USER}@${IP}:/tmp/
-    ssh \
+    timeout ${APT_UPDATE_TIMEOUT} ssh \
       -oConnectTimeout=10 \
       -oStrictHostKeyChecking=no \
       ${USER}@${IP} \
