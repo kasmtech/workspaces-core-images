@@ -192,12 +192,14 @@ deb ${APT_MIRROR} jammy-updates main restricted universe multiverse
 deb ${APT_MIRROR} jammy-backports main restricted universe multiverse
 deb ${APT_SECURITY_MIRROR} jammy-security main restricted universe multiverse
 EOL
+APT_UPDATE_TIMEOUT=120
 for IP in "${IPS[@]}"; do
-  scp \
+  timeout ${APT_UPDATE_TIMEOUT} scp \
+    -oConnectTimeout=10 \
     -oStrictHostKeyChecking=no \
     /root/sources.list \
     ${USER}@${IP}:/tmp/
-  ssh \
+  timeout ${APT_UPDATE_TIMEOUT} ssh \
     -oConnectTimeout=10 \
     -oStrictHostKeyChecking=no \
     ${USER}@${IP} \
