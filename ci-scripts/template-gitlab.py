@@ -26,13 +26,10 @@ with open("template-vars.yaml", 'r') as stream:
   templateVars['SCHEDULED'] = scheduled
   templateVars['SCHEDULE_NAME'] = scheduleName
 
-  # e2e_playwright defaults to false for every image (multi and single)
-  #   unless an entry explicitly opts in with `e2e_playwright: true` in
-  #   template-vars.yaml. Starting false, not true, because unlike
-  #   workspaces-images (which calibrated against its own image matrix
-  #   before flipping this default), no core image has run the Playwright
-  #   calibration suite yet -- opt in image by image as each is verified
-  #   green, then flip this default once the matrix is covered.
+  # Defaults e2e_playwright to false for every image; an entry opts in with
+  # `e2e_playwright: true` in template-vars.yaml. Starts false since no core
+  # image has run the Playwright calibration suite yet -- opt in image by
+  # image as each is verified green, then flip the default.
   for imageList in (templateVars.get('multiImages', []), templateVars.get('singleImages', [])):
     for image in imageList:
       image.setdefault('e2e_playwright', False)

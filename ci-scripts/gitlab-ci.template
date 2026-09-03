@@ -110,10 +110,9 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: test
   image: "{{ 'node:24' if IMAGE.e2e_playwright else 'docker:29.4.3' }}"
   {% if IMAGE.e2e_playwright %}before_script:
-    # node:24 has no docker CLI preinstalled, and the top-level
-    #   before_script (just SANITIZED_BRANCH -- see the file this template
-    #   renders from) is fully replaced, not merged, by this job-level
-    #   override, so that export has to be repeated here too.
+    # node:24 has no docker CLI preinstalled. This job-level before_script
+    # fully replaces, not merges with, the top-level one, so the
+    # SANITIZED_BRANCH export has to be repeated here too.
     - apt-get update && apt-get install -y --no-install-recommends docker.io
     - export SANITIZED_BRANCH="$(echo ${CI_COMMIT_REF_NAME:0:64} | sed -r 's#^release/##' | sed 's/\//_/g')"
   {% endif %}extends:
@@ -142,12 +141,8 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - ${TAG}
   retry: 1
   {% if IMAGE.e2e_playwright %}artifacts:
-    # kasmweb-checkout/ prefix: test.sh runs `npx playwright test` with `cd
-    #   kasmweb-checkout` first, so playwright.config.ts's relative
-    #   `outputFile: "playwright-results/results.xml"` resolves under there,
-    #   not at this job's own root. test-results/ holds per-test trace.zip
-    #   (trace: "on-first-retry") and error-context.md snapshots -- needed to
-    #   diagnose failures beyond what the JUnit XML alone shows.
+    # kasmweb-checkout/ prefix: test.sh runs playwright from that directory,
+    # so its relative output paths resolve there.
     when: always
     paths:
       - kasmweb-checkout/playwright-results/
