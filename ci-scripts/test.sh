@@ -11,22 +11,78 @@ DOCKERFILE=$6
 ARCH=$7
 AWS_ID=$8
 AWS_KEY=$9
+RUN_PLAYWRIGHT=${10:-false}
+
+# On this branch, the Playwright calibration tester replaces Selenium's
+#   kasm-tester entirely for images opted into `e2e_playwright` in
+#   template-vars.yaml -- not run alongside it -- so the two suites never
+#   share a DB/instance. Other images (and every image once RUN_PLAYWRIGHT
+#   isn't passed at all) are unaffected and keep running kasm-tester exactly
+#   as before.
+if [ "${RUN_PLAYWRIGHT}" == "true" ]; then
+  RUN_SELENIUM=false
+else
+  RUN_SELENIUM=true
+fi
+
+# Same collapsing rule as manifest.sh's ENDPOINT (kasmos has name1==name2 and
+#   publishes as kasmweb/core-kasmos, not kasmweb/core-kasmos-kasmos) --
+#   reused here as the Playwright image label so it lines up with the
+#   `core-*` prefixes already present in the *.image-spec.ts capability-skip
+#   lists (e.g. NO_XFCE's "core-kasmos", NO_CLIPBOARD's "core-fedora-42").
+#   Only used for the KASM_TEST_IMAGE_REFS label below -- the
+#   image-cache-private ref itself always keeps both names uncollapsed, same
+#   as the Selenium TEST_IMAGE and test-unit.sh's image_uri.
+if [[ "${NAME1}" == "${NAME2}" ]]; then
+  LABEL="core-${NAME1}"
+else
+  LABEL="core-${NAME1}-${NAME2}"
+fi
 
 # Setup aws cli
 export AWS_ACCESS_KEY_ID="${AWS_ID}"
 export AWS_SECRET_ACCESS_KEY="${AWS_KEY}"
 export AWS_DEFAULT_REGION=us-east-1
 
-# Install tools for testing
-apk add \
-  curl \
-  jq \
-  openssh-client
+# Install tools for testing. RUN_PLAYWRIGHT-flagged entries run this job on
+#   node:24 (Debian) instead of docker:29.4.3 (Alpine) -- see
+#   gitlab-ci.template's per-entry `image:` -- because Playwright's bundled
+#   Chromium needs glibc, which Alpine's musl libc doesn't provide. docker.io
+#   is already installed by that job's own before_script (needed there
+#   before the default before_script's SANITIZED_BRANCH export runs, and
+#   before the aws() wrapper below needs it).
+if [ "${RUN_PLAYWRIGHT}" == "true" ]; then
+  apt-get update && apt-get install -y --no-install-recommends curl jq git openssh-client
+else
+  apk add \
+    curl \
+    jq \
+    openssh-client
+fi
+
+# GitLab Secure File, same as kasmweb's own e2e-test job (.gitlab-ci.yml):
+#   downloads project Secure Files (distinct from CI/CD variables) into
+#   SECURE_FILES_DOWNLOAD_PATH via the community installer. Only needed on
+#   the RUN_PLAYWRIGHT leg -- Selenium's kasm-tester has no license handling
+#   at all.
+if [ "${RUN_PLAYWRIGHT}" == "true" ]; then
+  export SECURE_FILES_DOWNLOAD_PATH="/tmp/"
+  curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/load-secure-files/-/raw/main/installer" | bash
+fi
 
 AWS_CLI_IMAGE=public.ecr.aws/aws-cli/aws-cli:2.34.33
 
+# Pinned before anything below can reassign DOCKER_HOST (see the Playwright
+#   custom-frontend-build step further down, which points DOCKER_HOST at the
+#   remote EC2 instance's own daemon). Unlike workspaces-images, this repo's
+#   `aws` is this docker-wrapped function, not a real binary -- if it picked
+#   up a reassigned DOCKER_HOST, `turnoff`'s `aws ec2 delete-key-pair` call
+#   would run against the just-powered-off EC2 instance instead of the local
+#   dind sidecar, leaking a key pair on every Playwright run.
+AWS_DOCKER_HOST="${DOCKER_HOST}"
+
 aws() {
-  docker run --rm \
+  docker -H "${AWS_DOCKER_HOST}" run --rm \
     -e AWS_ACCESS_KEY_ID \
     -e AWS_SECRET_ACCESS_KEY \
     -e AWS_DEFAULT_REGION \
@@ -77,6 +133,32 @@ fi
 # Setup SSH Key
 mkdir -p /root/.ssh
 RAND=$(head /dev/urandom | tr -dc 'a-z0-9' | head -c36)
+
+# Shutdown Instances function and trap. Registered here -- as soon as RAND
+#   (the key-pair name) exists, before the key pair or instance are actually
+#   created -- and on EXIT rather than ERR, so cleanup fires no matter how
+#   the script terminates: a failing command under `set -e`, normal
+#   completion, or a GitLab job cancellation/timeout sending SIGTERM to this
+#   process (which ERR never catches -- signals bypass it entirely). Guarded
+#   with CLEANED_UP since EXIT still fires once more when the script's own
+#   `exit` calls near the end run, after cleanup already happened.
+CLEANED_UP=false
+function turnoff() {
+  if [ "${CLEANED_UP}" == "true" ]; then
+    return
+  fi
+  CLEANED_UP=true
+  for IP in "${IPS[@]}"; do
+    ssh \
+      -oConnectTimeout=4 \
+      -oStrictHostKeyChecking=no \
+      ${USER}@${IP} \
+      "sudo poweroff" || :
+  done
+  aws ec2 delete-key-pair --key-name ${RAND} || :
+}
+trap turnoff EXIT
+
 SSH_KEY=$(aws ec2 create-key-pair --key-name ${RAND} | jq -r '.KeyMaterial')
 cat >/root/.ssh/id_rsa <<EOL
 $SSH_KEY
@@ -123,19 +205,6 @@ for INSTANCE_ID in "${INSTANCES[@]}"; do
     fi
   done
 done
-
-# Shutdown Instances function and trap
-function turnoff() {
-  for IP in "${IPS[@]}"; do
-    ssh \
-      -oConnectTimeout=4 \
-      -oStrictHostKeyChecking=no \
-      ${USER}@${IP} \
-      "sudo poweroff" || :
-  done
-  aws ec2 delete-key-pair --key-name ${RAND}
-}
-trap turnoff ERR
 
 # Make sure the instance is up
 for IP in "${IPS[@]}"; do
@@ -226,46 +295,256 @@ for IP in "${IPS[@]}"; do
     "sudo mkdir -p /root/.docker && sudo mv /tmp/config.json /root/.docker/ && sudo chown root:root /root/.docker/config.json"
 done
 
+# Resolve which installer bundle to use.
+INSTALLER_URL="${TEST_INSTALLER}"
+if [ "${RUN_PLAYWRIGHT}" == "true" ]; then
+  # Rolling develop bundle, not the pinned release above -- calibration needs
+  #   the post-1.19.0 API/UI changes the DEVOPS-74 Playwright specs depend
+  #   on. Same install.sh-compatible tarball shape as TEST_INSTALLER; kept as
+  #   a separate variable so Selenium's own calibration against these images
+  #   isn't silently switched to a moving target.
+  INSTALLER_URL="${TEST_INSTALLER_ROLLING}"
+fi
+
 # Install Kasm workspaces
 ssh \
   -oConnectTimeout=4 \
   -oStrictHostKeyChecking=no \
   ${USER}@"${IPS[0]}" \
-  "curl -L -o /tmp/installer.tar.gz ${TEST_INSTALLER} && cd /tmp && tar xf installer.tar.gz && sudo bash kasm_release/install.sh -H -u -I -e -P ${RAND} -U ${RAND}"
+  "curl -fL -o /tmp/installer.tar.gz ${INSTALLER_URL} && cd /tmp && tar xf installer.tar.gz && sudo bash kasm_release/install.sh -H -u -I -e -P ${RAND} -U ${RAND}"
 
 # Ensure install is up and running
 ready_check
 
-# Pull tester image
-docker pull ${ORG_NAME}/kasm-tester:1.18.0
+# Playwright-calibration-only: swap in a custom frontend image carrying the
+#   DEVOPS-74 kasmweb branch's UI/test-ids, built directly into the
+#   instance's own Docker daemon -- which only exists now, post-install.
+if [ "${RUN_PLAYWRIGHT}" == "true" ]; then
+  CUSTOM_PROXY_TAG="pwcalib-${RAND}"
 
-# Run test
-cp /root/.ssh/id_rsa $(dirname ${CI_PROJECT_DIR})/sshkey
-chmod 777 $(dirname ${CI_PROJECT_DIR})/sshkey
-docker run --rm \
-  -e TZ=US/Pacific \
-  -e KASM_HOST=${IPS[0]} \
-  -e KASM_PORT=443 \
-  -e KASM_PASSWORD="${RAND}" \
-  -e SSH_USER=$USER \
-  -e DOCKERUSER=$DOCKER_HUB_USERNAME \
-  -e DOCKERPASS=$DOCKER_HUB_PASSWORD \
-  -e TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}" \
-  -e AWS_KEY=${KASM_TEST_AWS_KEY} \
-  -e AWS_SECRET="${KASM_TEST_AWS_SECRET}" \
-  -e SLACK_TOKEN=${SLACK_TOKEN} \
-  -e S3_BUCKET=kasm-ci \
-  -e COMMIT=${CI_COMMIT_SHA} \
-  -e REPO=workspaces-core-images \
-  -e AUTOMATED=true \
-  -v $(dirname ${CI_PROJECT_DIR})/sshkey:/sshkey:ro  ${SLIM_FLAG} \
-  kasmweb/kasm-tester:1.18.0
+  # install.sh never grants ${USER} docker-group access -- needed so the
+  #   DOCKER_HOST=ssh://${USER}@${IP} build below (and imageWarmup.ts's own
+  #   `docker pull` once Playwright runs) can reach the socket without sudo
+  #   (docker's ssh: transport runs a plain, unprefixed `docker system
+  #   dial-stdio` on the remote end). Group membership is re-evaluated per
+  #   SSH login, so this is picked up by every later connection with no
+  #   restart/re-login needed. Docker (and the docker group) exist now,
+  #   since install.sh has already run above.
+  ssh \
+    -oConnectTimeout=10 \
+    -oStrictHostKeyChecking=no \
+    ${USER}@"${IPS[0]}" \
+    "sudo usermod -aG docker ${USER}"
+
+  # SSH transport for the `docker build` below and for imageWarmup.ts's own
+  #   `docker pull` once Playwright runs -- both need to reach the
+  #   instance's own daemon, which is a separate daemon from this runner's.
+  #   docker's ssh: transport shells out to a bare `ssh` with no per-call
+  #   flags, unlike the explicit ssh/scp calls elsewhere in this script, so
+  #   it needs its own config. StrictHostKeyChecking is disabled because
+  #   this is a fresh instance every run -- there's no prior known_hosts
+  #   entry to check against.
+  mkdir -p /root/.ssh
+  cat >>/root/.ssh/config <<EOF
+Host ${IPS[0]}
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+EOF
+  chmod 600 /root/.ssh/config
+
+  # Exported (not passed as a one-off `docker -H`) because imageWarmup.ts's
+  #   own internal `docker pull` call (once Playwright runs, below) has no
+  #   way to take a per-call flag -- DOCKER_HOST is the only way to redirect
+  #   it. Safe to change for the rest of this run: RUN_SELENIUM is always
+  #   false whenever this branch executes, so nothing later in this script
+  #   still needs the original tcp://docker:2375 value -- and the aws()
+  #   wrapper above already pinned its own copy in AWS_DOCKER_HOST before
+  #   this reassignment.
+  export DOCKER_HOST="ssh://${USER}@${IPS[0]}"
+
+  echo "Building custom frontend image from kasmweb@${KASMWEB_VERSION:-develop}"
+  # Clear any stale checkout from a prior attempt -- job-level `retry: 1`
+  #   would otherwise hit "directory exists and is not empty" here.
+  rm -rf kasmweb-checkout
+  git clone --depth 1 --branch "${KASMWEB_VERSION:-develop}" \
+    "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/kasm-technologies/internal/kasmweb.git" \
+    kasmweb-checkout
+
+  # kasmweb's own `deploy` job uploads this per-branch on every pipeline run
+  #   on that branch, explicitly for other repos' dev/test use (see its
+  #   comment in kasmweb/.gitlab-ci.yml) -- picks up whatever UI/test-id
+  #   changes are on this branch, unlike the pinned release TEST_INSTALLER.
+  #   docker_build/Dockerfile.kasmweb just unpacks this tarball into an
+  #   nginx image -- no npm/webpack build needed here at all.
+  SANITIZED_KASMWEB_VERSION="$(echo "${KASMWEB_VERSION:-develop}" | sed 's/\//_/g')"
+
+  # Minimal build context (just this one file, at the relative path
+  #   Dockerfile.kasmweb's `COPY ./output/kasmweb.tar.gz` expects) instead of
+  #   the whole kasmweb-checkout tree -- Dockerfile.kasmweb doesn't reference
+  #   anything else in that repo, and the full checkout would otherwise get
+  #   sent as build context over the ssh transport for nothing. -f still
+  #   points at the checkout's copy of the Dockerfile itself (docker build
+  #   allows -f to live outside the context dir).
+  rm -rf kasmweb-frontend-context
+  mkdir -p kasmweb-frontend-context/output
+  curl -fL -o kasmweb-frontend-context/output/kasmweb.tar.gz \
+    "https://kasmweb-build-artifacts.s3.amazonaws.com/kasmweb/${SANITIZED_KASMWEB_VERSION}.tar.gz"
+
+  # Build straight into the instance's own daemon -- no registry push/pull
+  #   needed. install/bin/utils/pull (part of install.sh's flow) only
+  #   force-repulls image tags containing the literal string "rolling"; any
+  #   other tag (like this one) is left alone, and docker compose's default
+  #   pull_policy: missing just uses what's already there locally. Tag both
+  #   the public and private repo names since it's not known ahead of time
+  #   which one this bundle's compose files reference.
+  docker build \
+    -t "kasmweb/proxy:${CUSTOM_PROXY_TAG}" \
+    -t "kasmweb/proxy-private:${CUSTOM_PROXY_TAG}" \
+    -f kasmweb-checkout/docker_build/Dockerfile.kasmweb \
+    kasmweb-frontend-context
+
+  # Point the running install's proxy service at the custom-built image.
+  #   install.sh already collapsed every docker-compose-*.yaml variant down
+  #   to one live file by now (ROLE defaults to "all", so it copied
+  #   docker/.conf/docker-compose-all.yaml -> docker/docker-compose.yaml --
+  #   traced directly in install.sh's role dispatch), and that's the only
+  #   file install/bin/start's bare `docker compose up -d` actually reads (no
+  #   -f flag, relies on Compose's default discovery) -- so the swap targets
+  #   that single live file under /opt/kasm/current, not the extraction
+  #   directory. Built as a local script (rather than one long inline ssh
+  #   command string) to avoid layering this script's own quoting on top of
+  #   ssh's remote command string. Two separate substitutions (no
+  #   backreference) so the character class only needs to exclude the
+  #   surrounding quote style, not capture around it. Ends with `start`
+  #   (plain `docker compose up -d`, the same command install/bin/start
+  #   itself runs) rather than `restart` -- CUSTOM_PROXY_TAG is a fresh,
+  #   unique tag every run, so Compose's own config-diff already recreates
+  #   just the `proxy` service; nothing else needs a forced recreate.
+  cat >/tmp/kasm_swap_frontend_remote.sh <<EOF
+set -e
+sudo sed -i \\
+  -e "s#kasmweb/proxy:[^\"'[:space:]]\\+#kasmweb/proxy:${CUSTOM_PROXY_TAG}#g" \\
+  -e "s#kasmweb/proxy-private:[^\"'[:space:]]\\+#kasmweb/proxy-private:${CUSTOM_PROXY_TAG}#g" \\
+  /opt/kasm/current/docker/docker-compose.yaml
+sudo /opt/kasm/bin/start
+EOF
+
+  scp \
+    -oStrictHostKeyChecking=no \
+    /tmp/kasm_swap_frontend_remote.sh \
+    ${USER}@"${IPS[0]}":/tmp/kasm_swap_frontend_remote.sh
+  ssh \
+    -oConnectTimeout=10 \
+    -oStrictHostKeyChecking=no \
+    ${USER}@"${IPS[0]}" \
+    "bash /tmp/kasm_swap_frontend_remote.sh"
+
+  # Re-confirm readiness with the swapped frontend before Playwright runs.
+  ready_check
+fi
+
+# Playwright calibration tester (DEVOPS-74, ported from workspaces-images).
+#   Runs directly in this job's shell -- no separate tester image -- since
+#   this job's own container (node:24, see gitlab-ci.template) already has
+#   Node and can just clone kasmweb, npm install, and run the specs.
+#   Replaces kasm-tester on this instance (RUN_SELENIUM is false below)
+#   rather than running alongside it, so calibration never contaminates --
+#   or is contaminated by -- a Selenium run against the same DB.
+#
+# PLAYWRIGHT_STATUS is captured here (rather than let `set -e` kill the
+#   script) so `turnoff` still runs and shuts the instance down cleanly
+#   before the script exits on a test failure, matching the existing
+#   Selenium branch's STATUS-then-check pattern. Selenium is skipped on this
+#   branch for these images (see RUN_SELENIUM above), so PLAYWRIGHT_STATUS is
+#   now the only result signal for the job -- wired into the final exit code
+#   below.
+PLAYWRIGHT_STATUS=0
+if [ "${RUN_PLAYWRIGHT}" == "true" ]; then
+  echo "Running Playwright calibration tests against ${LABEL}"
+  # Subshell: keeps the cd and all these exports scoped to just this step,
+  #   rather than leaking into the rest of the script (RUN_SELENIUM is false
+  #   here regardless, but this keeps it airtight if that ever changes).
+  (
+    cd kasmweb-checkout
+    npm ci
+    npx playwright install --with-deps chromium
+    export CI=true
+    export KASM_ADDR="https://${IPS[0]}"
+    export USER_NAME="admin@kasm.local"
+    export PASSWORD="${RAND}"
+    # LABEL (computed above) is this image's canonical name for
+    # imageMatrix.ts's capability-skip maps (e.g. "core-ubuntu-noble",
+    # "core-fedora-43") -- the same collapsing convention manifest.sh's
+    # ENDPOINT already uses. KASM_TEST_IMAGE_REFS requires an explicit
+    # "label|ref" entry (see imageMatrix.ts) precisely so this label doesn't
+    # need to be re-derived from the ref on the Playwright side.
+    export KASM_TEST_IMAGE_REFS="${LABEL}|${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}"
+    # activation_key is the Secure File downloaded above -- same
+    #   `cat`-the-file pattern kasmweb's own e2e-test job uses, since it's a
+    #   multi-line secure file, not a plain CI/CD variable.
+    export KASM_LICENSE_KEY="$(cat /tmp/activation_key)"
+    # SKIP_DB_SNAPSHOT_ON_FAILURE: pass through as-is from the pipeline's own
+    #   CI/CD variable. Set to "true" by default to bound test-results/ artifact
+    #   size across the many per-image runs this pipeline accumulates. Change
+    #   to false when a failure needs extra diagnostics.
+    export SKIP_DB_SNAPSHOT_ON_FAILURE="${SKIP_DB_SNAPSHOT_ON_FAILURE:-true}"
+    # SKIP_TRACE_ON_FAILURE: same reasoning as SKIP_DB_SNAPSHOT_ON_FAILURE
+    #   above -- default to "true" here to bound test-results/ artifact size
+    #   (trace.zip files can run 70MB+ each) across the many per-image runs
+    #   this pipeline accumulates. Change to false on a specific pipeline run
+    #   when a failure needs a real trace.
+    export SKIP_TRACE_ON_FAILURE="${SKIP_TRACE_ON_FAILURE:-true}"
+    # DOCKER_HOST is already exported above (needed there for the frontend
+    #   image build) and inherited into this subshell -- imageWarmup.ts's own
+    #   `docker pull` needs it too, to reach the same instance daemon.
+    npx playwright test --project="image-spec:${LABEL}" --workers=1
+  ) || PLAYWRIGHT_STATUS=$?
+
+  echo "Playwright calibration tester exit status: ${PLAYWRIGHT_STATUS}"
+fi
+
+if [ "${RUN_SELENIUM}" == "true" ]; then
+  # Pull tester image
+  docker pull ${ORG_NAME}/kasm-tester:1.18.0
+
+  # Run test
+  cp /root/.ssh/id_rsa $(dirname ${CI_PROJECT_DIR})/sshkey
+  chmod 777 $(dirname ${CI_PROJECT_DIR})/sshkey
+  docker run --rm \
+    -e TZ=US/Pacific \
+    -e KASM_HOST=${IPS[0]} \
+    -e KASM_PORT=443 \
+    -e KASM_PASSWORD="${RAND}" \
+    -e SSH_USER=$USER \
+    -e DOCKERUSER=$DOCKER_HUB_USERNAME \
+    -e DOCKERPASS=$DOCKER_HUB_PASSWORD \
+    -e TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}" \
+    -e AWS_KEY=${KASM_TEST_AWS_KEY} \
+    -e AWS_SECRET="${KASM_TEST_AWS_SECRET}" \
+    -e SLACK_TOKEN=${SLACK_TOKEN} \
+    -e S3_BUCKET=kasm-ci \
+    -e COMMIT=${CI_COMMIT_SHA} \
+    -e REPO=workspaces-core-images \
+    -e AUTOMATED=true \
+    -v $(dirname ${CI_PROJECT_DIR})/sshkey:/sshkey:ro  ${SLIM_FLAG} \
+    kasmweb/kasm-tester:1.18.0
+fi
 
 # Shutdown Instances
 turnoff
 
-# Exit 1 if test failed or file does not exist
-STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
-if [ ! "${STATUS}" == "PASS" ]; then
-  exit 1
+if [ "${RUN_SELENIUM}" == "true" ]; then
+  # Exit 1 if test failed or file does not exist
+  STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
+  if [ ! "${STATUS}" == "PASS" ]; then
+    exit 1
+  fi
+else
+  # Selenium didn't run on this branch, so there's no ci-status.yml to check
+  #   -- PLAYWRIGHT_STATUS (captured above) is the job's only result signal,
+  #   and gates this job's exit code directly.
+  echo "Selenium skipped on this branch; Playwright calibration tester exit status was ${PLAYWRIGHT_STATUS}"
+  if [ "${PLAYWRIGHT_STATUS}" -ne 0 ]; then
+    exit "${PLAYWRIGHT_STATUS}"
+  fi
 fi

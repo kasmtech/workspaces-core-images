@@ -62,9 +62,18 @@ if [[ -z "${REVERT_PIPELINE_ID}" ]]; then
     STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
     if [ "${STATUS}" == "PASS" ]; then
       STATE=success
-    else
+    elif [ "${STATUS}" == "FAIL" ]; then
       STATE=failed
       FAILED="true"
+    else
+      # Playwright-tested entries (see test.sh) never write ci-status.yml --
+      #   that's Selenium's kasm-tester's own output file. An empty/missing
+      #   STATUS here just means this test_ job ran Playwright, not that the
+      #   test result is unknown; the job's own exit code already gated
+      #   whether this manifest job runs at all (see gitlab-ci.template's
+      #   `needs: test_... / when: on_success`), so there's nothing to ping
+      #   the GitLab API about for this ARCH and nothing to fail on.
+      continue
     fi
 
     # Ping gitlab api with link output
