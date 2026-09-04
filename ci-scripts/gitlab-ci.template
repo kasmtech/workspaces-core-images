@@ -115,6 +115,11 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     # SANITIZED_BRANCH export has to be repeated here too.
     - apt-get update && apt-get install -y --no-install-recommends docker.io
     - export SANITIZED_BRANCH="$(echo ${CI_COMMIT_REF_NAME:0:64} | sed -r 's#^release/##' | sed 's/\//_/g')"
+    # docker:29.4.3 jobs get ~/.docker/config.json for free from
+    # DOCKER_AUTH_CONFIG; node:24 doesn't, so test-unit.sh's `docker run`
+    # (which pulls this pipeline's own image-cache-private tag) fails with
+    # "pull access denied" without this. Same as the scan job's before_script.
+    - mkdir -p ~/.docker && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json
   {% endif %}extends:
     - .run_rules
     - .monitor-in-grafana
@@ -163,6 +168,7 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     # See the matching multiImages test_ job comment above -- same reasoning.
     - apt-get update && apt-get install -y --no-install-recommends docker.io
     - export SANITIZED_BRANCH="$(echo ${CI_COMMIT_REF_NAME:0:64} | sed -r 's#^release/##' | sed 's/\//_/g')"
+    - mkdir -p ~/.docker && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json
   {% endif %}extends:
     - .run_rules
     - .monitor-in-grafana
