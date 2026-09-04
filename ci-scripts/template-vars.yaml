@@ -66,9 +66,6 @@ multiImages:
     bg: bg_noble.png
     distro: ubuntu
     dockerfile: dockerfile-kasm-core
-    # DEVOPS-74 canary: first Debian-family image opted into the Playwright
-    # calibration tester in place of Selenium's kasm-tester. See test.sh.
-    e2e_playwright: true
     changeFiles:
       - dockerfile-kasm-core
       - src/ubuntu/xfce/**
@@ -292,9 +289,6 @@ multiImages:
     bg: bg_fedora.png
     distro: fedora43
     dockerfile: dockerfile-kasm-core-fedora
-    # DEVOPS-74 canary: first RPM-family image opted into the Playwright
-    # calibration tester in place of Selenium's kasm-tester. See test.sh.
-    e2e_playwright: true
     changeFiles:
       - dockerfile-kasm-core-fedora
       - src/fedora43/**

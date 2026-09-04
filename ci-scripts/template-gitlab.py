@@ -26,13 +26,18 @@ with open("template-vars.yaml", 'r') as stream:
   templateVars['SCHEDULED'] = scheduled
   templateVars['SCHEDULE_NAME'] = scheduleName
 
-  # Defaults e2e_playwright to false for every image; an entry opts in with
-  # `e2e_playwright: true` in template-vars.yaml. Starts false since no core
-  # image has run the Playwright calibration suite yet -- opt in image by
-  # image as each is verified green, then flip the default.
+  # Defaults e2e_playwright to true for every image now that the ubuntu/noble
+  # and fedora/43 canaries are green against both target architectures
+  # (including aarch64 session recording, which needed the xhost fix in
+  # src/ubuntu/install/recorder/install_recorder.sh) -- both legs run on the
+  # oci-amd-scheduled runner, driving an x86_64 or aarch64 EC2 test instance
+  # respectively; the runner itself is never arm64. An entry can still opt
+  # out with `e2e_playwright: false` in template-vars.yaml if a specific
+  # image needs more time on Selenium's kasm-tester -- that's the escape
+  # hatch now, not a growing allow-list.
   for imageList in (templateVars.get('multiImages', []), templateVars.get('singleImages', [])):
     for image in imageList:
-      image.setdefault('e2e_playwright', False)
+      image.setdefault('e2e_playwright', True)
 
 # Read template file
 with open("gitlab-ci.template", 'r') as stream:

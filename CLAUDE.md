@@ -155,7 +155,7 @@ Key scripts invoked from the template:
 
 `FILE_LIMITS` gating: on feature branches the pipeline only builds images whose `files:` globs in `template-vars.yaml` actually changed. `develop` and `release/*` branches build everything. `UNIVERSAL_CHANGE_FILES` (at the top of `template-vars.yaml`) is the set of paths that force rebuilding every image — edit those conservatively.
 
-**Playwright calibration tester (DEVOPS-74):** an `e2e_playwright: true` entry in `template-vars.yaml` (per-image opt-in, defaults to `false`) replaces that image's Selenium `kasm-tester` run in `test.sh` with the kasmweb Playwright `*.image-spec.ts` suite — same mechanism ported from `workspaces-images`, run against a `KASMWEB_VERSION` checkout on a `node:24` test job image instead of `docker:29.4.3`. Related variables (`.gitlab-ci.yml`):
+**Playwright calibration tester (DEVOPS-74):** replaces Selenium's `kasm-tester` run in `test.sh` with the kasmweb Playwright `*.image-spec.ts` suite, run against a `KASMWEB_VERSION` checkout on a `node:24` test job image instead of `docker:29.4.3` — same mechanism ported from `workspaces-images`. Defaults to `true` for every image in `template-vars.yaml`; an entry can opt out with `e2e_playwright: false` if it needs more time on Selenium first. Related variables (`.gitlab-ci.yml`):
 
 - `TEST_INSTALLER_ROLLING` — rolling `develop` install bundle used only on the Playwright leg, since calibration needs post-1.19.0 API/UI changes the specs depend on; Selenium's `TEST_INSTALLER` stays pinned.
 - `KASMWEB_VERSION` — kasmweb ref the specs are cloned from; pinned to a feature branch until DEVOPS-74 merges to `develop`.
