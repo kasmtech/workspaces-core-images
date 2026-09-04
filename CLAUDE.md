@@ -148,16 +148,16 @@ The CI pipeline is **dynamically generated**:
 Key scripts invoked from the template:
 
 - `ci-scripts/build.sh NAME1 NAME2 BASE BG DISTRO DOCKERFILE` — per-arch build, pushes to private image cache
-- `ci-scripts/test.sh ... ARCH AWS_ID AWS_KEY` — spins up an EC2 instance to smoke-test the image with the Playwright calibration tester below
+- `ci-scripts/test.sh ... ARCH AWS_ID AWS_KEY` — spins up an EC2 instance to smoke-test the image with the Playwright tester below
 - `ci-scripts/manifest.sh` / `weekly-manifest.sh` — joins x86_64 + aarch64 into a single multi-arch manifest
 - `ci-scripts/scan/` + `vulnerability-filter.rego` — Trivy CVE scan with Rego-based allowlist
 - `ci-scripts/readme.sh`, `quay_readme.sh` — push the per-image `docs/core-*/README.md` to Dockerhub/Quay
 
 `FILE_LIMITS` gating: on feature branches the pipeline only builds images whose `files:` globs in `template-vars.yaml` actually changed. `develop` and `release/*` branches build everything. `UNIVERSAL_CHANGE_FILES` (at the top of `template-vars.yaml`) is the set of paths that force rebuilding every image — edit those conservatively.
 
-**Playwright calibration tester (DEVOPS-74):** every `test_*` job runs the kasmweb Playwright `*.image-spec.ts` suite in `test.sh`, against a `KASMWEB_VERSION` checkout on a `node:24` test job image (Playwright's bundled Chromium needs glibc) — same mechanism ported from `workspaces-images`. This replaced the legacy Selenium `kasm-tester` suite, which has been removed. Related variables (`.gitlab-ci.yml`):
+**Playwright tester (DEVOPS-74):** every `test_*` job runs the kasmweb Playwright `*.image-spec.ts` suite in `test.sh`, against a `KASMWEB_VERSION` checkout on a `node:24` test job image (Playwright's bundled Chromium needs glibc) — same mechanism ported from `workspaces-images`. This replaced the legacy Selenium `kasm-tester` suite, which has been removed. Related variables (`.gitlab-ci.yml`):
 
-- `TEST_INSTALLER_ROLLING` — rolling `develop` install bundle, since calibration needs post-1.19.0 API/UI changes the specs depend on.
+- `TEST_INSTALLER_ROLLING` — rolling `develop` install bundle, since the specs need post-1.19.0 API/UI changes.
 - `KASMWEB_VERSION` — kasmweb ref the specs are cloned from; pinned to a feature branch until DEVOPS-74 merges to `develop`.
 - `SKIP_DB_SNAPSHOT_ON_FAILURE` / `SKIP_TRACE_ON_FAILURE` — default `true` to bound `pg_dump`/`trace.zip` artifact size across the many per-image runs this pipeline accumulates; set to `false` on a specific pipeline run to get full diagnostics for a failure.
 

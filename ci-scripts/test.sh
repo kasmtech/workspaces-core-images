@@ -286,7 +286,7 @@ for IP in "${IPS[@]}"; do
     "sudo mkdir -p /root/.docker && sudo mv /tmp/config.json /root/.docker/ && sudo chown root:root /root/.docker/config.json"
 done
 
-# TEST_INSTALLER_ROLLING for Playwright calibration; see its definition in
+# TEST_INSTALLER_ROLLING for the Playwright tester; see its definition in
 # .gitlab-ci.yml for why.
 INSTALLER_URL="${TEST_INSTALLER_ROLLING}"
 
@@ -300,6 +300,12 @@ ssh \
 # Ensure install is up and running
 ready_check
 
+# TODO(DEVOPS-74): remove this whole custom-frontend swap once a Kasm
+# release ships with the DEVOPS-74 kasmweb UI/test-id changes built in --
+# at that point the stock installer's own frontend already has what the
+# specs need, and TEST_INSTALLER_ROLLING can revert to a pinned release too
+# (see TEST_INSTALLER above).
+#
 # Swap in a custom frontend image carrying the DEVOPS-74 kasmweb branch's
 # UI/test-ids, built directly into the instance's own Docker daemon --
 # which only exists now, post-install.
@@ -385,14 +391,14 @@ ssh \
 # Re-confirm readiness with the swapped frontend before Playwright runs.
 ready_check
 
-# Playwright calibration tester. Runs directly in this job's own node:24
-# shell rather than a separate tester image.
+# Playwright tester. Runs directly in this job's own node:24 shell rather
+# than a separate tester image.
 #
 # PLAYWRIGHT_STATUS is captured explicitly, not left to `set -e`, so
 # `turnoff` still runs and shuts the instance down before the script exits.
 # It's the job's only result signal.
 PLAYWRIGHT_STATUS=0
-echo "Running Playwright calibration tests against ${LABEL}"
+echo "Running Playwright tests against ${LABEL}"
 # Subshell scopes the cd and all these exports to just this step.
 (
   cd kasmweb-checkout
@@ -421,7 +427,7 @@ echo "Running Playwright calibration tests against ${LABEL}"
   npx playwright test --project="image-spec:${LABEL}" --workers=1
 ) || PLAYWRIGHT_STATUS=$?
 
-echo "Playwright calibration tester exit status: ${PLAYWRIGHT_STATUS}"
+echo "Playwright tester exit status: ${PLAYWRIGHT_STATUS}"
 if [ "${PLAYWRIGHT_STATUS}" -ne 0 ]; then
   exit "${PLAYWRIGHT_STATUS}"
 fi
