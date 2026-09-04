@@ -12,7 +12,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
         zypper -n --gpg-auto-import-keys dup --from packman --allow-vendor-change
     fi
     zypper install -ny xhost
-elif [[ "${DISTRO}" == fedora* ]] && [ "$(arch)" == "aarch64" ]; then
+elif [ "${DISTRO}" == fedora* ]; then
     dnf install -y xhost
 fi
 
