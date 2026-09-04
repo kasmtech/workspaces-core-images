@@ -13,7 +13,7 @@ elif [ "${DISTRO}" == "opensuse" ]; then
     fi
     zypper install -ny xhost
 elif [[ "${DISTRO}" == fedora* ]] && [ "$(arch)" == "aarch64" ]; then
-    dnf install -y xorg-x11-server-utils
+    dnf install -y xhost
 fi
 
 COMMIT_ID="075aab468e8fcb4cf70703770164d8f3b89df5b8"
