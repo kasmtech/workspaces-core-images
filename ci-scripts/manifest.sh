@@ -2,7 +2,6 @@
 set -e 
 
 # Globals
-FAILED="false"
 PUBLIC_BUILD="false"
 REGISTRY_MIRRORS=("quay.io" "ghcr.io")
 
@@ -46,42 +45,6 @@ if [[ ! -z "${REVERT_PIPELINE_ID}" ]]; then
       SANITIZED_BRANCH=${SANITIZED_BRANCH}-rolling-${SCHEDULE_NAME}
     fi
   fi
-fi
-
-# Check test output
-if [[ -z "${REVERT_PIPELINE_ID}" ]]; then
-  apk add curl
-  if [[ "${TYPE}" == "multi" ]]; then
-    ARCHES=("x86_64" "aarch64")
-  else
-    ARCHES=("x86_64")
-  fi
-  for ARCH in "${ARCHES[@]}"; do
-
-    # Determine test status
-    STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
-    if [ "${STATUS}" == "PASS" ]; then
-      STATE=success
-    elif [ "${STATUS}" == "FAIL" ]; then
-      STATE=failed
-      FAILED="true"
-    else
-      # Playwright-tested entries never write ci-status.yml -- that's
-      # Selenium's own output file. This manifest job already only runs on
-      # a passing test job (see gitlab-ci.template's `when: on_success`), so
-      # there's nothing to ping the GitLab API about here.
-      continue
-    fi
-
-    # Ping gitlab api with link output
-    curl --request POST --header "PRIVATE-TOKEN:${GITLAB_API_TOKEN}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/statuses/${CI_COMMIT_SHA}?state=${STATE}&name=core-${NAME1}-${NAME2}_${ARCH}&target_url=https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${PULL_BRANCH}-${CI_PIPELINE_ID}/index.html"
-
-  done
-fi
-
-# Fail job and go no further if tests did not pass
-if [[ "${FAILED}" == "true" ]]; then
-  exit 1
 fi
 
 # Manifest for multi pull and push for single arch

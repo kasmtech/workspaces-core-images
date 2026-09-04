@@ -15,7 +15,6 @@ default:
   retry: 2
 variables:
   KASM_RELEASE: "{{ KASM_RELEASE }}"
-  TEST_INSTALLER: "{{ TEST_INSTALLER }}"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
@@ -108,8 +107,8 @@ build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in multiImages %}
 test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: test
-  image: "{{ 'node:24' if IMAGE.e2e_playwright else 'docker:29.4.3' }}"
-  {% if IMAGE.e2e_playwright %}before_script:
+  image: "node:24"
+  before_script:
     # node:24 has no docker CLI preinstalled. This job-level before_script
     # fully replaces, not merges with, the top-level one, so the
     # SANITIZED_BRANCH export has to be repeated here too.
@@ -120,7 +119,7 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     # (which pulls this pipeline's own image-cache-private tag) fails with
     # "pull access denied" without this. Same as the scan job's before_script.
     - mkdir -p ~/.docker && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json
-  {% endif %}extends:
+  extends:
     - .run_rules
     - .monitor-in-grafana
   rules:
@@ -136,21 +135,19 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
   script:
-    {% if IMAGE.e2e_playwright %}# ARCH comes straight from the parallel matrix below -- this leg's job
+    # ARCH comes straight from the parallel matrix below -- this leg's job
     # container always runs on oci-amd-scheduled (load-secure-files has no
     # aarch64 build, see test.sh's secure-files download), so ARCH here only
     # selects the deployed EC2 test instance's architecture, same as
     # workspaces-images.
-    {% else %}- ARCH=$( echo "$CI_RUNNER_TAGS" | sed -e 's/.*-amd-.*/x86_64/' -e 's/.*-arm-.*/aarch64/' )
-    {% endif %}{% if not IMAGE.e2e_playwright %}- apk add bash
-    {% endif %}- bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "${ARCH}"
-    - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "${ARCH}" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}" "{{ (IMAGE.e2e_playwright | default(false)) | lower }}"
+    - bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "${ARCH}"
+    - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "${ARCH}" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   tags:
-    {% if IMAGE.e2e_playwright %}- oci-amd-scheduled{% else %}- ${TAG}{% endif %}
+    - oci-amd-scheduled
   retry: 1
-  {% if IMAGE.e2e_playwright %}artifacts:
+  artifacts:
     # kasmweb-checkout/ prefix: test.sh runs playwright from that directory,
     # so its relative output paths resolve there.
     when: always
@@ -160,21 +157,21 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     expire_in: 1 day
     reports:
       junit: kasmweb-checkout/playwright-results/results.xml
-  {% endif %}parallel:
+  parallel:
     matrix:
-      {% if IMAGE.e2e_playwright %}- ARCH: [ "x86_64", "aarch64" ]{% else %}- TAG: [ oci-amd-scheduled, oci-arm-scheduled ]{% endif %}
+      - ARCH: [ "x86_64", "aarch64" ]
 {% endfor %}
 
 {% for IMAGE in singleImages %}
 test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: test
-  image: "{{ 'node:24' if IMAGE.e2e_playwright else 'docker:29.4.3' }}"
-  {% if IMAGE.e2e_playwright %}before_script:
+  image: "node:24"
+  before_script:
     # See the matching multiImages test_ job comment above -- same reasoning.
     - apt-get update && apt-get install -y --no-install-recommends docker.io
     - export SANITIZED_BRANCH="$(echo ${CI_COMMIT_REF_NAME:0:64} | sed -r 's#^release/##' | sed 's/\//_/g')"
     - mkdir -p ~/.docker && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json
-  {% endif %}extends:
+  extends:
     - .run_rules
     - .monitor-in-grafana
   rules:
@@ -190,15 +187,14 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
   script:
-    {% if not IMAGE.e2e_playwright %}- apk add bash
-    {% endif %}- bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "x86_64"
-    - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "x86_64" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}" "{{ (IMAGE.e2e_playwright | default(false)) | lower }}"
+    - bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "x86_64"
+    - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "x86_64" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   tags:
     - oci-amd-scheduled
   retry: 1
-  {% if IMAGE.e2e_playwright %}artifacts:
+  artifacts:
     # See the matching multiImages test_ job comment above -- same reasoning.
     when: always
     paths:
@@ -207,7 +203,6 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     expire_in: 1 day
     reports:
       junit: kasmweb-checkout/playwright-results/results.xml
-  {% endif %}
 {% endfor %}
 
 ######################################
