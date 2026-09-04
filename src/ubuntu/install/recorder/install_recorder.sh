@@ -12,6 +12,8 @@ elif [ "${DISTRO}" == "opensuse" ]; then
         zypper -n --gpg-auto-import-keys dup --from packman --allow-vendor-change
     fi
     zypper install -ny xhost
+elif [[ "${DISTRO}" == fedora* ]] && [ "$(arch)" == "aarch64" ]; then
+    dnf install -y xorg-x11-server-utils
 fi
 
 COMMIT_ID="075aab468e8fcb4cf70703770164d8f3b89df5b8"
