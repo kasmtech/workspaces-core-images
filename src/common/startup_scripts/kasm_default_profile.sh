@@ -13,6 +13,8 @@ function copy_default_profile_to_home {
 function verify_profile_config {
     echo "Verifying Uploads/Downloads Configurations"
 
+    [ -d "$HOME/Desktop" ] || mkdir -p "$HOME/Desktop"
+
     mkdir -p $HOME/Uploads
 
     if [ -d "$HOME/Desktop/Uploads" ]; then
