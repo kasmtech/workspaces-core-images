@@ -77,22 +77,26 @@ download_and_symlink() {
   COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
   BINARY_NAME="${profile_distro}_${BRANCH}_${COMMIT_ID_SHORT}_${ARCH}-kasm-profile-sync"
   BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/profile-sync/${COMMIT_ID}/${BINARY_NAME}"
-
   cd /usr/bin/
-  wget "$BUILD_URL"
-  chmod +x "$BINARY_NAME"
-  ln -s "$BINARY_NAME" kasm-profile-sync
+  if wget "$BUILD_URL" 2>/dev/null; then
+    chmod +x "$BINARY_NAME"
+    ln -s "$BINARY_NAME" kasm-profile-sync
+  else
+    echo "Warning: profile-sync binary not available for $profile_distro"
+  fi
 }
 
 download_and_symlink_v2() {
   COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
   BINARY_NAME="${profile_distro}_${BRANCH}_${COMMIT_ID_SHORT}_${ARCH}-kasm-profile-sync-2"
   BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/profile-sync/${COMMIT_ID}/${BINARY_NAME}"
-
   cd /usr/bin/
-  wget "$BUILD_URL"
-  chmod +x "$BINARY_NAME"
-  ln -s "$BINARY_NAME" kasm-profile-sync-2
+  if wget "$BUILD_URL" 2>/dev/null; then
+    chmod +x "$BINARY_NAME"
+    ln -s "$BINARY_NAME" kasm-profile-sync-2
+  else
+    echo "Warning: profile-sync-v2 binary not available for $profile_distro"
+  fi
 }
 
 install_v2_dependencies() {
