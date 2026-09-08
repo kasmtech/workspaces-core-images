@@ -51,7 +51,7 @@ elif [[ "${DISTRO}" == "alpine" ]]; then
     font-noto-all \
     font-noto-cjk \
     font-noto-emoji
-elif [[ "${DISTRO}" == @(debian|parrotos7|kali) ]]; then
+elif [[ "${DISTRO}" == @(debian|parrotos7|kali|ubuntu) ]]; then
   apt-get update
   apt-get install -y \
     fonts-noto-core \
