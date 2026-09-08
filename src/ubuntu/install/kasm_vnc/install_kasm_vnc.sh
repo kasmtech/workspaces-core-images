@@ -11,13 +11,31 @@ prepare_rpm_repo_dependencies() {
   fi
 }
 
+# KasmVNC builds before VNC-335 used codename-only DEB artifact names. Keep a
+# fallback so older pinned builds remain installable during the transition.
+download_kasmvnc_deb() {
+  local output_file="$1"
+
+  if wget "${BUILD_URL}" -O "${output_file}"; then
+    return
+  fi
+
+  if [[ -z "${LEGACY_BUILD_URL}" ]]; then
+    return 1
+  fi
+
+  echo "Current KasmVNC artifact name was not found; trying the legacy name"
+  wget "${LEGACY_BUILD_URL}" -O "${output_file}"
+}
+
 echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -m)
 UBUNTU_CODENAME=""
-COMMIT_ID="17265facc40ab50db5740cdf0d12c61173edafc9"
-BRANCH="release" # just use 'release' for a release branch
-KASMVNC_VER="1.5.0"
+LEGACY_BUILD_URL=""
+COMMIT_ID="7b5c304e105d34ca56f150edc1cba974fab20a7a"
+BRANCH="master"
+KASMVNC_VER="1.5.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
@@ -31,9 +49,11 @@ then
     apt-get update
     apt-get install -y sgml-base
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali_kali-rolling_${KASM_VER_NAME_PART}_amd64.deb"
+        LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_amd64.deb"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_arm64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali_kali-rolling_${KASM_VER_NAME_PART}_arm64.deb"
+        LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_kali-rolling_${KASM_VER_NAME_PART}_arm64.deb"
     fi
 elif [[ "${DISTRO}" == @(rockylinux8|oracle8|almalinux8) ]] ; then
     if [[ "$(arch)" =~ ^x86_64$ ]] ; then
@@ -70,21 +90,27 @@ elif [[ "${DISTRO}" == "fedora43" ]] ; then
 elif [[ "${DISTRO}" = @(debian|parrotos7) ]] ; then
     if grep -q trixie /etc/os-release || grep -qi echo /etc/os-release; then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_trixie_${KASM_VER_NAME_PART}_amd64.deb"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_debian_trixie_${KASM_VER_NAME_PART}_amd64.deb"
+            LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_trixie_${KASM_VER_NAME_PART}_amd64.deb"
         else
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_trixie_${KASM_VER_NAME_PART}_arm64.deb"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_debian_trixie_${KASM_VER_NAME_PART}_arm64.deb"
+            LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_trixie_${KASM_VER_NAME_PART}_arm64.deb"
         fi
     elif grep -q bookworm /etc/os-release || grep -q lory /etc/os-release; then
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bookworm_${KASM_VER_NAME_PART}_amd64.deb"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_debian_bookworm_${KASM_VER_NAME_PART}_amd64.deb"
+            LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bookworm_${KASM_VER_NAME_PART}_amd64.deb"
         else
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bookworm_${KASM_VER_NAME_PART}_arm64.deb"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_debian_bookworm_${KASM_VER_NAME_PART}_arm64.deb"
+            LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bookworm_${KASM_VER_NAME_PART}_arm64.deb"
         fi
     else
         if [[ "$(arch)" =~ ^x86_64$ ]] ; then
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_amd64.deb"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_debian_bullseye_${KASM_VER_NAME_PART}_amd64.deb"
+            LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_amd64.deb"
         else
-            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_arm64.deb"
+            BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_debian_bullseye_${KASM_VER_NAME_PART}_arm64.deb"
+            LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_bullseye_${KASM_VER_NAME_PART}_arm64.deb"
         fi
     fi
 elif [[ "${DISTRO}" == "alpine" ]] ; then
@@ -110,9 +136,11 @@ elif [[ "${DISTRO}" == "alpine" ]] ; then
 else
     UBUNTU_CODENAME=$(grep -Po -m 1 "(?<=_CODENAME=)\w+" /etc/os-release)
     if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] ; then
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_arm64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_ubuntu_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_arm64.deb"
+        LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_arm64.deb"
     else
-        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_amd64.deb"
+        BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_ubuntu_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_amd64.deb"
+        LEGACY_BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/kasmvnc/${COMMIT_ID}/kasmvncserver_${UBUNTU_CODENAME}_${KASM_VER_NAME_PART}_amd64.deb"
     fi
 fi
 
@@ -188,7 +216,7 @@ elif [[ "${DISTRO}" == "alpine" ]] ; then
     ln -s /usr/local/lib/kasmvnc /usr/lib/kasmvncserver
     rm -f kasmvncserver.apk
 else
-    wget "${BUILD_URL}" -O kasmvncserver.deb
+    download_kasmvnc_deb kasmvncserver.deb
     apt-get update
     apt-get install -y gettext ssl-cert libxfont2
     apt-get install -y /tmp/kasmvncserver.deb

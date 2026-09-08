@@ -11,6 +11,7 @@ DOCKERFILE=$6
 ARCH=$7
 AWS_ID=$8
 AWS_KEY=$9
+TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}"
 
 # Same collapsing rule as manifest.sh's ENDPOINT (kasmos has name1==name2 and
 # publishes as kasmweb/core-kasmos, not kasmweb/core-kasmos-kasmos), reused
@@ -126,6 +127,27 @@ function gather_kasm_logs() {
   done
 }
 
+# The integration report can only show that a workspace is restarting. Capture
+# the actual container exit state and startup log before the ephemeral test
+# host is destroyed so image startup regressions can be diagnosed straight
+# from the job log. Prints to stdout rather than a file, so unlike
+# gather_kasm_logs above it isn't gated by SKIP_TRACE_ON_FAILURE (which only
+# bounds downloadable-artifact size, not job-log output).
+function collect_workspace_logs() {
+  for IP in "${IPS[@]}"; do
+    # Bounded like gather_kasm_logs above: this runs before delete-key-pair
+    # in turnoff(), so a wedged instance must not be able to hang here.
+    timeout 90 ssh \
+      -oConnectTimeout=4 \
+      -oStrictHostKeyChecking=no \
+      ${USER}@${IP} \
+      "for container in \$(sudo docker ps -aq --filter ancestor='${TEST_IMAGE}'); do
+         sudo docker inspect --format 'Workspace container {{.Name}}: status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}} restart_count={{.RestartCount}}' \"\${container}\"
+         sudo docker logs --timestamps --tail 500 \"\${container}\" 2>&1
+       done" || :
+  done
+}
+
 # Registered on EXIT (not ERR) so cleanup runs on any exit path, including a
 # GitLab job cancellation/timeout signal, which ERR does not catch.
 function turnoff() {
@@ -134,9 +156,11 @@ function turnoff() {
   # the tests failed.
   EXIT_CODE="$?"
 
-  if { [ "${EXIT_CODE}" -ne 0 ] || [ "${PLAYWRIGHT_STATUS:-0}" -ne 0 ]; } \
-    && [ "${SKIP_TRACE_ON_FAILURE:-true}" != "true" ]; then
-    gather_kasm_logs
+  if [ "${EXIT_CODE}" -ne 0 ] || [ "${PLAYWRIGHT_STATUS:-0}" -ne 0 ]; then
+    collect_workspace_logs
+    if [ "${SKIP_TRACE_ON_FAILURE:-true}" != "true" ]; then
+      gather_kasm_logs
+    fi
   fi
 
   for IP in "${IPS[@]}"; do
@@ -431,3 +455,6 @@ echo "Playwright tester exit status: ${PLAYWRIGHT_STATUS}"
 if [ "${PLAYWRIGHT_STATUS}" -ne 0 ]; then
   exit "${PLAYWRIGHT_STATUS}"
 fi
+
+# Shutdown Instances
+turnoff
