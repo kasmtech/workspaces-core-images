@@ -37,7 +37,7 @@ apt-get update && apt-get install -y --no-install-recommends curl jq git openssh
 # Downloads GitLab Secure Files (the license activation key) into
 # SECURE_FILES_DOWNLOAD_PATH via the community installer.
 export SECURE_FILES_DOWNLOAD_PATH="/tmp/"
-curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/load-secure-files/-/raw/5e1cf0e12fd9e8910f8dc7272e8844db474995cc/installer" | bash
+curl -f --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/load-secure-files/-/raw/5e1cf0e12fd9e8910f8dc7272e8844db474995cc/installer" | bash
 
 AWS_CLI_IMAGE=public.ecr.aws/aws-cli/aws-cli:2.34.33
 
