@@ -106,20 +106,6 @@ COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
 
-### Install Squid
-COPY ./src/ubuntu/install/squid/install/ $INST_SCRIPTS/squid_install/
-RUN bash $INST_SCRIPTS/squid_install/install_squid.sh && rm -rf $INST_SCRIPTS/squid_install/
-COPY ./src/ubuntu/install/squid/resources/*.conf /etc/squid/
-COPY ./src/ubuntu/install/squid/resources/start_squid.sh /etc/squid/start_squid.sh
-COPY ./src/ubuntu/install/squid/resources/SN.png /usr/local/squid/share/icons/SN.png
-RUN chown proxy:proxy /usr/local/squid/share/icons/SN.png
-COPY ./src/ubuntu/install/squid/resources/error_message/access_denied.html /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN chown proxy:proxy /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN rm -rf "$INST_SCRIPTS/resources/"
-
-RUN chmod +x /etc/squid/kasm_squid_adapter
-RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
-
 ### Install Smartcard Service
 COPY ./src/ubuntu/install/smartcard $INST_SCRIPTS/smartcard/
 RUN bash $INST_SCRIPTS/smartcard/install_smartcard.sh && rm -rf $INST_SCRIPTS/smartcard/

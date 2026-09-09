@@ -77,8 +77,12 @@ EOF
 # override with custom OpenSC configuration
 cp $INST_SCRIPTS/smartcard/opensc.conf /etc/opensc/opensc.conf
 
-# register OpenSC module
+# NSS db for Chrome: required by the OpenSC registration below and the network plugin's webfilter CA import
 mkdir -p $HOME/.pki/nssdb
+certutil -N -d sql:$HOME/.pki/nssdb/ --empty-password
+chown -R 1000:1000 $HOME/.pki/nssdb/
+
+# register OpenSC module
 echo "library=${OPENSC_LIB}" >> $HOME/.pki/nssdb/pkcs11.txt
 echo "name=OpenSC PKCS#11" >> $HOME/.pki/nssdb/pkcs11.txt
 

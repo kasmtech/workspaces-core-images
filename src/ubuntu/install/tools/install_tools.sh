@@ -177,3 +177,11 @@ elif [ "$DISTRO" = "ubuntu" ] && grep -q "24.04" /etc/os-release; then
   userdel ubuntu
   rm -Rf /home/ubuntu
 fi
+
+# Web filtering is now enforced transparently by the network plugin.
+# We need to keep the helper for any downstream images that might depend on it.
+cat >/usr/bin/filter_ready <<EOL
+#!/usr/bin/env bash
+echo 'web filter is enforced outside the container, nothing to wait for'
+EOL
+chmod +x /usr/bin/filter_ready
