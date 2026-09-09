@@ -15,13 +15,14 @@ else
   apt-get install -y openssl
 fi
 
-# Intall squid
+# Install squid
 SQUID_COMMIT='eeb77407cf8ae952078520d8f4f231958a0ad98f'
 if grep -q Focal /etc/os-release || grep -q bullseye /etc/os-release || [[ "${DISTRO}" == @(oracle8|almalinux8|rockylinux8) ]]; then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_ubuntu11_${ARCH}.tar.gz | tar -xzf - -C /
 elif [[ "${DISTRO}" == "alpine" ]]; then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_alpine_${ARCH}.tar.gz | tar -xzf - -C /
 else
+  # Generic Ubuntu (Jammy, Noble, Resolute)
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_ubuntu_${ARCH}.tar.gz | tar -xzf - -C /
 fi
 
@@ -44,7 +45,7 @@ chmod 700 /usr/local/squid/etc/ssl_cert -R
 cd /usr/local/squid/etc/ssl_cert
 /usr/local/squid/libexec/security_file_certgen -c -s /usr/local/squid/var/logs/ssl_db -M 4MB
 chown proxy:proxy /usr/local/squid/var/logs/ssl_db -R
-chown -R proxy:proxy /usr/local/squid -R
+chown -R proxy:proxy /usr/local/squid
 mkdir -p /etc/squid/
 
 # Trick so we can auto re-direct blocked urls to a special page
