@@ -106,3 +106,33 @@ cd $STARTUPDIR
 mkdir jsmpeg
 wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_websocket_relay/${WS_COMMIT_ID}/kasm_websocket_relay_${ARCH}_${WS_BRANCH}.${WS_COMMIT_ID_SHORT}.tar.gz | tar xz --strip 1 -C $STARTUPDIR/jsmpeg
 chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux
+
+if [[ "${DISTRO}" == "alpine" ]]; then
+  # Alpine's gcompat shim doesn't implement fcntl64, so the glibc binary fails to load 
+  # Build a shim that forwards fcntl64() to musl's fcntl()
+  apk add --no-cache --virtual .audio-build-deps gcc musl-dev
+  cat > /tmp/fcntl64_compat.c << 'EOF'
+#define _GNU_SOURCE
+#include <fcntl.h>
+#include <stdarg.h>
+int fcntl64(int fd, int cmd, ...) {
+    va_list ap;
+    va_start(ap, cmd);
+    void *arg = va_arg(ap, void *);
+    va_end(ap);
+    return fcntl(fd, cmd, arg);
+}
+EOF
+  gcc -shared -fPIC -o /usr/local/lib/fcntl64_compat.so /tmp/fcntl64_compat.c
+  rm /tmp/fcntl64_compat.c
+  apk del .audio-build-deps
+
+  mv $STARTUPDIR/jsmpeg/kasm_audio_out-linux $STARTUPDIR/jsmpeg/kasm_audio_out-linux.bin
+  cat > $STARTUPDIR/jsmpeg/kasm_audio_out-linux << 'WRAPPER'
+#!/bin/sh
+exec env LD_PRELOAD=/usr/local/lib/fcntl64_compat.so \
+  /dockerstartup/jsmpeg/kasm_audio_out-linux.bin "$@"
+WRAPPER
+  chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux
+  chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux.bin
+fi
