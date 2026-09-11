@@ -115,9 +115,94 @@ if [[ "${DISTRO}" == "alpine" ]]; then
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <stdarg.h>
+
+/* fcntl()'s third argument varies by cmd: some commands take none, some an
+ * int, some a pointer. Constants are guarded so this */
+static int fcntl64_takes_no_arg(int cmd) {
+    switch (cmd) {
+#ifdef F_GETFD
+    case F_GETFD:
+#endif
+#ifdef F_GETFL
+    case F_GETFL:
+#endif
+#ifdef F_GETOWN
+    case F_GETOWN:
+#endif
+#ifdef F_GETSIG
+    case F_GETSIG:
+#endif
+#ifdef F_GETLEASE
+    case F_GETLEASE:
+#endif
+#ifdef F_GETPIPE_SZ
+    case F_GETPIPE_SZ:
+#endif
+#ifdef F_GET_SEALS
+    case F_GET_SEALS:
+#endif
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+static int fcntl64_takes_int_arg(int cmd) {
+    switch (cmd) {
+#ifdef F_DUPFD
+    case F_DUPFD:
+#endif
+#ifdef F_DUPFD_CLOEXEC
+    case F_DUPFD_CLOEXEC:
+#endif
+#ifdef F_SETFD
+    case F_SETFD:
+#endif
+#ifdef F_SETFL
+    case F_SETFL:
+#endif
+#ifdef F_SETOWN
+    case F_SETOWN:
+#endif
+#ifdef F_SETSIG
+    case F_SETSIG:
+#endif
+#ifdef F_SETLEASE
+    case F_SETLEASE:
+#endif
+#ifdef F_NOTIFY
+    case F_NOTIFY:
+#endif
+#ifdef F_SETPIPE_SZ
+    case F_SETPIPE_SZ:
+#endif
+#ifdef F_ADD_SEALS
+    case F_ADD_SEALS:
+#endif
+        return 1;
+    default:
+        return 0;
+    }
+}
+
 int fcntl64(int fd, int cmd, ...) {
     va_list ap;
     va_start(ap, cmd);
+
+    if (fcntl64_takes_no_arg(cmd)) {
+        va_end(ap);
+        return fcntl(fd, cmd);
+    }
+
+    if (fcntl64_takes_int_arg(cmd)) {
+        int arg = va_arg(ap, int);
+        va_end(ap);
+        return fcntl(fd, cmd, arg);
+    }
+
+    /* Everything else (F_GETLK/F_SETLK/F_SETLKW, F_OFD_*, F_GETOWN_EX/
+     * F_SETOWN_EX, F_GET_RW_HINT/F_SET_RW_HINT, and any future/unknown
+     * command) takes a pointer. */
     void *arg = va_arg(ap, void *);
     va_end(ap);
     return fcntl(fd, cmd, arg);
