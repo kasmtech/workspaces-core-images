@@ -35,10 +35,22 @@ export AWS_DEFAULT_REGION=us-east-1
 apt-get update && apt-get install -y --no-install-recommends curl jq git openssh-client
 
 # Downloads GitLab Secure Files (the license activation key) into
-# SECURE_FILES_DOWNLOAD_PATH via the community installer.
+# SECURE_FILES_DOWNLOAD_PATH via glab, GitLab's own CLI -- ships real amd64
+# and arm64 builds, unlike the old load-secure-files installer this
+# replaces. Version-pinned and sha256-verified since this fetches and runs
+# a third-party binary as root.
 export SECURE_FILES_DOWNLOAD_PATH="/tmp/"
-curl -f --silent -o /tmp/load-secure-files-installer "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/load-secure-files/-/raw/5e1cf0e12fd9e8910f8dc7272e8844db474995cc/installer"
-bash /tmp/load-secure-files-installer
+GLAB_VERSION="1.118.0"
+declare -A GLAB_SHA256=(
+  [amd64]="2a4a6413594cfaf9b84af33780d32098ee5011092607389a57a8452efa33c698"
+  [arm64]="633adef24092ae9406d114e8daa4fcbe87b1c32fab2fbba8e2a55dd217975392"
+)
+GLAB_PKG_ARCH="$(dpkg --print-architecture)"
+GLAB_DEB="glab_${GLAB_VERSION}_linux_${GLAB_PKG_ARCH}.deb"
+curl -f --silent -o "/tmp/${GLAB_DEB}" "https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/packages/generic/glab/${GLAB_VERSION}/${GLAB_DEB}"
+echo "${GLAB_SHA256[$GLAB_PKG_ARCH]}  /tmp/${GLAB_DEB}" | sha256sum -c -
+dpkg -i "/tmp/${GLAB_DEB}"
+GLAB_ENABLE_CI_AUTOLOGIN=true glab -R "$CI_PROJECT_PATH" securefile download --all --output-dir="$SECURE_FILES_DOWNLOAD_PATH"
 
 AWS_CLI_IMAGE=public.ecr.aws/aws-cli/aws-cli:2.34.33
 

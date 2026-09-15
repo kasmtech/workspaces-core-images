@@ -135,17 +135,13 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
   script:
-    # ARCH comes straight from the parallel matrix below -- this leg's job
-    # container always runs on oci-amd-scheduled (load-secure-files has no
-    # aarch64 build, see test.sh's secure-files download), so ARCH here only
-    # selects the deployed EC2 test instance's architecture, same as
-    # workspaces-images.
+    - ARCH=$( echo "$CI_RUNNER_TAGS" | sed -e 's/.*-amd-.*/x86_64/' -e 's/.*-arm-.*/aarch64/' )
     - bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "${ARCH}"
     - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "${ARCH}" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   needs:
     - build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
   tags:
-    - oci-amd-scheduled
+    - ${TAG}
   retry: 1
   artifacts:
     # kasmweb-checkout/ prefix: test.sh runs playwright from that directory,
@@ -159,7 +155,7 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       junit: kasmweb-checkout/playwright-results/results.xml
   parallel:
     matrix:
-      - ARCH: [ "x86_64", "aarch64" ]
+      - TAG: [ oci-amd-scheduled, oci-arm-scheduled ]
 {% endfor %}
 
 {% for IMAGE in singleImages %}
