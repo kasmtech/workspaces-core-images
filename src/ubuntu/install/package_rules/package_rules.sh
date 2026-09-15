@@ -9,6 +9,15 @@ elif [[ "${DISTRO}" == "debian" ]] ; then
   sed -i \
     '/locale/d' \
     /etc/dpkg/dpkg.cfg.d/docker
+  if grep -q bullseye /etc/os-release; then
+    # Debian 11 (bullseye) has aged out of security.debian.org and archive.debian.org hasn't backfilled it yet,
+    # Pin to a snapshot.debian.org.
+    sed -i \
+      -e 's|^deb http://deb\.debian\.org|# deb http://deb.debian.org|' \
+      -e 's|^# deb http://snapshot\.debian\.org|deb http://snapshot.debian.org|' \
+      /etc/apt/sources.list
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99snapshot-no-check-valid-until
+  fi
 elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora42|fedora43|oracle8|oracle9|rhel9|rockylinux8|rockylinux9) ]]; then
   rm -f /etc/rpm/macros.image-language-conf
 fi
