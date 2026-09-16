@@ -14,9 +14,9 @@ elif [[ "${DISTRO}" == "debian" ]] ; then
     # Pin to a snapshot.debian.org timestamp from before the cutover instead.
     SNAPSHOT_TS="20260824T000000Z"
     cat > /etc/apt/sources.list <<EOF
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye main
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/${SNAPSHOT_TS} bullseye-security main
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye-updates main
+deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye main
+deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/${SNAPSHOT_TS} bullseye-security main
+deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye-updates main
 EOF
   fi
 elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora42|fedora43|oracle8|oracle9|rhel9|rockylinux8|rockylinux9) ]]; then
