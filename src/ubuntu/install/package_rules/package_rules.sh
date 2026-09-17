@@ -12,12 +12,17 @@ elif [[ "${DISTRO}" == "debian" ]] ; then
   if grep -q bullseye /etc/os-release; then
     # Debian 11 (bullseye) has aged out of security.debian.org and archive.debian.org hasn't backfilled it yet,
     # Pin to a snapshot.debian.org timestamp from before the cutover instead.
-    SNAPSHOT_TS="20260824T000000Z"
+    SNAPSHOT_TS="20260901T090127Z"
     cat > /etc/apt/sources.list <<EOF
-deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye main
-deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/${SNAPSHOT_TS} bullseye-security main
-deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye-updates main
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye main
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/${SNAPSHOT_TS} bullseye-security main
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/${SNAPSHOT_TS} bullseye-updates main
 EOF
+    # snapshot.debian.org is a shared, rate-limited archive and intermittently
+    # answers with 503/504/connection-reset under load. apt does not retry
+    # transport failures by default (Acquire::Retries=0); every apt-get call
+    # for the rest of this build needs retries, not just this script's own.
+    echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/99snapshot-retries
   fi
 elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora42|fedora43|oracle8|oracle9|rhel9|rockylinux8|rockylinux9) ]]; then
   rm -f /etc/rpm/macros.image-language-conf
