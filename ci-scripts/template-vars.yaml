@@ -78,22 +78,6 @@ multiImages:
       - src/ubuntu/sysbox/**
       - src/ubuntu/virtualgl/**
   - name1: debian
-    name2: bullseye
-    base: debian:bullseye-slim
-    bg: bg_debian.svg
-    distro: debian
-    dockerfile: dockerfile-kasm-core
-    changeFiles:
-      - dockerfile-kasm-core
-      - src/debian/**
-      - src/debian/xfce/**
-      - src/debian/xfce/.config/**
-      - src/debian/xfce/.config/xfce4/**
-      - src/debian/xfce/.config/xfce4/xfconf/**
-      - src/debian/xfce/.config/xfce4/xfconf/xfce-perchannel-xml/**
-      - src/ubuntu/sysbox/**
-      - src/ubuntu/virtualgl/**
-  - name1: debian
     name2: bookworm
     base: debian:bookworm-slim
     bg: bg_debian.svg
