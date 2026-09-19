@@ -75,8 +75,8 @@ sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
 
-COMMIT_ID="2472f2c1606244d311addc16dab436f5f56d5467"
-BRANCH="develop"
+COMMIT_ID="ef9f56dc420033a10644e54326b440f24c03b3e9"
+BRANCH="feature_DEV-29-migration-security-web-filter"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 
