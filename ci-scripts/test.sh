@@ -13,21 +13,56 @@ AWS_ID=$8
 AWS_KEY=$9
 TEST_IMAGE="${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}"
 
+# Same collapsing rule as manifest.sh's ENDPOINT (kasmos has name1==name2 and
+# publishes as kasmweb/core-kasmos, not kasmweb/core-kasmos-kasmos), reused
+# here as the Playwright image label so it matches the `core-*` prefixes in
+# the *.image-spec.ts capability-skip lists. The image-cache-private ref
+# itself always keeps both names uncollapsed.
+if [[ "${NAME1}" == "${NAME2}" ]]; then
+  LABEL="core-${NAME1}"
+else
+  LABEL="core-${NAME1}-${NAME2}"
+fi
+
 # Setup aws cli
 export AWS_ACCESS_KEY_ID="${AWS_ID}"
 export AWS_SECRET_ACCESS_KEY="${AWS_KEY}"
 export AWS_DEFAULT_REGION=us-east-1
 
-# Install tools for testing
-apk add \
-  curl \
-  jq \
-  openssh-client
+# This job runs on node:24 (Debian), not docker:29.4.3 (Alpine), because
+# Playwright's bundled Chromium needs glibc. docker.io is already installed
+# by that job's own before_script (see gitlab-ci.template).
+apt-get update && apt-get install -y --no-install-recommends curl jq git openssh-client
+
+# Downloads GitLab Secure Files (the license activation key) into
+# SECURE_FILES_DOWNLOAD_PATH via glab, GitLab's own CLI -- ships real amd64
+# and arm64 builds, unlike the old load-secure-files installer this
+# replaces. Version-pinned and sha256-verified since this fetches and runs
+# a third-party binary as root.
+export SECURE_FILES_DOWNLOAD_PATH="/tmp/"
+GLAB_VERSION="1.118.0"
+declare -A GLAB_SHA256=(
+  [amd64]="2a4a6413594cfaf9b84af33780d32098ee5011092607389a57a8452efa33c698"
+  [arm64]="633adef24092ae9406d114e8daa4fcbe87b1c32fab2fbba8e2a55dd217975392"
+)
+GLAB_PKG_ARCH="$(dpkg --print-architecture)"
+GLAB_DEB="glab_${GLAB_VERSION}_linux_${GLAB_PKG_ARCH}.deb"
+curl -f --silent -o "/tmp/${GLAB_DEB}" "https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/packages/generic/glab/${GLAB_VERSION}/${GLAB_DEB}"
+echo "${GLAB_SHA256[$GLAB_PKG_ARCH]}  /tmp/${GLAB_DEB}" | sha256sum -c -
+dpkg -i "/tmp/${GLAB_DEB}"
+GLAB_ENABLE_CI_AUTOLOGIN=true glab -R "$CI_PROJECT_PATH" securefile download --all --output-dir="$SECURE_FILES_DOWNLOAD_PATH"
 
 AWS_CLI_IMAGE=public.ecr.aws/aws-cli/aws-cli:2.34.33
 
+# Pinned before the Playwright frontend-build step further down reassigns
+# DOCKER_HOST to the remote EC2 instance. aws() is a docker-wrapped function,
+# not a real binary, so without this it would pick up that reassignment and
+# `turnoff`'s `aws ec2 delete-key-pair` would run against the wrong daemon,
+# leaking a key pair on every Playwright run.
+AWS_DOCKER_HOST="${DOCKER_HOST}"
+
 aws() {
-  docker run --rm \
+  docker -H "${AWS_DOCKER_HOST}" run --rm \
     -e AWS_ACCESS_KEY_ID \
     -e AWS_SECRET_ACCESS_KEY \
     -e AWS_DEFAULT_REGION \
@@ -78,6 +113,80 @@ fi
 # Setup SSH Key
 mkdir -p /root/.ssh
 RAND=$(head /dev/urandom | tr -dc 'a-z0-9' | head -c36)
+
+# Kasm instance container logs, written into the Playwright job's existing
+# test-results/ artifact tree. Only gathered on a failing Playwright run with
+# SKIP_TRACE_ON_FAILURE=false (see turnoff below) -- off by default, same as
+# the trace/DB-snapshot artifacts.
+LOGS_DIR="kasmweb-checkout/test-results/kasm-logs"
+function gather_kasm_logs() {
+  mkdir -p "${LOGS_DIR}"
+  for IP in "${IPS[@]}"; do
+    echo "Gathering Kasm logs from ${IP}..."
+    # Individually bounded so a wedged instance can't hang turnoff() and
+    # block the poweroff loop below it.
+    CONTAINERS=$(timeout 30 ssh \
+      -oConnectTimeout=4 \
+      -oStrictHostKeyChecking=no \
+      ${USER}@${IP} \
+      sudo docker container ls --all --format '{{.Names}}' || :)
+    for CONTAINER in ${CONTAINERS}; do
+      timeout 60 ssh \
+        -oConnectTimeout=4 \
+        -oStrictHostKeyChecking=no \
+        ${USER}@${IP} \
+        sudo docker logs "${CONTAINER}" &>"${LOGS_DIR}/${CONTAINER}-${IP}.log" || :
+    done
+  done
+}
+
+# The integration report can only show that a workspace is restarting. Capture
+# the actual container exit state and startup log before the ephemeral test
+# host is destroyed so image startup regressions can be diagnosed straight
+# from the job log. Prints to stdout rather than a file, so unlike
+# gather_kasm_logs above it isn't gated by SKIP_TRACE_ON_FAILURE (which only
+# bounds downloadable-artifact size, not job-log output).
+function collect_workspace_logs() {
+  for IP in "${IPS[@]}"; do
+    # Bounded like gather_kasm_logs above: this runs before delete-key-pair
+    # in turnoff(), so a wedged instance must not be able to hang here.
+    timeout 90 ssh \
+      -oConnectTimeout=4 \
+      -oStrictHostKeyChecking=no \
+      ${USER}@${IP} \
+      "for container in \$(sudo docker ps -aq --filter ancestor='${TEST_IMAGE}'); do
+         sudo docker inspect --format 'Workspace container {{.Name}}: status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}} restart_count={{.RestartCount}}' \"\${container}\"
+         sudo docker logs --timestamps --tail 500 \"\${container}\" 2>&1
+       done" || :
+  done
+}
+
+# Registered on EXIT (not ERR) so cleanup runs on any exit path, including a
+# GitLab job cancellation/timeout signal, which ERR does not catch.
+function turnoff() {
+  # Captured first, before any command can clobber $?. Nonzero means the
+  # script itself died; PLAYWRIGHT_STATUS (below) covers a clean run where
+  # the tests failed.
+  EXIT_CODE="$?"
+
+  if [ "${EXIT_CODE}" -ne 0 ] || [ "${PLAYWRIGHT_STATUS:-0}" -ne 0 ]; then
+    collect_workspace_logs
+    if [ "${SKIP_TRACE_ON_FAILURE:-true}" != "true" ]; then
+      gather_kasm_logs
+    fi
+  fi
+
+  for IP in "${IPS[@]}"; do
+    ssh \
+      -oConnectTimeout=4 \
+      -oStrictHostKeyChecking=no \
+      ${USER}@${IP} \
+      "sudo poweroff" || :
+  done
+  aws ec2 delete-key-pair --key-name ${RAND} || :
+}
+trap turnoff EXIT
+
 SSH_KEY=$(aws ec2 create-key-pair --key-name ${RAND} | jq -r '.KeyMaterial')
 cat >/root/.ssh/id_rsa <<EOL
 $SSH_KEY
@@ -124,36 +233,6 @@ for INSTANCE_ID in "${INSTANCES[@]}"; do
     fi
   done
 done
-
-# Shutdown Instances function and trap
-function turnoff() {
-  for IP in "${IPS[@]}"; do
-    ssh \
-      -oConnectTimeout=4 \
-      -oStrictHostKeyChecking=no \
-      ${USER}@${IP} \
-      "sudo poweroff" || :
-  done
-  aws ec2 delete-key-pair --key-name ${RAND}
-}
-
-# The integration report can only show that a workspace is restarting. Capture
-# the actual container exit state and startup log before the ephemeral test host
-# is destroyed so image startup regressions can be diagnosed from the job log.
-function collect_workspace_logs() {
-  for IP in "${IPS[@]}"; do
-    ssh \
-      -oConnectTimeout=4 \
-      -oStrictHostKeyChecking=no \
-      ${USER}@${IP} \
-      "for container in \$(sudo docker ps -aq --filter ancestor='${TEST_IMAGE}'); do
-         sudo docker inspect --format 'Workspace container {{.Name}}: status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}} restart_count={{.RestartCount}}' \"\${container}\"
-         sudo docker logs --timestamps --tail 500 \"\${container}\" 2>&1
-       done" || :
-  done
-}
-
-trap 'collect_workspace_logs; turnoff' ERR
 
 # Make sure the instance is up
 for IP in "${IPS[@]}"; do
@@ -244,47 +323,98 @@ for IP in "${IPS[@]}"; do
     "sudo mkdir -p /root/.docker && sudo mv /tmp/config.json /root/.docker/ && sudo chown root:root /root/.docker/config.json"
 done
 
+# TEST_INSTALLER_ROLLING for the Playwright tester; see its definition in
+# .gitlab-ci.yml for why.
+INSTALLER_URL="${TEST_INSTALLER_ROLLING}"
+
 # Install Kasm workspaces
 ssh \
   -oConnectTimeout=4 \
   -oStrictHostKeyChecking=no \
   ${USER}@"${IPS[0]}" \
-  "curl -L -o /tmp/installer.tar.gz ${TEST_INSTALLER} && cd /tmp && tar xf installer.tar.gz && sudo bash kasm_release/install.sh -H -u -I -e -P ${RAND} -U ${RAND}"
+  "curl -fL -o /tmp/installer.tar.gz ${INSTALLER_URL} && cd /tmp && tar xf installer.tar.gz && sudo bash kasm_release/install.sh -H -u -I -e -P ${RAND} -U ${RAND}"
 
 # Ensure install is up and running
 ready_check
 
-# Pull tester image
-docker pull ${ORG_NAME}/kasm-tester:1.18.0
+# Grants docker-group access so the ssh: DOCKER_HOST transport below can
+# reach the daemon without sudo (imageWarmup.ts's own `docker pull` needs
+# it too). Group membership is re-evaluated per SSH login, so no restart
+# is needed.
+ssh \
+  -oConnectTimeout=10 \
+  -oStrictHostKeyChecking=no \
+  ${USER}@"${IPS[0]}" \
+  "sudo usermod -aG docker ${USER}"
 
-# Run test
-cp /root/.ssh/id_rsa $(dirname ${CI_PROJECT_DIR})/sshkey
-chmod 777 $(dirname ${CI_PROJECT_DIR})/sshkey
-docker run --rm \
-  -e TZ=US/Pacific \
-  -e KASM_HOST=${IPS[0]} \
-  -e KASM_PORT=443 \
-  -e KASM_PASSWORD="${RAND}" \
-  -e SSH_USER=$USER \
-  -e DOCKERUSER=$DOCKER_HUB_USERNAME \
-  -e DOCKERPASS=$DOCKER_HUB_PASSWORD \
-  -e TEST_IMAGE="${TEST_IMAGE}" \
-  -e AWS_KEY=${KASM_TEST_AWS_KEY} \
-  -e AWS_SECRET="${KASM_TEST_AWS_SECRET}" \
-  -e SLACK_TOKEN=${SLACK_TOKEN} \
-  -e S3_BUCKET=kasm-ci \
-  -e COMMIT=${CI_COMMIT_SHA} \
-  -e REPO=workspaces-core-images \
-  -e AUTOMATED=true \
-  -v $(dirname ${CI_PROJECT_DIR})/sshkey:/sshkey:ro  ${SLIM_FLAG} \
-  kasmweb/kasm-tester:1.18.0
+# docker's ssh: transport shells out to a bare `ssh` with no per-call
+# flags, so it needs its own config to skip host-key checking for this
+# fresh instance.
+mkdir -p /root/.ssh
+cat >>/root/.ssh/config <<EOF
+Host ${IPS[0]}
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+EOF
+chmod 600 /root/.ssh/config
 
-# Exit 1 if test failed or file does not exist
-STATUS=$(curl -sL https://kasm-ci.s3.amazonaws.com/${CI_COMMIT_SHA}/${ARCH}/kasmweb/image-cache-private/${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}/ci-status.yml | awk -F'"' '{print $2}')
-if [ ! "${STATUS}" == "PASS" ]; then
-  collect_workspace_logs
-  turnoff
-  exit 1
+# Exported, not passed as a one-off `docker -H`, because imageWarmup.ts's
+# own `docker pull` call needs it too and can't take a per-call flag. The
+# aws() wrapper above already pinned its own copy in AWS_DOCKER_HOST, so
+# reassigning this doesn't affect it.
+export DOCKER_HOST="ssh://${USER}@${IPS[0]}"
+
+# The frontend under test is whatever TEST_INSTALLER_ROLLING's backend
+# bundle already installed -- this clone only supplies the Playwright spec
+# files themselves, pinned to the same branch.
+rm -rf kasmweb-checkout
+git clone --depth 1 --branch "${KASMWEB_VERSION:-develop}" \
+  "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/kasm-technologies/internal/kasmweb.git" \
+  kasmweb-checkout
+
+# Playwright tester. Runs directly in this job's own node:24 shell rather
+# than a separate tester image.
+#
+# PLAYWRIGHT_STATUS is captured explicitly, not left to `set -e`, so
+# `turnoff` still runs and shuts the instance down before the script exits.
+# It's the job's only result signal.
+PLAYWRIGHT_STATUS=0
+echo "Running Playwright tests against ${LABEL}"
+# Subshell scopes the cd and all these exports to just this step.
+set +e
+(
+  set -e
+  cd kasmweb-checkout
+  npm ci
+  npx playwright install --with-deps chromium
+  export CI=true
+  export KASM_ADDR="https://${IPS[0]}"
+  export USER_NAME="admin@kasm.local"
+  export PASSWORD="${RAND}"
+  # LABEL (computed above) is this image's canonical name for
+  # imageMatrix.ts's capability-skip maps, used verbatim so it matches
+  # this image's own skip map on the kasmweb side.
+  export KASM_TEST_IMAGE_REFS="${LABEL}|${ORG_NAME}/image-cache-private:${ARCH}-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}"
+  # activation_key is the Secure File downloaded above, not a plain CI/CD
+  # variable, so it's read from disk.
+  export KASM_LICENSE_KEY="$(cat /tmp/activation_key)"
+  # Defaults to "true" to bound per-failure artifact size (pg_dump) across
+  # the many per-image runs this pipeline accumulates. Set false to get a
+  # DB snapshot for a specific failure.
+  export SKIP_DB_SNAPSHOT_ON_FAILURE="${SKIP_DB_SNAPSHOT_ON_FAILURE:-true}"
+  # Same reasoning: bounds trace.zip size (70MB+ each) across per-image
+  # runs. Also gates gather_kasm_logs above. Set false for a real trace.
+  export SKIP_TRACE_ON_FAILURE="${SKIP_TRACE_ON_FAILURE:-true}"
+  # DOCKER_HOST is exported above and inherited here; imageWarmup.ts's own
+  # `docker pull` needs it to reach the same instance daemon.
+  npx playwright test --project="image-spec:${LABEL}" --workers=1
+)
+PLAYWRIGHT_STATUS=$?
+set -e
+
+echo "Playwright tester exit status: ${PLAYWRIGHT_STATUS}"
+if [ "${PLAYWRIGHT_STATUS}" -ne 0 ]; then
+  exit "${PLAYWRIGHT_STATUS}"
 fi
 
 # Shutdown Instances

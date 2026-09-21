@@ -20,7 +20,6 @@ if 'SCHEDULE_NAME' in os.environ:
 with open("template-vars.yaml", 'r') as stream:
   templateVars = yaml.safe_load(stream)
   templateVars['KASM_RELEASE'] = os.getenv('KASM_RELEASE')
-  templateVars['TEST_INSTALLER'] = os.getenv('TEST_INSTALLER')
   templateVars['SANITIZED_BRANCH'] = os.getenv('SANITIZED_BRANCH')
   templateVars['FILE_LIMITS'] = fileLimits
   templateVars['SCHEDULED'] = scheduled

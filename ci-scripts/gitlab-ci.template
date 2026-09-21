@@ -15,7 +15,6 @@ default:
   retry: 2
 variables:
   KASM_RELEASE: "{{ KASM_RELEASE }}"
-  TEST_INSTALLER: "{{ TEST_INSTALLER }}"
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_AUTH_CONFIG: ${_DOCKER_AUTH_CONFIG}
@@ -108,6 +107,18 @@ build_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in multiImages %}
 test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: test
+  image: "node:24"
+  before_script:
+    # node:24 has no docker CLI preinstalled. This job-level before_script
+    # fully replaces, not merges with, the top-level one, so the
+    # SANITIZED_BRANCH export has to be repeated here too.
+    - apt-get update && apt-get install -y --no-install-recommends docker.io
+    - export SANITIZED_BRANCH="$(echo ${CI_COMMIT_REF_NAME:0:64} | sed -r 's#^release/##' | sed 's/\//_/g')"
+    # docker:29.4.3 jobs get ~/.docker/config.json for free from
+    # DOCKER_AUTH_CONFIG; node:24 doesn't, so test-unit.sh's `docker run`
+    # (which pulls this pipeline's own image-cache-private tag) fails with
+    # "pull access denied" without this. Same as the scan job's before_script.
+    - mkdir -p ~/.docker && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json
   extends:
     - .run_rules
     - .monitor-in-grafana
@@ -125,7 +136,6 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% endfor %}{% endif %}
   script:
     - ARCH=$( echo "$CI_RUNNER_TAGS" | sed -e 's/.*-amd-.*/x86_64/' -e 's/.*-arm-.*/aarch64/' )
-    - apk add bash
     - bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "${ARCH}"
     - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "${ARCH}" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   needs:
@@ -133,6 +143,16 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   tags:
     - ${TAG}
   retry: 1
+  artifacts:
+    # kasmweb-checkout/ prefix: test.sh runs playwright from that directory,
+    # so its relative output paths resolve there.
+    when: always
+    paths:
+      - kasmweb-checkout/playwright-results/
+      - kasmweb-checkout/test-results/
+    expire_in: 1 day
+    reports:
+      junit: kasmweb-checkout/playwright-results/results.xml
   parallel:
     matrix:
       - TAG: [ oci-amd-scheduled, oci-arm-scheduled ]
@@ -141,6 +161,12 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
 {% for IMAGE in singleImages %}
 test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   stage: test
+  image: "node:24"
+  before_script:
+    # See the matching multiImages test_ job comment above -- same reasoning.
+    - apt-get update && apt-get install -y --no-install-recommends docker.io
+    - export SANITIZED_BRANCH="$(echo ${CI_COMMIT_REF_NAME:0:64} | sed -r 's#^release/##' | sed 's/\//_/g')"
+    - mkdir -p ~/.docker && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json
   extends:
     - .run_rules
     - .monitor-in-grafana
@@ -157,7 +183,6 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
       {% endfor %}{% endif %}
   script:
-    - apk add bash
     - bash ci-scripts/test-unit.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "x86_64"
     - bash ci-scripts/test.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "{{ IMAGE.base }}" "{{ IMAGE.bg }}" "{{ IMAGE.distro }}" "{{ IMAGE.dockerfile }}" "x86_64" "${EC2_LAUNCHER_ID}" "${EC2_LAUNCHER_SECRET}"
   needs:
@@ -165,6 +190,15 @@ test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
   tags:
     - oci-amd-scheduled
   retry: 1
+  artifacts:
+    # See the matching multiImages test_ job comment above -- same reasoning.
+    when: always
+    paths:
+      - kasmweb-checkout/playwright-results/
+      - kasmweb-checkout/test-results/
+    expire_in: 1 day
+    reports:
+      junit: kasmweb-checkout/playwright-results/results.xml
 {% endfor %}
 
 ######################################
@@ -264,9 +298,9 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     - if: $CI_COMMIT_REF_NAME == "develop" || $CI_COMMIT_REF_NAME =~ /^release\/.*$/
-      when: always
+      when: on_success
     - if: $PARENT_PIPELINE_SOURCE == "merge_request_event"
-      when: always
+      when: on_success
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
@@ -278,7 +312,8 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - apk add bash
     - bash ci-scripts/manifest.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "multi"
   needs:
-    - test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+    - job: test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+      artifacts: false
   tags:
     - oci-amd-scheduled
 {% endfor %}
@@ -297,9 +332,9 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - if: $PARENT_PIPELINE_SOURCE == "schedule" && $RUN_SET == "schedule"
       when: never
     - if: $CI_COMMIT_REF_NAME == "develop" || $CI_COMMIT_REF_NAME =~ /^release\/.*$/
-      when: always
+      when: on_success
     - if: $PARENT_PIPELINE_SOURCE == "merge_request_event"
-      when: always
+      when: on_success
     {% if FILE_LIMITS %}- changes:
       {% for FILE in files %}- {{ FILE }}
       {% endfor %}{% for FILE in IMAGE.changeFiles %}- {{ FILE }}
@@ -311,7 +346,8 @@ manifest_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}:
     - apk add bash
     - bash ci-scripts/manifest.sh "{{ IMAGE.name1 }}" "{{ IMAGE.name2 }}" "single"
   needs:
-    - test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+    - job: test_{{ IMAGE.name1 }}_{{ IMAGE.name2 }}
+      artifacts: false
   tags:
     - oci-amd-scheduled
 {% endfor %}
