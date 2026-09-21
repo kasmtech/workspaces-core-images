@@ -158,7 +158,7 @@ Key scripts invoked from the template:
 **Playwright tester (DEVOPS-74):** every `test_*` job runs the kasmweb Playwright `*.image-spec.ts` suite in `test.sh`, against a `KASMWEB_VERSION` checkout on a `node:24` test job image (Playwright's bundled Chromium needs glibc) — same mechanism ported from `workspaces-images`. This replaced the legacy Selenium `kasm-tester` suite, which has been removed. Related variables (`.gitlab-ci.yml`):
 
 - `TEST_INSTALLER_ROLLING` — rolling `develop` install bundle, since the specs need post-1.19.0 API/UI changes.
-- `KASMWEB_VERSION` — kasmweb ref the specs are cloned from; pinned to a feature branch until DEVOPS-74 merges to `develop`.
+- `KASMWEB_VERSION` — kasmweb ref the specs are cloned from; defaults to `develop`.
 - `SKIP_DB_SNAPSHOT_ON_FAILURE` / `SKIP_TRACE_ON_FAILURE` — default `true` to bound `pg_dump`/`trace.zip` artifact size across the many per-image runs this pipeline accumulates; set to `false` on a specific pipeline run to get full diagnostics for a failure.
 
 ## Common tasks
