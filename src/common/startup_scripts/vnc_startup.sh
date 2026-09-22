@@ -716,7 +716,7 @@ do
 					echo "Smartcard Service Failed"
 					start_smartcard
 					;;
-				custom_script)
+				custom_startup)
 					echo "The custom startup script exited."
 					# custom startup scripts track the target process on their own, they should not exit
 					custom_startup
