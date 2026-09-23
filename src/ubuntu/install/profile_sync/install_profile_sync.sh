@@ -112,12 +112,22 @@ convert_local_distro_to_profile_sync_distro
 check_distro_is_supported
 
 # profile-sync-v1
-BRANCH="release/1.1.2"
-COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a""
+# Use RELEASE channel for Resolute, DEVELOP for others
+if [[ "$profile_distro" == "ubuntu_resolute" ]]; then
+  BRANCH="release_1.1.2"
+  COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
+else
+  BRANCH="develop"
+  COMMIT_ID="86a9b4e00ee781c21c46ce604f14f43eeb1386da"
+fi
 download_and_symlink
 
 # profile-sync-v2
-BRANCH="release/1.1.2"
-COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
-install_v2_dependencies
-download_and_symlink_v2
+# Use RELEASE channel for Resolute, DEVELOP for others
+if [[ "$profile_distro" == "ubuntu_resolute" ]]; then
+  BRANCH="release_1.1.2"
+  COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
+else
+  BRANCH="develop"
+  COMMIT_ID="c8a0bca33079cd948cc679da06e2e87b25bae3c3"
+fi
