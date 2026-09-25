@@ -79,8 +79,8 @@ download_and_symlink() {
   BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/profile-sync/${COMMIT_ID}/${BINARY_NAME}"
   cd /usr/bin/
   wget "$BUILD_URL"
-    chmod +x "$BINARY_NAME"
-    ln -s "$BINARY_NAME" kasm-profile-sync
+  chmod +x "$BINARY_NAME"
+  ln -s "$BINARY_NAME" kasm-profile-sync
 }
 
 download_and_symlink_v2() {
@@ -89,8 +89,8 @@ download_and_symlink_v2() {
   BUILD_URL="https://kasmweb-build-artifacts.s3.amazonaws.com/profile-sync/${COMMIT_ID}/${BINARY_NAME}"
   cd /usr/bin/
   wget "$BUILD_URL"
-    chmod +x "$BINARY_NAME"
-    ln -s "$BINARY_NAME" kasm-profile-sync-2
+  chmod +x "$BINARY_NAME"
+  ln -s "$BINARY_NAME" kasm-profile-sync-2
 }
 
 install_v2_dependencies() {
@@ -112,22 +112,12 @@ convert_local_distro_to_profile_sync_distro
 check_distro_is_supported
 
 # profile-sync-v1
-# Use RELEASE channel for Resolute, DEVELOP for others
-if [[ "$profile_distro" == "ubuntu_resolute" ]]; then
-  BRANCH="release_1.1.2"
-  COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
-else
-  BRANCH="develop"
-  COMMIT_ID="86a9b4e00ee781c21c46ce604f14f43eeb1386da"
-fi
+BRANCH="develop"
+COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
 download_and_symlink
 
 # profile-sync-v2
-# Use RELEASE channel for Resolute, DEVELOP for others
-if [[ "$profile_distro" == "ubuntu_resolute" ]]; then
-  BRANCH="release_1.1.2"
-  COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
-else
-  BRANCH="develop"
-  COMMIT_ID="c8a0bca33079cd948cc679da06e2e87b25bae3c3"
-fi
+BRANCH="develop"
+COMMIT_ID="702ba2f8e6d5881031b16d046244051465f68d18"
+install_v2_dependencies
+download_and_symlink_v2
