@@ -76,7 +76,7 @@ EOL
 
 
 COMMIT_ID="3874458d778a575a9eea8f816d6b544937f613a4"
-BRANCH="integ/otel-openapi-pubsub"
+BRANCH="integ_otel-openapi-pubsub"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 
