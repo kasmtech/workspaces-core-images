@@ -75,8 +75,8 @@ sasldb_path: /etc/sasl2/memcached-sasldb2
 EOL
 
 
-COMMIT_ID="2472f2c1606244d311addc16dab436f5f56d5467"
-BRANCH="develop"
+COMMIT_ID="3874458d778a575a9eea8f816d6b544937f613a4"
+BRANCH="integ_otel-openapi-pubsub"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 
