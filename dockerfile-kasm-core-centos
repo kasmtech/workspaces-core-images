@@ -224,6 +224,7 @@ ENV AUDIO_PORT=4901 \
     INST_SCRIPTS=/dockerstartup/install \
     KASMVNC_AUTO_RECOVER=true \
     KASM_VNC_PATH=/usr/share/kasmvnc \
+    KASM_A11Y_APP_ARGS="--force-renderer-accessibility" \
     LANG=$LANG \
     LANGUAGE=$LANGUAGE \
     LC_ALL=$LC_ALL \

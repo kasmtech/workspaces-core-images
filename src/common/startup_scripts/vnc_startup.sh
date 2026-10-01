@@ -41,10 +41,11 @@ export MOZ_USE_XINPUT2=1
 export GNOME_ACCESSIBILITY=1
 export GTK_MODULES=gail:atk-bridge
 
-# Enable AT-SPI accessibility bridge for Qt and LibreOffice apps
+# Enable AT-SPI accessibility bridge for Qt, LibreOffice and Electron apps
 export QT_ACCESSIBILITY=1
 export QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1
 export SAL_ACCESSIBILITY_ENABLED=1  # LibreOffice, forces its ATK bridge on
+export KASM_A11Y_APP_ARGS="--force-renderer-accessibility"
 
 # Dbus
 export $(dbus-launch)
