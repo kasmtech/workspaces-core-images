@@ -159,6 +159,7 @@ Key scripts invoked from the template:
 
 - `TEST_INSTALLER_ROLLING` — rolling `develop` install bundle, since the specs need post-1.19.0 API/UI changes.
 - `KASMWEB_VERSION` — kasmweb ref the specs are cloned from; defaults to `develop`.
+- `SESSION_INTEGRITY_IMAGES` — space-separated image labels that get the second Playwright run (kasmweb's `session-integrity:<label>` project) after the image-specs. Unset or empty runs it on every image; set it to narrow the run to those images. A failure only there exits 3, which the test job's `allow_failure: exit_codes: [3]` shows as passed with warnings.
 - `SKIP_DB_SNAPSHOT_ON_FAILURE` / `SKIP_TRACE_ON_FAILURE` — default `true` to bound `pg_dump`/`trace.zip` artifact size across the many per-image runs this pipeline accumulates; set to `false` on a specific pipeline run to get full diagnostics for a failure.
 
 ## Common tasks
