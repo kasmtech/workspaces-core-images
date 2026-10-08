@@ -441,9 +441,14 @@ else
     set -e
     cd kasmweb-checkout
     export_playwright_env
-    if ! npx playwright test --list --project="session-integrity:${LABEL}" >/dev/null 2>&1; then
-      echo "No session-integrity:${LABEL} project on this kasmweb branch; skipping"
-      exit 0
+    if ! list_output="$(npx playwright test --list --project="session-integrity:${LABEL}" 2>&1)"; then
+      if grep -q 'Project(s) .* not found' <<<"${list_output}"; then
+        echo "No session-integrity:${LABEL} project on this kasmweb branch; skipping"
+        exit 0
+      fi
+      echo "${list_output}"
+      echo "Listing session-integrity:${LABEL} failed"
+      exit 1
     fi
     echo "Running session-integrity tests against ${LABEL}"
     export PLAYWRIGHT_JUNIT_OUTPUT_FILE="playwright-results/session-integrity.xml"
