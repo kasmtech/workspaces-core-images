@@ -197,6 +197,10 @@ COPY --from=base_layer / /
 ### Labels
 LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasm.com"'
 LABEL "com.kasmweb.image"="true"
+ARG KASM_RELEASE
+RUN test -n "$KASM_RELEASE"
+LABEL "com.kasmweb.kasm_version"="$KASM_RELEASE"
+ENV KASM_VERSION=$KASM_RELEASE
 ### Adding label to let Kasm Backend know the port upload request should be sent to
 ### See Kasm-7989 for details
 #LABEL "kasm.port_map.uploads"="6901/tcp/https/basic"
