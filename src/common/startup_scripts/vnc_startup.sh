@@ -100,7 +100,7 @@ function pull_profile (){
 			OUTPUT=$(http_proxy="" https_proxy="" /usr/bin/kasm-profile-sync --download /home/kasm-user --insecure --remote ${KASM_API_HOST} --port ${KASM_API_PORT} -c ${KASM_PROFILE_CHUNK_SIZE} --token ${KASM_API_JWT} 2>&1 )
 		fi
 		PROCESS_SYNC_EXIT_CODE=$?
-        
+
 		# log output of profile sync
 		while IFS= read -r line; do
 			log "$line"
@@ -263,7 +263,7 @@ function start_window_manager (){
         if [ "${START_DE}" == "kde5" ] ; then
                 if [ -f /opt/VirtualGL/bin/vglrun ] && [ ! -z "${KASM_EGL_CARD}" ] && [ ! -z "${KASM_RENDERD}" ] && [ -w "${KASM_RENDERD}" ] && [ -w "${KASM_EGL_CARD}" ] ; then
                 echo "Starting KDE with VirtualGL using EGL device ${KASM_EGL_CARD}"
-                        DISPLAY=:1 /opt/VirtualGL/bin/vglrun -d "${KASM_EGL_CARD}" /usr/bin/startplasma-x11 &
+                        DISPLAY=:1 KWIN_COMPOSE=N /opt/VirtualGL/bin/vglrun -d "${KASM_EGL_CARD}" /usr/bin/startplasma-x11 &
                 else
                         echo "Starting KDE"
                         DISPLAY=:1 /usr/bin/startplasma-x11 &
