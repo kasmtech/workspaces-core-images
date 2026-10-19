@@ -97,11 +97,15 @@ RUN bash $INST_SCRIPTS/cursors/install_cursors.sh && rm -rf $INST_SCRIPTS/cursor
 COPY ./src/ubuntu/install/smartcard $INST_SCRIPTS/smartcard/
 RUN bash $INST_SCRIPTS/smartcard/install_smartcard.sh && rm -rf $INST_SCRIPTS/smartcard/
 
-### configure startup 
+### configure startup
 COPY ./src/common/scripts/kasm_hook_scripts $STARTUPDIR
 ADD ./src/common/startup_scripts $STARTUPDIR
 RUN bash $STARTUPDIR/set_user_permission.sh $STARTUPDIR $HOME && \
     echo 'source $STARTUPDIR/generate_container_user' >> $HOME/.bashrc
+
+### VirtualGL
+COPY ./src/ubuntu/install/virtualgl $INST_SCRIPTS/virtualgl/
+RUN bash $INST_SCRIPTS/virtualgl/install_virtualgl.sh && rm -rf $INST_SCRIPTS/virtualgl/
 
 ### Sysbox support
 COPY ./src/ubuntu/install/sysbox $INST_SCRIPTS/sysbox/

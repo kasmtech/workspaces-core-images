@@ -108,12 +108,16 @@ wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm_websocket_relay/
 chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux
 
 if [[ "${DISTRO}" == "alpine" ]]; then
-  # Alpine's gcompat shim doesn't implement fcntl64, so the glibc binary fails to load 
-  # Build a shim that forwards fcntl64() to musl's fcntl()
+  # Alpine's gcompat shim doesn't implement fcntl64, so the glibc binary fails to load.
+  # On arm64 it also doesn't export glibc's private __pthread_key_create alias, which
+  # ICU/libstdc++ probe at startup to detect thread support (arm64 aborts with
+  # std::system_error; on amd64 GCC folds the same check away at compile time).
+  # Build a shim that forwards both to musl's real implementations.
   apk add --no-cache --virtual .audio-build-deps gcc musl-dev
   cat > /tmp/fcntl64_compat.c << 'EOF'
 #define _GNU_SOURCE
 #include <fcntl.h>
+#include <pthread.h>
 #include <stdarg.h>
 
 /* fcntl()'s third argument varies by cmd: some commands take none, some an
@@ -206,6 +210,15 @@ int fcntl64(int fd, int cmd, ...) {
     void *arg = va_arg(ap, void *);
     va_end(ap);
     return fcntl(fd, cmd, arg);
+}
+
+/* glibc-private alias for pthread_key_create(), used by libstdc++/ICU as a
+ * "is this binary actually linked with real thread support" probe. musl only
+ * ever exports the public POSIX name, so gcompat resolves this to NULL on
+ * arm64, which ICU treats as fatal instead of falling back to single-threaded
+ * mode. Forward it to the real implementation. */
+int __pthread_key_create(pthread_key_t *key, void (*destructor)(void *)) {
+    return pthread_key_create(key, destructor);
 }
 EOF
   gcc -shared -fPIC -o /usr/local/lib/fcntl64_compat.so /tmp/fcntl64_compat.c
