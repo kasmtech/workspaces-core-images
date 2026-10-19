@@ -13,7 +13,7 @@ Related repos in the broader Kasm system:
 - `kasm_backend` (parent of this clone) — the backend services that orchestrate workspaces
 - `workspaces-images` — application-specific images built on top of these cores
 - `KasmVNC` — the VNC server that renders the desktop to a browser
-- `kasm_squid_adapter`, `kasm_upload_service`, `kasm_printer_service`, `kasm-webcam-server`, `kasm-gamepad-server`, `profile-sync`, `kasm_smartcard_bridge`, `kasm_websocket_relay`, `kasm_audio_input_server`, `kasm_recorder_service`, `kasm-squid-builder` — component binaries pulled in at image build time
+- `kasm_upload_service`, `kasm_printer_service`, `kasm-webcam-server`, `kasm-gamepad-server`, `profile-sync`, `kasm_smartcard_bridge`, `kasm_websocket_relay`, `kasm_audio_input_server`, `kasm_recorder_service` — component binaries pulled in at image build time
 
 ## Repository Layout
 
@@ -80,11 +80,10 @@ Every dockerfile follows the same shape — a series of `COPY` + `RUN bash $INST
 12. **Printer** (`kasm_printer_service`) — CUPS + start_cups.sh
 13. **Recorder** (`kasm_recorder_service`) — session recording via FFmpeg + KasmVNC capture
 14. **Cursors** — custom cursor theme
-15. **Squid** (`kasm_squid_adapter` + `kasm-squid-builder`) — per-session egress proxy
-16. **Smartcard** (`kasm_smartcard_bridge`) — CCID/pcscd passthrough
-17. **NVIDIA / VirtualGL** — optional GPU acceleration
-18. **Hook scripts** — `src/common/scripts/kasm_hook_scripts/` (see below)
-19. **Cleanup** — strip caches, man pages, locales to shrink layers
+15. **Smartcard** (`kasm_smartcard_bridge`) — CCID/pcscd passthrough
+16. **NVIDIA / VirtualGL** — optional GPU acceleration
+17. **Hook scripts** — `src/common/scripts/kasm_hook_scripts/` (see below)
+18. **Cleanup** — strip caches, man pages, locales to shrink layers
 
 Environment variables set by every core image:
 
@@ -99,7 +98,7 @@ Containers start at `vnc_startup.sh` (in `src/common/startup_scripts/`). It:
 
 1. Logs to the Kasm API via `KASM_API_JWT` / `KASM_API_HOST` / `KASM_API_PORT` if set
 2. Regenerates the container user (`generate_container_user`) so UIDs match the workspace config
-3. Starts dbus, PulseAudio, KasmVNC, the desktop (XFCE by default, overridable via `START_XFCE4` / `START_ICEWM` / etc.), kasm_upload_server, the squid adapter, cups, profile_sync, the recorder
+3. Starts dbus, PulseAudio, KasmVNC, the desktop (XFCE by default, overridable via `START_XFCE4` / `START_ICEWM` / etc.), kasm_upload_server, cups, profile_sync, the recorder
 4. Invokes lifecycle hook scripts in `src/common/scripts/kasm_hook_scripts/` at the right moments:
    - `kasm_post_run_root.sh`   — runs as root after core services are up
    - `kasm_post_run_user.sh`   — runs as `kasm-user` after login

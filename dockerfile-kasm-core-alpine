@@ -9,7 +9,6 @@ COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
 RUN bash "$INST_SCRIPTS/tools/install_tools.sh" && rm -rf "$INST_SCRIPTS/tools/"
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
-### Layer from squid changes
 FROM install_tools AS base_layer
 
 ### Environment config
@@ -92,20 +91,6 @@ COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
 RUN apk add --no-cache coreutils  # the timeout function used by the backend needs to be the one from core utils.
-
-### Install Squid
-COPY ./src/ubuntu/install/squid/install/ $INST_SCRIPTS/squid_install/
-RUN bash $INST_SCRIPTS/squid_install/install_squid.sh && rm -rf $INST_SCRIPTS/squid_install/
-COPY ./src/ubuntu/install/squid/resources/*.conf /etc/squid/
-COPY ./src/ubuntu/install/squid/resources/start_squid.sh /etc/squid/start_squid.sh
-COPY ./src/ubuntu/install/squid/resources/SN.png /usr/local/squid/share/icons/SN.png
-RUN chown proxy:proxy /usr/local/squid/share/icons/SN.png
-COPY ./src/ubuntu/install/squid/resources/error_message/access_denied.html /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN chown proxy:proxy /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN rm -rf "$INST_SCRIPTS/resources/"
-
-RUN chmod +x /etc/squid/kasm_squid_adapter
-RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
 
 ### Install Smartcard Service
 COPY ./src/ubuntu/install/smartcard $INST_SCRIPTS/smartcard/
@@ -199,7 +184,6 @@ ENV KASM_VERSION=$KASM_RELEASE
 ### See Kasm-7989 for details
 #LABEL "kasm.port_map.uploads"="6901/tcp/https/basic"
 ### End of change for Kasm-7987
-
 
 ### Environment config
 ARG DISTRO=alpine

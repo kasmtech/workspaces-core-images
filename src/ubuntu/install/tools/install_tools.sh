@@ -36,7 +36,7 @@ install_first_available_pkg() {
 
 echo "Install some common tools for further installation"
 if [[ "${DISTRO}" == @(fedora42|fedora43|oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9) ]]; then
-  dnf install -y wget net-tools bzip2 tar vim hostname procps-ng bc vulkan-tools
+  dnf install -y wget net-tools iproute bzip2 tar vim hostname procps-ng bc vulkan-tools
   yum install -y vim wget net-tools bzip2 ca-certificates bc
   install_first_available_pkg "yum" "yum install -y" mesa-demos mesa-utils
   install_first_available_pkg "yum" "yum install -y" libva-utils vainfo
@@ -52,7 +52,7 @@ if [[ "${DISTRO}" == @(fedora42|fedora43|oracle8|oracle9|rockylinux9|rockylinux8
     install_first_available_pkg "yum" "yum install -y" libva-intel-driver i965-va-driver
   fi
 elif [[ "${DISTRO}" == @(fedora37|fedora38|fedora39|fedora40|fedora41|fedora42|fedora43|oracle8|oracle9|rockylinux9|rockylinux8|almalinux8|almalinux9) ]]; then
-  dnf install -y wget net-tools bzip2 tar vim hostname procps-ng bc
+  dnf install -y wget net-tools iproute bzip2 tar vim hostname procps-ng bc
   install_first_available_pkg "dnf" "dnf install -y" mesa-demos mesa-utils
   install_first_available_pkg "dnf" "dnf install -y" libva-utils vainfo
   install_first_available_pkg "dnf" "dnf install -y" mesa-va-drivers mesa-dri-drivers
@@ -67,7 +67,7 @@ elif [[ "${DISTRO}" == @(fedora37|fedora38|fedora39|fedora40|fedora41|fedora42|f
     install_first_available_pkg "dnf" "dnf install -y" libva-intel-driver i965-va-driver
   fi
 elif [[ "${DISTRO}" == @(rhel9) ]]; then
-  dnf install -y wget net-tools bzip2 tar vim hostname procps-ng bc
+  dnf install -y wget net-tools iproute bzip2 tar vim hostname procps-ng bc
   install_first_available_pkg "dnf" "dnf install -y" mesa-demos mesa-utils
   install_first_available_pkg "dnf" "dnf install -y" libva-utils vainfo
   install_first_available_pkg "dnf" "dnf install -y" mesa-va-drivers mesa-dri-drivers
@@ -82,7 +82,7 @@ elif [[ "${DISTRO}" == @(rhel9) ]]; then
     install_first_available_pkg "dnf" "dnf install -y" libva-intel-driver i965-va-driver
   fi
 elif [ "${DISTRO}" == "opensuse" ]; then
-  zypper install -yn wget net-tools bzip2 tar vim gzip iputils bc
+  zypper install -yn wget net-tools iproute2 bzip2 tar vim gzip iputils bc
   install_first_available_pkg "zypper" "zypper install -yn" Mesa-demos mesa-utils Mesa-demo-x
   install_first_available_pkg "zypper" "zypper install -yn" libva-utils vainfo
   install_first_available_pkg "zypper" "zypper install -yn" Mesa-libva mesa-va-drivers
@@ -136,12 +136,12 @@ else
 
   # software-properties is removed from kali-rolling and debian trixie
   if grep -q "kali-rolling" /etc/os-release || grep -q "trixie" /etc/os-release || grep -qi "parrot" /etc/os-release; then
-    apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl mesa-utils bc vulkan-tools
+    apt-get install ${PARROTEXTRA} -y vim wget net-tools iproute2 locales bzip2 wmctrl mesa-utils bc vulkan-tools
   fi
   if grep -q "kali-rolling" /etc/os-release || grep -q "trixie" /etc/os-release || grep -qi "parrot" /etc/os-release; then
-    apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl bc
+    apt-get install ${PARROTEXTRA} -y vim wget net-tools iproute2 locales bzip2 wmctrl bc
   else
-    apt-get install ${PARROTEXTRA} -y vim wget net-tools locales bzip2 wmctrl software-properties-common bc
+    apt-get install ${PARROTEXTRA} -y vim wget net-tools iproute2 locales bzip2 wmctrl software-properties-common bc
   fi
 
   install_optional_pkg "apt" "mesa-utils" "apt-get install ${PARROTEXTRA} -y mesa-utils"
@@ -177,3 +177,11 @@ elif [ "$DISTRO" = "ubuntu" ] && grep -q "24.04" /etc/os-release; then
   userdel ubuntu
   rm -Rf /home/ubuntu
 fi
+
+# Web filtering is now enforced transparently by the network plugin.
+# We need to keep the helper for any downstream images that might depend on it.
+cat >/usr/bin/filter_ready <<EOL
+#!/usr/bin/env bash
+echo 'web filter is enforced outside the container, nothing to wait for'
+EOL
+chmod +x /usr/bin/filter_ready
