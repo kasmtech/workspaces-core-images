@@ -4,7 +4,6 @@ ARG BASE_IMAGE="opensuse/leap:16.0"
 FROM $BASE_IMAGE AS install_tools
 ARG DISTRO=opensuse
 
-
 ### Install common tools
 
 COPY ./src/ubuntu/install/tools $INST_SCRIPTS/tools/
@@ -90,20 +89,6 @@ COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 ### Install Recorder Service
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
-
-### Install Squid
-COPY ./src/ubuntu/install/squid/install/ $INST_SCRIPTS/squid_install/
-RUN bash $INST_SCRIPTS/squid_install/install_squid.sh && rm -rf $INST_SCRIPTS/squid_install/
-COPY ./src/ubuntu/install/squid/resources/*.conf /etc/squid/
-COPY ./src/ubuntu/install/squid/resources/start_squid.sh /etc/squid/start_squid.sh
-COPY ./src/ubuntu/install/squid/resources/SN.png /usr/local/squid/share/icons/SN.png
-RUN chown proxy:proxy /usr/local/squid/share/icons/SN.png
-COPY ./src/ubuntu/install/squid/resources/error_message/access_denied.html /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN chown proxy:proxy /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN rm -rf "$INST_SCRIPTS/resources/"
-
-RUN chmod +x /etc/squid/kasm_squid_adapter
-RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
 
 ### Install Smartcard Service
 COPY ./src/ubuntu/install/smartcard $INST_SCRIPTS/smartcard/
@@ -197,6 +182,10 @@ COPY --from=base_layer / /
 ### Labels
 LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasm.com"'
 LABEL "com.kasmweb.image"="true"
+ARG KASM_RELEASE
+RUN test -n "$KASM_RELEASE"
+LABEL "com.kasmweb.kasm_version"="$KASM_RELEASE"
+ENV KASM_VERSION=$KASM_RELEASE
 ### Adding label to let Kasm Backend know the port upload request should be sent to
 ### See Kasm-7989 for details
 #LABEL "kasm.port_map.uploads"="6901/tcp/https/basic"

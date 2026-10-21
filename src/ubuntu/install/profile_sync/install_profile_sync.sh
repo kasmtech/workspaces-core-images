@@ -113,11 +113,11 @@ check_distro_is_supported
 
 # profile-sync-v1
 BRANCH="develop"
-COMMIT_ID="924ba43dd70b483f3d7fdbca43057cb1a8b66f8a"
+COMMIT_ID="7462acb8e345ae6aec8d581872506fae75323f0f"
 download_and_symlink
 
 # profile-sync-v2
 BRANCH="develop"
-COMMIT_ID="702ba2f8e6d5881031b16d046244051465f68d18"
+COMMIT_ID="61518f3524a1e962540eca9af0e7500db4d06130"
 install_v2_dependencies
 download_and_symlink_v2
