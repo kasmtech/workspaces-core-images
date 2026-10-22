@@ -32,8 +32,8 @@ fi
 # to the one watched by the printer service
 sed -i -r -e "s:^(Out\s).*:\1/home/kasm-user/PDF:" /etc/cups/cups-pdf.conf
 
-COMMIT_ID="8a006be9c56e179daa80293fde4f37cfa8d600cb"
-BRANCH="develop"
+COMMIT_ID="6dc6fdd2c83bc70b78580e273e5687eb70e59247"
+BRANCH="bugfix_DEV-1177-print-startup-race"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
