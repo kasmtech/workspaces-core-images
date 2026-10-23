@@ -4,6 +4,11 @@ set -e
 
 APP_NAME=$(basename "$0")
 
+# Keep this path in sync with /etc/profile.d/kasm_ssh_agent.sh, written by
+# install_ssh_agent.sh.
+KASM_SSH_AGENT_DIR=/tmp/.kasm-ssh-agent
+KASM_SSH_AGENT_SOCK="$KASM_SSH_AGENT_DIR/ssh-agent.sock"
+
 log () {
     if [ ! -z "${1}" ]; then
         LOG_LEVEL="${2:-DEBUG}"
@@ -209,6 +214,20 @@ function start_kasmvnc (){
 
 	if [[ ${KASM_SVC_SMARTCARD:-1} == 1 ]]; then
 		VNCOPTIONS="$VNCOPTIONS -UnixRelay smartcard:/tmp/smartcard"
+	fi
+
+	if [[ ${KASM_SVC_FIDO2:-0} == 1 ]]; then
+		VNCOPTIONS="$VNCOPTIONS -UnixRelay fido2:/tmp/fido2"
+	fi
+
+	if [[ ${KASM_SVC_SSH_AGENT:-0} == 1 ]]; then
+		VNCOPTIONS="$VNCOPTIONS -UnixRelay ssh_agent:/tmp/ssh_agent"
+
+		export SSH_AUTH_SOCK="$KASM_SSH_AGENT_SOCK"
+
+		# Must run before start_window_manager, or the DE clobbers the export
+		# above for the entire session.
+		disable_de_ssh_agent
 	fi
 
 	if [[ "${BUILD_ARCH}" =~ ^aarch64$ ]] && [[ -f /lib/aarch64-linux-gnu/libgcc_s.so.1 ]] ; then
@@ -436,6 +455,81 @@ function start_smartcard (){
 	fi
 }
 
+function disable_de_ssh_agent (){
+	local session_xml="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-session.xml"
+	local startup_block='  <property name="startup" type="empty">\n    <property name="ssh-agent" type="empty">\n      <property name="enabled" type="bool" value="false"/>\n    </property>\n    <property name="gpg-agent" type="empty">\n      <property name="enabled" type="bool" value="false"/>\n    </property>\n  </property>'
+
+	if ! mkdir -p "$(dirname "$session_xml")"; then
+		log "Failed to create xfce4 config directory" "WARNING"
+		return
+	fi
+
+	# Most distro trees in this repo ship no xfce4-session.xml at all and run
+	# purely on upstream defaults, so creating the file is the common path.
+	if [ ! -f "$session_xml" ]; then
+		log 'Disabling DE ssh-agent: creating xfce4-session config'
+		{
+			echo '<?xml version="1.0" encoding="UTF-8"?>'
+			echo '<channel name="xfce4-session" version="1.0">'
+			printf '%b\n' "$startup_block"
+			echo '</channel>'
+		} > "$session_xml"
+		return
+	fi
+
+	# Pull the 'enabled' value out of the ssh-agent property if it is already
+	# present,
+	local ssh_agent_enabled
+	ssh_agent_enabled=$(awk '
+		/name="ssh-agent"/ { in_ssh_agent = 1 }
+		in_ssh_agent && /name="enabled"/ {
+			if (match($0, /value="[a-z]+"/))
+				print substr($0, RSTART + 7, RLENGTH - 8)
+			exit
+		}' "$session_xml")
+
+	if [ "$ssh_agent_enabled" == "false" ]; then
+		return
+	fi
+
+	if [ -n "$ssh_agent_enabled" ] || grep -q '<property name="startup"' "$session_xml"; then
+		log "Not disabling DE ssh-agent: $session_xml already manages the 'startup' property. The DE may override SSH_AUTH_SOCK." "WARNING"
+		return
+	fi
+
+	log 'Disabling DE ssh-agent in existing xfce4-session config'
+	if ! sed -i "s|</channel>|$startup_block\n</channel>|" "$session_xml"; then
+		log "Failed to modify xfce4-session config, DE ssh-agent may override SSH_AUTH_SOCK" "WARNING"
+	fi
+}
+
+function start_ssh_agent (){
+	if [[ ${KASM_SVC_SSH_AGENT:-0} == 1 ]]; then
+		if [ ! -f "$STARTUPDIR/ssh_agent/kasm_ssh_agent_bridge" ]; then
+			log 'SSH-agent bridge binary not found, skipping ssh-agent forwarding' 'WARNING'
+			return
+		fi
+
+		log 'Starting ssh-agent forwarding bridge'
+
+		mkdir -p "$KASM_SSH_AGENT_DIR"
+		chmod 700 "$KASM_SSH_AGENT_DIR"
+
+		if [[ $DEBUG == true ]]; then
+				$STARTUPDIR/ssh_agent/kasm_ssh_agent_bridge --agent-socket "$KASM_SSH_AGENT_SOCK" --debug &
+		else
+				$STARTUPDIR/ssh_agent/kasm_ssh_agent_bridge --agent-socket "$KASM_SSH_AGENT_SOCK" &
+		fi
+
+		KASM_PROCS['kasm_ssh_agent']=$!
+
+		if [[ $DEBUG == true ]]; then
+			echo -e "\n------------------ Started SSH-agent Bridge  ----------------------------"
+			echo "Kasm SSH-agent Bridge PID: ${KASM_PROCS['kasm_ssh_agent']}";
+		fi
+	fi
+}
+
 function wait_on_smartcard (){
 	if [[ ${KASM_SVC_SMARTCARD:-1} == 1 && ${KASM_SMARTCARD_WAIT:-0} == 1 ]]; then
 		log 'Waiting on smartcard service to be ready'
@@ -613,6 +707,7 @@ chmod 600 $PASSWD_PATH
 wait_on_printer
 wait_on_smartcard
 start_kasmvnc
+start_ssh_agent
 start_window_manager
 start_audio_out_websocket
 start_audio_out
@@ -715,6 +810,10 @@ do
 				kasm_smartcard)
 					echo "Smartcard Service Failed"
 					start_smartcard
+					;;
+				kasm_ssh_agent)
+					echo "SSH-agent Bridge Failed"
+					start_ssh_agent
 					;;
 				custom_script)
 					echo "The custom startup script exited."
