@@ -35,7 +35,7 @@ UBUNTU_CODENAME=""
 LEGACY_BUILD_URL=""
 COMMIT_ID="faded1d95d659cd69d0821ac8adc3ebbd54de316"
 BRANCH="master" # just use 'release' for a release branch
-KASMVNC_VER="1.5.1"
+KASMVNC_VER="1.5.3"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 
 # Naming scheme is now different between an official release and feature branch
