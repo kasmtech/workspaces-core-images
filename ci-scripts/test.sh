@@ -52,7 +52,7 @@ echo "${GLAB_SHA256[$GLAB_PKG_ARCH]}  /tmp/${GLAB_DEB}" | sha256sum -c -
 dpkg -i "/tmp/${GLAB_DEB}"
 GLAB_ENABLE_CI_AUTOLOGIN=true glab -R "$CI_PROJECT_PATH" securefile download --all --output-dir="$SECURE_FILES_DOWNLOAD_PATH"
 
-AWS_CLI_IMAGE=public.ecr.aws/aws-cli/aws-cli:2.34.33
+AWS_CLI_IMAGE=amazon/aws-cli:2.37.5
 
 # Pinned before the Playwright frontend-build step further down reassigns
 # DOCKER_HOST to the remote EC2 instance. aws() is a docker-wrapped function,

@@ -14,5 +14,6 @@ docker build --provenance=false \
   --build-arg BASE_IMAGE="${BASE}" \
   --build-arg DISTRO="${DISTRO}" \
   --build-arg BG_IMG="${BG}" \
+  --build-arg KASM_RELEASE="${KASM_RELEASE}" \
   -f ${DOCKERFILE} .
 docker push ${ORG_NAME}/image-cache-private:$(arch)-core-${NAME1}-${NAME2}-${SANITIZED_BRANCH}-${CI_PIPELINE_ID}

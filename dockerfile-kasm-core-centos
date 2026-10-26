@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 #### Build Stage ####
 ARG BASE_IMAGE="centos:centos7"
 
@@ -96,23 +97,22 @@ COPY ./src/ubuntu/install/printer/resources/*.ppd /etc/cups/ppd/
 COPY ./src/ubuntu/install/recorder $INST_SCRIPTS/recorder/
 RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/recorder
 
-### Install Squid
-COPY ./src/ubuntu/install/squid/install/ $INST_SCRIPTS/squid_install/
-RUN bash $INST_SCRIPTS/squid_install/install_squid.sh && rm -rf $INST_SCRIPTS/squid_install/
-COPY ./src/ubuntu/install/squid/resources/*.conf /etc/squid/
-COPY ./src/ubuntu/install/squid/resources/start_squid.sh /etc/squid/start_squid.sh
-COPY ./src/ubuntu/install/squid/resources/SN.png /usr/local/squid/share/icons/SN.png
-RUN chown proxy:proxy /usr/local/squid/share/icons/SN.png
-COPY ./src/ubuntu/install/squid/resources/error_message/access_denied.html /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN chown proxy:proxy /usr/local/squid/share/errors/en/ERR_ACCESS_DENIED
-RUN rm -rf "$INST_SCRIPTS/resources/"
-
-RUN chmod +x /etc/squid/kasm_squid_adapter
-RUN chmod +x /etc/squid/start_squid.sh && chmod 4755 /etc/squid/start_squid.sh
-
 ### Install Smartcard Service
 COPY ./src/ubuntu/install/smartcard $INST_SCRIPTS/smartcard/
 RUN bash $INST_SCRIPTS/smartcard/install_smartcard.sh && rm -rf $INST_SCRIPTS/smartcard/
+
+### Install FIDO2 Bridge (opt-in, gated at runtime by KASM_SVC_FIDO2)
+COPY ./src/ubuntu/install/fido2 $INST_SCRIPTS/fido2/
+RUN bash $INST_SCRIPTS/fido2/install_fido2.sh && rm -rf $INST_SCRIPTS/fido2/
+
+### Install workspace-device-extension (unpacked; downstream browser image
+### wires up the Chrome policy to actually load it - see install script)
+COPY ./src/ubuntu/install/device_extension $INST_SCRIPTS/device_extension/
+RUN bash $INST_SCRIPTS/device_extension/install_device_extension.sh && rm -rf $INST_SCRIPTS/device_extension/
+
+### Install SSH-agent forwarding bridge (opt-in, gated at runtime by KASM_SVC_SSH_AGENT)
+COPY ./src/ubuntu/install/ssh_agent $INST_SCRIPTS/ssh_agent/
+RUN bash $INST_SCRIPTS/ssh_agent/install_ssh_agent.sh && rm -rf $INST_SCRIPTS/ssh_agent/
 
 ### configure startup
 COPY ./src/common/scripts/kasm_hook_scripts $STARTUPDIR
@@ -168,6 +168,8 @@ RUN touch $STARTUPDIR/wm.log \
     && chmod 755 $STARTUPDIR/generate_container_user \
     && chmod 755 $STARTUPDIR/printer/kasm_printer_service \
     && chmod 755 $STARTUPDIR/smartcard/kasm_smartcard_bridge \
+    && chmod 755 $STARTUPDIR/fido2/kasm_fido2_bridge \
+    && chmod 755 $STARTUPDIR/ssh_agent/kasm_ssh_agent_bridge \
     && chmod 755 $STARTUPDIR/recorder/kasm_recorder_service \
     && chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux \
     && rm -rf $STARTUPDIR/install \
@@ -189,6 +191,10 @@ COPY --from=base_layer / /
 ### Labels
 LABEL "org.opencontainers.image.authors"='Kasm Tech "info@kasm.com"'
 LABEL "com.kasmweb.image"="true"
+ARG KASM_RELEASE
+RUN test -n "$KASM_RELEASE"
+LABEL "com.kasmweb.kasm_version"="$KASM_RELEASE"
+ENV KASM_VERSION=$KASM_RELEASE
 ### Adding label to let Kasm Backend know the port upload request should be sent to
 ### See Kasm-7989 for details
 LABEL "kasm.port_map.uploads"="6901/tcp/https/basic"

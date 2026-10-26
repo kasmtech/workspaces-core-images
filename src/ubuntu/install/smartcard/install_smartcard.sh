@@ -2,7 +2,7 @@
 ### every exit != 0 fails the script
 set -ex
 
-COMMIT_ID="c5a0041bdbae2e42ec27118cef35ce0f75faf2f1"
+COMMIT_ID="1ac25f5f22ea0832a9a4b27936efb4bf3e76b234"
 BRANCH="main"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 ARCH=$(arch | sed 's/aarch64/arm64/g' | sed 's/x86_64/amd64/g')
@@ -77,8 +77,12 @@ EOF
 # override with custom OpenSC configuration
 cp $INST_SCRIPTS/smartcard/opensc.conf /etc/opensc/opensc.conf
 
-# register OpenSC module
+# NSS db for Chrome: required by the OpenSC registration below and the network plugin's webfilter CA import
 mkdir -p $HOME/.pki/nssdb
+certutil -N -d sql:$HOME/.pki/nssdb/ --empty-password
+chown -R 1000:1000 $HOME/.pki/nssdb/
+
+# register OpenSC module
 echo "library=${OPENSC_LIB}" >> $HOME/.pki/nssdb/pkcs11.txt
 echo "name=OpenSC PKCS#11" >> $HOME/.pki/nssdb/pkcs11.txt
 
