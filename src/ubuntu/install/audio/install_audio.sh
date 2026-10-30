@@ -94,6 +94,11 @@ else
     git \
     pulseaudio \
     pulseaudio-utils
+
+  # Kali's ffmpeg 9 update moved ffplay into its own package
+  if [[ "${DISTRO}" == "kali" ]]; then
+    apt-get install -y --no-install-recommends ffplay
+  fi
 fi
 
 mkdir -p /var/run/pulse

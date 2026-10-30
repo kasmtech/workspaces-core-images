@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 #### Build Stage ####
 ARG BASE_IMAGE="centos:centos7"
 
@@ -100,6 +101,19 @@ RUN bash $INST_SCRIPTS/recorder/install_recorder.sh && rm -rf $INST_SCRIPTS/reco
 COPY ./src/ubuntu/install/smartcard $INST_SCRIPTS/smartcard/
 RUN bash $INST_SCRIPTS/smartcard/install_smartcard.sh && rm -rf $INST_SCRIPTS/smartcard/
 
+### Install FIDO2 Bridge (opt-in, gated at runtime by KASM_SVC_FIDO2)
+COPY ./src/ubuntu/install/fido2 $INST_SCRIPTS/fido2/
+RUN bash $INST_SCRIPTS/fido2/install_fido2.sh && rm -rf $INST_SCRIPTS/fido2/
+
+### Install workspace-device-extension (unpacked; downstream browser image
+### wires up the Chrome policy to actually load it - see install script)
+COPY ./src/ubuntu/install/device_extension $INST_SCRIPTS/device_extension/
+RUN bash $INST_SCRIPTS/device_extension/install_device_extension.sh && rm -rf $INST_SCRIPTS/device_extension/
+
+### Install SSH-agent forwarding bridge (opt-in, gated at runtime by KASM_SVC_SSH_AGENT)
+COPY ./src/ubuntu/install/ssh_agent $INST_SCRIPTS/ssh_agent/
+RUN bash $INST_SCRIPTS/ssh_agent/install_ssh_agent.sh && rm -rf $INST_SCRIPTS/ssh_agent/
+
 ### configure startup
 COPY ./src/common/scripts/kasm_hook_scripts $STARTUPDIR
 COPY ./src/common/startup_scripts $STARTUPDIR
@@ -154,6 +168,8 @@ RUN touch $STARTUPDIR/wm.log \
     && chmod 755 $STARTUPDIR/generate_container_user \
     && chmod 755 $STARTUPDIR/printer/kasm_printer_service \
     && chmod 755 $STARTUPDIR/smartcard/kasm_smartcard_bridge \
+    && chmod 755 $STARTUPDIR/fido2/kasm_fido2_bridge \
+    && chmod 755 $STARTUPDIR/ssh_agent/kasm_ssh_agent_bridge \
     && chmod 755 $STARTUPDIR/recorder/kasm_recorder_service \
     && chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux \
     && rm -rf $STARTUPDIR/install \

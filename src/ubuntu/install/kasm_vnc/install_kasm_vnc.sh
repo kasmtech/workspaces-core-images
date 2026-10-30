@@ -33,8 +33,8 @@ cd /tmp
 BUILD_ARCH=$(uname -m)
 UBUNTU_CODENAME=""
 LEGACY_BUILD_URL=""
-COMMIT_ID="7b5c304e105d34ca56f150edc1cba974fab20a7a"
-BRANCH="master"
+COMMIT_ID="a01febe19073caf019ad97768caa9b6e3216f3e2"
+BRANCH="master" # just use 'release' for a release branch
 KASMVNC_VER="1.5.1"
 COMMIT_ID_SHORT=$(echo "${COMMIT_ID}" | cut -c1-6)
 

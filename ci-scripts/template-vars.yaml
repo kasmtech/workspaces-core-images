@@ -7,7 +7,9 @@ files: &UNIVERSAL_CHANGE_FILES
   - src/ubuntu/install/audio_input/**
   - src/ubuntu/install/cleanup/**
   - src/ubuntu/install/cursors/**
+  - src/ubuntu/install/device_extension/**
   - src/ubuntu/install/emblems/**
+  - src/ubuntu/install/fido2/**
   - src/ubuntu/install/fonts/**
   - src/ubuntu/install/gamepad/**
   - src/ubuntu/install/kasm_upload_server/**
@@ -17,6 +19,7 @@ files: &UNIVERSAL_CHANGE_FILES
   - src/ubuntu/install/package_rules/**
   - src/ubuntu/install/printer/**
   - src/ubuntu/install/smartcard/**
+  - src/ubuntu/install/ssh_agent/**
   - src/ubuntu/install/profile_sync/**
   - src/ubuntu/install/tools/**
   - src/ubuntu/install/webcam/**
