@@ -22,12 +22,6 @@ elif [ "${DISTRO}" == "alpine" ]; then
   apk update
   apk add --upgrade apk-tools
   apk upgrade --available
-elif [[ "${DISTRO}" == "parrotos7" ]]; then
-  sed -i 's|https://deb.parrot.sh/parrot|https://mirrors.mit.edu/parrot|g' /etc/apt/sources.list.d/parrot.list
-  apt-get update
-  DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
-    -o Dpkg::Options::="--force-confdef" \
-    -o Dpkg::Options::="--force-confold"
 else
   apt-get update
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
