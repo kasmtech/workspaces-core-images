@@ -16,9 +16,9 @@ else
 fi
 
 # Intall squid
-SQUID_COMMIT='c45537169794a16029e06d7d456edb21b9ce7d12'
+SQUID_COMMIT='bc19232ce75be65817b068b73f1d46b7b52df07b'
 if $(grep -q Focal /etc/os-release) || $(grep -q bullseye /etc/os-release) || [ -f /usr/bin/zypper ] || [[ "${DISTRO}" == @(oracle8|almalinux8|rockylinux8) ]]; then
-  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_ubuntu11_${ARCH}.tar.gz | tar -xzf - -C /
+  wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_el8_${ARCH}.tar.gz | tar -xzf - -C /
 elif [[ "${DISTRO}" == "alpine" ]]; then
   wget -qO- https://kasmweb-build-artifacts.s3.amazonaws.com/kasm-squid-builder/${SQUID_COMMIT}/output/kasm-squid-builder_alpine_${ARCH}.tar.gz | tar -xzf - -C /
 else
