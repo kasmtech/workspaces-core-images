@@ -74,6 +74,13 @@ elif [[ "$DISTRO" = @(ubuntu|debian) ]]; then
     xfce4-terminal \
     xterm \
     xclip
+  # Ubuntu 26.04 (Resolute): glycin image loader uses bwrap --unshare-all
+  # which fails inside Docker containers. Replace bwrap with a wrapper that
+  # strips sandboxing flags and execs the target directly.
+  if grep -q "Resolute" /etc/os-release; then
+    cp "$(dirname $0)/bwrap_wrapper.sh" /usr/bin/bwrap
+    chmod 755 /usr/bin/bwrap
+  fi
 elif [[ "$DISTRO" = "parrotos7" ]]; then
   # Plymouth fails in Docker because it tries to run update-initramfs, which doesn't exists in a container environment
   printf '#!/bin/sh\nexit 0\n' > /usr/sbin/update-initramfs
