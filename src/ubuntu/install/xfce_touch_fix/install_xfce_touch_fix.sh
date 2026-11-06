@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://gitlab.com/kasm-technologies/playground/el/xfce_touch_fix.git"
+REPO_URL="gitlab.com/kasm-technologies/internal/xfce_touch_fix"
 BUILD_DIR="/tmp/xfce_touch_fix_build"
 INSTALL_DIR="${STARTUPDIR}/xfce_touch_fix"
 
 if [ -n "${GITLAB_TOKEN:-}" ]; then
-  REPO_URL="https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/kasm-technologies/playground/el/xfce_touch_fix.git"
+  REPO_URL="gitlab-ci-token:${GITLAB_TOKEN}@${REPO_URL}"
 fi
+
+REPO_URL="https://${REPO_URL}"
 
 echo "Install build dependencies for xfce_touch_fix"
 if [[ "${DISTRO}" == @(ubuntu|debian|kali|parrotos7) ]]; then
