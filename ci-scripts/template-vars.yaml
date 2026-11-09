@@ -24,7 +24,8 @@ files: &UNIVERSAL_CHANGE_FILES
   - src/ubuntu/install/tools/**
   - src/ubuntu/install/webcam/**
   - src/ubuntu/install/recorder/**
-  - src/ubuntu/install/xfce
+  - src/ubuntu/install/xfce/**
+  - src/ubuntu/install/xfce_touch_fix/**
   - ci-scripts/**
   - .gitlab-ci.yml
 

@@ -34,6 +34,19 @@ if [ "${LC_ALL}" != "en_US.UTF-8" ]; then
   export LANGUAGE=${LC_ALL}
 fi
 
+# Enable XInput2 in Firefox for touch device support
+export MOZ_USE_XINPUT2=1
+
+# Enable AT-SPI accessibility bridge for GTK apps (e.g. Firefox) so touch input focus fixes work
+export GNOME_ACCESSIBILITY=1
+export GTK_MODULES=gail:atk-bridge
+
+# Enable AT-SPI accessibility bridge for Qt, LibreOffice and Electron apps
+export QT_ACCESSIBILITY=1
+export QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1
+export SAL_ACCESSIBILITY_ENABLED=1  # LibreOffice, forces its ATK bridge on
+export KASM_A11Y_APP_ARGS="--force-renderer-accessibility"
+
 # Dbus
 export $(dbus-launch)
 
@@ -291,6 +304,17 @@ function start_window_manager (){
         else
                 echo "Skipping KDE Startup"
         fi
+}
+
+function start_xfce_touch_fix (){
+	if [ "${START_XFCE4}" == "1" ] || [ "${START_DE}" == "xfce4-session" ]; then
+		if [ -d "$STARTUPDIR/xfce_touch_fix" ]; then
+			log 'Starting xfce touch fix'
+			find "$STARTUPDIR/xfce_touch_fix" -maxdepth 1 -type f -executable | while read -r bin; do
+				DISPLAY=:1 "$bin" &
+			done
+		fi
+	fi
 }
 
 function start_audio_out_websocket (){
@@ -709,6 +733,7 @@ wait_on_smartcard
 start_kasmvnc
 start_ssh_agent
 start_window_manager
+start_xfce_touch_fix
 start_audio_out_websocket
 start_audio_out
 start_audio_in
@@ -769,6 +794,7 @@ do
 					fi
 
 					start_window_manager
+					start_xfce_touch_fix
 					;;
 				kasm_audio_out_websocket)
 					echo "Restarting Audio Out Websocket Service"

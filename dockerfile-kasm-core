@@ -49,6 +49,11 @@ RUN bash $INST_SCRIPTS/fonts/install_custom_fonts.sh && rm -rf $INST_SCRIPTS/fon
 ### Install xfce UI
 COPY ./src/ubuntu/install/xfce $INST_SCRIPTS/xfce/
 RUN bash $INST_SCRIPTS/xfce/install_xfce_ui.sh && rm -rf $INST_SCRIPTS/xfce/
+
+### Install XFCE Touch Fix
+ARG GITLAB_TOKEN=""
+COPY ./src/ubuntu/install/xfce_touch_fix $INST_SCRIPTS/xfce_touch_fix/
+RUN bash $INST_SCRIPTS/xfce_touch_fix/install_xfce_touch_fix.sh && rm -rf $INST_SCRIPTS/xfce_touch_fix/
 ADD ./src/$DISTRO/xfce/.config/ $HOME/.config/
 RUN mkdir -p /usr/share/extra/backgrounds/
 RUN mkdir -p /usr/share/extra/icons/
@@ -180,6 +185,7 @@ RUN touch $STARTUPDIR/wm.log \
     && chmod 755 $STARTUPDIR/ssh_agent/kasm_ssh_agent_bridge \
     && chmod 755 $STARTUPDIR/recorder/kasm_recorder_service \
     && chmod 755 $STARTUPDIR/generate_container_user \
+    && (find $STARTUPDIR/xfce_touch_fix -maxdepth 1 -type f -exec chmod 755 {} \; 2>/dev/null; true) \
     && chmod +x $STARTUPDIR/jsmpeg/kasm_audio_out-linux \
     && rm -rf $STARTUPDIR/install \
     && mkdir -p $STARTUPDIR/kasmrx/Downloads \
@@ -229,6 +235,7 @@ ENV AUDIO_PORT=4901 \
     INST_SCRIPTS=/dockerstartup/install \
     KASMVNC_AUTO_RECOVER=true \
     KASM_VNC_PATH=/usr/share/kasmvnc \
+    KASM_A11Y_APP_ARGS="--force-renderer-accessibility" \
     LANG=$LANG \
     LANGUAGE=$LANGUAGE \
     LC_ALL=$LC_ALL \

@@ -45,6 +45,6 @@ sed -r -i 's#Name(\[\w+\])?=gedit#Name\1=Editor#g' /usr/share/applications/org.g
 sed -r -i 's#Name(\[\w+\])?=[Ss]hotwell#Name\1=Photos#g' /usr/share/applications/shotwell.desktop
 sed -r -i 's#Icon=.+#Icon=videos#' /usr/share/applications/mpv.desktop
 sed -r -i 's#Name(\[\w+\])?=.+#Name\1=Videos#g' /usr/share/applications/mpv.desktop
-sed -r -i 's#Categories=.+#Categories=System;#' /usr/share/applications/org.kde.kdeconnect.app.desktop
-sed -r -i 's#Categories=.+#Categories=System;#' /usr/share/applications/org.kde.kdeconnect.sms.desktop
-sed -r -i 's#Categories=.+#Categories=System;#' /usr/share/applications/org.kde.kdeconnect_open.desktop
+[ -f /usr/share/applications/org.kde.kdeconnect.app.desktop ] && sed -r -i 's#Categories=.+#Categories=System;#' /usr/share/applications/org.kde.kdeconnect.app.desktop || true
+[ -f /usr/share/applications/org.kde.kdeconnect.sms.desktop ] && sed -r -i 's#Categories=.+#Categories=System;#' /usr/share/applications/org.kde.kdeconnect.sms.desktop || true
+[ -f /usr/share/applications/org.kde.kdeconnect_open.desktop ] && sed -r -i 's#Categories=.+#Categories=System;#' /usr/share/applications/org.kde.kdeconnect_open.desktop || true

@@ -2,13 +2,13 @@
 set -ex
 
 if [[ "${DISTRO}" == "ubuntu" ]] ; then
-  sed -i \
-    '/locale/d' \
-    /etc/dpkg/dpkg.cfg.d/excludes
+  if [ -f /etc/dpkg/dpkg.cfg.d/excludes ]; then
+    sed -i '/locale/d' /etc/dpkg/dpkg.cfg.d/excludes
+  fi
 elif [[ "${DISTRO}" == "debian" ]] ; then
-  sed -i \
-    '/locale/d' \
-    /etc/dpkg/dpkg.cfg.d/docker
+  if [ -f /etc/dpkg/dpkg.cfg.d/docker ]; then
+    sed -i '/locale/d' /etc/dpkg/dpkg.cfg.d/docker
+  fi
 elif [[ "${DISTRO}" == @(almalinux8|almalinux9|fedora42|fedora43|oracle8|oracle9|rhel9|rockylinux8|rockylinux9) ]]; then
   rm -f /etc/rpm/macros.image-language-conf
 fi
